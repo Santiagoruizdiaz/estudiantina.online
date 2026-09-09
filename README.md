@@ -76,7 +76,7 @@ estudiantina/
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/estudiantina.git
+git clone https://github.com/santiagoruizdiaz/estudiantina.git
 cd estudiantina
 
 # 2. Crear los archivos de datos desde los ejemplos
