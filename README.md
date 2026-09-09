@@ -213,9 +213,10 @@ El proyecto está configurado para **Hostinger** con Apache/LiteSpeed:
 
 ---
 
-## 📄 Licencia
+## 🔒 Licencia y Propiedad
 
-MIT © 2026 Estudiantina de Posadas
+**Proyecto Privado — Todos los derechos reservados © 2026.**  
+Este proyecto y su código fuente son de carácter estrictamente privado y confidencial. Queda prohibida su copia, distribución, modificación o explotación comercial sin el consentimiento explícito de sus propietarios.
 
 ---
 

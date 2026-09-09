@@ -16,6 +16,6 @@
     "juego",
     "copero"
   ],
-  "author": "Antigravity",
-  "license": "MIT"
+  "private": true,
+  "license": "UNLICENSED"
 }
