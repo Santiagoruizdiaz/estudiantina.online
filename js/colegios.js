@@ -1,5 +1,5 @@
 /**
- * Base de datos oficial de las 33 instituciones participantes de la Estudiantina de Posadas de la Estudiantina de Posadas
+ * Base de datos oficial de las 33 instituciones participantes de la Estudiantina de Posadas
  * Actualizado con los colores y prendas de los uniformes escolares oficiales (chomba, campera y vivos).
  */
 export const COLEGIOS = [

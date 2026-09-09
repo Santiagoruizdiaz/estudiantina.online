@@ -1019,16 +1019,26 @@ class ComunidadApp {
   // NOTICIAS (Editorial)
   // -------------------------------------------------------------
   async loadData() {
-    try {
-      let res = await fetch("/api/comunidad");
-      if (!res.ok) res = await fetch("data/comunidad.json?v=" + Date.now());
-      if (res.ok) {
-        this.data = await res.json();
-      } else {
-        throw new Error("Respuesta no OK");
+    const endpoints = ["/api/comunidad", "api/comunidad.php", "data/comunidad.json?v=" + Date.now()];
+    for (const ep of endpoints) {
+      try {
+        const res = await fetch(ep, { cache: "no-store" });
+        if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          if (contentType.includes("application/json") || ep.includes(".json")) {
+            const parsed = await res.json();
+            if (parsed && (Array.isArray(parsed.noticias) || Array.isArray(parsed.cronograma))) {
+              this.data = parsed;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        // Continuar al siguiente endpoint
       }
-    } catch (e) {
-      console.warn("Cargando datos fallback:", e);
+    }
+    if (!this.data) {
+      console.warn("Cargando datos fallback.");
       this.data = this.getFallbackData();
     }
 

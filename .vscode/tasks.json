@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Iniciar Servidor Dev",
+      "type": "npm",
+      "script": "start",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Ejecutar Tests",
+      "type": "npm",
+      "script": "test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Chequeo de Calidad (Lint)",
+      "type": "npm",
+      "script": "lint",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Quality Gate Stop Check",
+      "type": "npm",
+      "script": "quality-gate",
+      "problemMatcher": []
+    }
+  ]
+}

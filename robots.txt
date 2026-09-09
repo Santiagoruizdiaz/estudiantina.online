@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /data/
+Disallow: /api/admin.php
+Disallow: /api/admin
 
 Sitemap: https://estudiantina.online/sitemap.xml

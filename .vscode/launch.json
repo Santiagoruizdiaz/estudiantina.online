@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🥁 Iniciar Servidor Dev (Node.js)",
+      "program": "${workspaceFolder}/server.js",
+      "env": {
+        "PORT": "3000"
+      },
+      "console": "integratedTerminal",
+      "restart": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🧪 Ejecutar Tests",
+      "program": "${workspaceFolder}/scripts/test-runner.mjs",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🔍 Validar Sintaxis (Lint/Check)",
+      "program": "${workspaceFolder}/scripts/check-syntax.mjs",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "🛡️ Ejecutar Stop Quality Gate",
+      "program": "${workspaceFolder}/scripts/antigravity-stop-gate.mjs",
+      "console": "integratedTerminal"
+    }
+  ]
+}

@@ -10,7 +10,9 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
-if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+$method = $_SERVER["REQUEST_METHOD"] ?? "GET";
+
+if ($method === "OPTIONS") {
     http_response_code(200);
     exit;
 }
@@ -209,7 +211,7 @@ if ($action === "hilo") {
 // -------------------------------------------------------------
 // ACTION: AUTH GOOGLE (Guardar / Actualizar usuario)
 // -------------------------------------------------------------
-if ($action === "auth_google" && $_SERVER["REQUEST_METHOD"] === "POST") {
+if ($action === "auth_google" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
     $googleId = trim($body["googleId"] ?? "");
     $nombre = trim($body["nombre"] ?? "");
@@ -246,7 +248,7 @@ if ($action === "auth_google" && $_SERVER["REQUEST_METHOD"] === "POST") {
 // -------------------------------------------------------------
 // ACTION: CREAR HILO
 // -------------------------------------------------------------
-if ($action === "crear_hilo" && $_SERVER["REQUEST_METHOD"] === "POST") {
+if ($action === "crear_hilo" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
     $canalId = trim($body["canalId"] ?? "general");
     $titulo = trim($body["titulo"] ?? "");
@@ -291,7 +293,7 @@ if ($action === "crear_hilo" && $_SERVER["REQUEST_METHOD"] === "POST") {
 // -------------------------------------------------------------
 // ACTION: COMENTAR
 // -------------------------------------------------------------
-if ($action === "comentar" && $_SERVER["REQUEST_METHOD"] === "POST") {
+if ($action === "comentar" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
     $hiloId = (int)($body["hiloId"] ?? 0);
     $contenido = trim($body["contenido"] ?? "");
@@ -330,7 +332,7 @@ if ($action === "comentar" && $_SERVER["REQUEST_METHOD"] === "POST") {
 // -------------------------------------------------------------
 // ACTION: VOTAR (Toggle único por Google ID)
 // -------------------------------------------------------------
-if ($action === "votar" && $_SERVER["REQUEST_METHOD"] === "POST") {
+if ($action === "votar" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
     $tipo = $body["tipo"] === "comentario" ? "comentario" : "hilo";
     $itemId = (int)($body["itemId"] ?? 0);
@@ -370,7 +372,7 @@ if ($action === "votar" && $_SERVER["REQUEST_METHOD"] === "POST") {
 // -------------------------------------------------------------
 // ACTION: REPORTAR (Auto-moderación con 3 reportes)
 // -------------------------------------------------------------
-if ($action === "reportar" && $_SERVER["REQUEST_METHOD"] === "POST") {
+if ($action === "reportar" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
     $tipo = $body["tipo"] === "comentario" ? "comentario" : "hilo";
     $itemId = (int)($body["itemId"] ?? 0);

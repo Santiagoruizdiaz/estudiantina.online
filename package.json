@@ -6,15 +6,21 @@
   "main": "index.html",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "node scripts/test-runner.mjs",
+    "lint": "node scripts/check-syntax.mjs",
+    "check": "node scripts/check-syntax.mjs",
+    "quality-gate": "node scripts/antigravity-stop-gate.mjs"
   },
   "keywords": [
     "estudiantina",
     "posadas",
     "misiones",
-        "simulador",
+    "simulador",
     "juego",
-    "copero"
+    "copero",
+    "banda-de-musica",
+    "cuerpo-de-baile"
   ],
   "private": true,
   "license": "UNLICENSED"

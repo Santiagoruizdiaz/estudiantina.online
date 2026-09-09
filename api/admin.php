@@ -10,7 +10,9 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
-if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+$method = $_SERVER["REQUEST_METHOD"] ?? "GET";
+
+if ($method === "OPTIONS") {
     http_response_code(200);
     exit;
 }
@@ -160,7 +162,7 @@ function syncComunidadJson($pdo) {
 
 $action = isset($_GET["action"]) ? $_GET["action"] : "";
 
-if ($_SERVER["REQUEST_METHOD"] === "GET") {
+if ($method === "GET") {
     if ($action === "verificar") {
         $admin = getAdminFromRequest($ADMIN_SECRET);
         if (!$admin) {
@@ -220,7 +222,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
     exit;
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($method === "POST") {
     $input = file_get_contents("php://input");
     $body = json_decode($input, true) ?: [];
 

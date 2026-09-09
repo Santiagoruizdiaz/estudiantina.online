@@ -10,7 +10,9 @@ header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
-if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+$method = $_SERVER["REQUEST_METHOD"] ?? "GET";
+
+if ($method === "OPTIONS") {
     http_response_code(200);
     exit;
 }
@@ -42,6 +44,16 @@ try {
         $rows = $stmt->fetchAll();
 
         $noticias = array_map(function($r) {
+            $contenido = json_decode($r["contenido"] ?: "[]", true);
+            $bloques = !empty($r["bloques"]) ? json_decode($r["bloques"], true) : null;
+            if (!$bloques || !is_array($bloques) || count($bloques) === 0) {
+                $bloques = array_map(function($p) {
+                    return [
+                        "tipo" => "parrafo",
+                        "texto" => is_string($p) ? $p : ($p["texto"] ?? "")
+                    ];
+                }, is_array($contenido) ? $contenido : [$contenido]);
+            }
             return [
                 "id" => $r["id"],
                 "titulo" => $r["titulo"],
@@ -52,7 +64,8 @@ try {
                 "tiempoLectura" => $r["tiempo_lectura"],
                 "badge" => $r["badge"],
                 "resumen" => $r["resumen"],
-                "contenido" => json_decode($r["contenido"] ?: "[]", true),
+                "contenido" => $contenido,
+                "bloques" => $bloques,
                 "tags" => json_decode($r["tags"] ?: "[]", true),
                 "imagen" => $r["imagen_url"] ?: "",
                 "imagenUrl" => $r["imagen_url"] ?: "",

@@ -46,6 +46,8 @@ Options -Indexes
 
   # Enrutar llamadas limpias de API a PHP
   RewriteRule ^api/ranking/?$ api/ranking.php [L,QSA]
+  RewriteRule ^api/comunidad/?$ api/comunidad.php [L,QSA]
+  RewriteRule ^api/noticias/?$ api/comunidad.php [L,QSA]
   RewriteRule ^api/foro/?$ api/foro.php [L,QSA]
   RewriteRule ^api/admin/?$ api/admin.php [L,QSA]
 

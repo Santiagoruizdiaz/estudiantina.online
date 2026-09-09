@@ -140,6 +140,7 @@ export class SimuladorCarrera {
     this.mensajeAscenso = null;
     this.bonusColegioDestacado = false;
     this.apodoPersonalizado = "";
+    this.titulosChallenger = 0;
   }
 
   iniciarCarrera(nombre, colegioId, rubroId, rolId, esDestacado = false) {

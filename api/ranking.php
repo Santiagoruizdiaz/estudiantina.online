@@ -10,7 +10,9 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
-if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
+$method = $_SERVER["REQUEST_METHOD"] ?? "GET";
+
+if ($method === "OPTIONS") {
     http_response_code(200);
     exit;
 }
@@ -78,7 +80,7 @@ function compararPorOVR($a, $b) {
 }
 
 // 1. GET: Retorna el Top 10 global y estadísticas de colegios
-if ($_SERVER["REQUEST_METHOD"] === "GET") {
+if ($method === "GET") {
     $datos = leerDatos($dataFile);
     echo json_encode([
         "status" => "ok",
@@ -89,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] === "GET") {
 }
 
 // 2. POST: Registro de egresados o estadísticas
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($method === "POST") {
     $input = file_get_contents("php://input");
     $body = json_decode($input, true);
 

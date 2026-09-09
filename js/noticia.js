@@ -196,18 +196,26 @@ class NoticiaPageApp {
   }
 
   async loadData() {
-    try {
-      const res = await fetch("/api/comunidad", { cache: "no-store" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      this.data = await res.json();
-    } catch (err) {
-      console.warn("Fallo cargando /api/comunidad, intentando /data/comunidad.json:", err);
+    const endpoints = ["/api/comunidad", "api/comunidad.php", "data/comunidad.json"];
+    for (const ep of endpoints) {
       try {
-        const res2 = await fetch("data/comunidad.json", { cache: "no-store" });
-        this.data = await res2.json();
-      } catch (err2) {
-        console.error("Error definitivo cargando datos:", err2);
+        const res = await fetch(ep, { cache: "no-store" });
+        if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          if (contentType.includes("application/json") || ep.endsWith(".json")) {
+            const parsed = await res.json();
+            if (parsed && Array.isArray(parsed.noticias)) {
+              this.data = parsed;
+              break;
+            }
+          }
+        }
+      } catch (err) {
+        // Continuar al siguiente fallback
       }
+    }
+    if (!this.data) {
+      console.error("Error definitivo cargando datos de noticias.");
     }
 
     this.renderArticle();
