@@ -1,0 +1,247 @@
+{
+  "noticias": [
+    {
+      "id": "noticia-02",
+      "titulo": "Cuerpo de Baile: Innovación Coreográfica y Trajes de Élite Marcan la Temporada 2026",
+      "categoria": "Cuerpo de Baile",
+      "categoriaSlug": "baile",
+      "fecha": "06/09/2026",
+      "autor": "Crónica Cultural",
+      "tiempoLectura": "4 min de lectura",
+      "badge": "DESTACADO",
+      "resumen": "Con plumas de faisán, tocados con micro-LEDs y diseños vanguardistas, las pasistas posadeñas revolucionan la estética de la Estudiantina este año.",
+      "contenido": [
+        "Las escuadras de baile presentaron este año una evolución técnica que fusiona samba enredo tradicional con destrezas contemporáneas.",
+        "Los espaldares de alta competencia incorporaron estructuras ultralivianas, permitiendo pasadas mucho más ágiles sin resignar el impacto visual imponente.",
+        "Los coordinadores adelantaron que cada pasada tendrá cambios de vestuario in-situ y sorpresas lumínicas diseñadas para los palcos."
+      ],
+      "bloques": null,
+      "tags": [
+        "Cuerpo de Baile",
+        "Trajes",
+        "Coreografía",
+        "Posadas"
+      ],
+      "imagen": "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80",
+      "imagenUrl": "https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80"
+    },
+    {
+      "id": "noticia-03",
+      "titulo": "Actualización Mayor del Simulador: Nuevo Modo Cuerpo de Baile y Jerarquías Oficiales",
+      "categoria": "Simulador",
+      "categoriaSlug": "simulador",
+      "fecha": "05/09/2026",
+      "autor": "Equipo de Desarrollo",
+      "tiempoLectura": "2 min de lectura",
+      "badge": "ACTUALIZACIÓN",
+      "resumen": "Ya está disponible el parche 2.0 con las 33 instituciones secundarias recreadas, físicas de ritmo mejoradas y el flamante modo carrera.",
+      "contenido": [
+        "Los fanáticos del simulador de la Estudiantina ya pueden disfrutar de la actualización más grande hasta la fecha.",
+        "Entre las novedades sobresalen: selector completo de colegios con escudos oficiales, sistema de fatiga en pasadas largas y un minijuego de precisión de redoble.",
+        "El juego funciona 100% en navegadores móviles y de escritorio sin descargas adicionales ni publicidad."
+      ],
+      "bloques": null,
+      "tags": [
+        "Simulador",
+        "Videojuego",
+        "Update",
+        "Colegios"
+      ],
+      "imagen": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80",
+      "imagenUrl": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80"
+    }
+  ],
+  "cronograma": [
+    {
+      "id": "fase-01",
+      "numero": "01",
+      "badge": "FASE PREVIA",
+      "titulo": "Pruebas Piloto",
+      "fecha": "21 y 28 de Agosto 2026",
+      "hora": "14:00 hs",
+      "lugar": "Cuarto Tramo Costanera",
+      "descripcion": "Puesta a punto de bandas de música y cuerpos de baile sobre el trazado oficial.",
+      "estado": "completado",
+      "orden": 1
+    },
+    {
+      "id": "fase-02",
+      "numero": "02",
+      "badge": "COMPETENCIA OFICIAL",
+      "titulo": "Noches de Calle",
+      "fecha": "19, 20, 26 y 27 de Septiembre 2026",
+      "hora": "17:30 hs",
+      "lugar": "Cuarto Tramo Costanera",
+      "descripcion": "Cuatro noches históricas con más de 30 colegios desfilando por los 4 palcos frente al río Paraná.",
+      "estado": "confirmado",
+      "orden": 2
+    },
+    {
+      "id": "fase-03",
+      "numero": "03",
+      "badge": "MUESTRA TÉCNICA",
+      "titulo": "Expo Carrozas",
+      "fecha": "04 de Octubre 2026",
+      "hora": "16:00 hs",
+      "lugar": "Parque La Cantera (Cascada)",
+      "descripcion": "Exhibición de carrozas ingeniosas y artísticas construidas por los estudiantes posadeños.",
+      "estado": "proximo",
+      "orden": 3
+    },
+    {
+      "id": "fase-04",
+      "numero": "04",
+      "badge": "GRAN FINAL",
+      "titulo": "Show de Scolas",
+      "fecha": "10 y 11 de Octubre 2026",
+      "hora": "18:00 hs",
+      "lugar": "Anfiteatro Manuel Antonio Ramírez",
+      "descripcion": "El gran cierre con las mejores puestas coreográficas y el veredicto final del jurado.",
+      "estado": "proximo",
+      "orden": 4
+    }
+  ],
+  "faq": [
+    {
+      "id": "faq-01",
+      "pregunta": "¿Qué costo tiene la entrada a las noches de calle?",
+      "respuesta": "El acceso a las cuatro noches de calle a lo largo de la Costanera de Posadas es 100% libre y gratuito para toda la comunidad.",
+      "categoria": "Acceso"
+    },
+    {
+      "id": "faq-02",
+      "pregunta": "¿Dónde se ubican los cuatro palcos principales?",
+      "respuesta": "Están distribuidos a lo largo del 4to tramo: Palco 1 (Rotonda del Papa), Palco 2 (Ex Estación), Palco 3 (Paseo de Artesanos) y Palco 4 (Teatrino).",
+      "categoria": "Ubicación"
+    },
+    {
+      "id": "faq-03",
+      "pregunta": "¿Se permite el ingreso con silbatos, pirotecnia o botellas de vidrio?",
+      "respuesta": "Está terminantemente prohibido por ordenanza municipal el ingreso con pirotecnia sonora, silbatos y envases de vidrio por seguridad de los participantes y público.",
+      "categoria": "Seguridad"
+    },
+    {
+      "id": "faq-04",
+      "pregunta": "¿Dónde puedo consultar el orden de salida de los colegios?",
+      "respuesta": "El orden de desfile oficial fiscalizado por APES y la Municipalidad se publica en nuestras redes sociales y en este portal informativo 48 hs antes de cada pasada.",
+      "categoria": "Cronograma"
+    }
+  ],
+  "foro": {
+    "canales": [
+      {
+        "id": "banda",
+        "titulo": "Banda de Música",
+        "descripcion": "Debates sobre redoblantes, caños, parches, afinación, ritmos tradicionales y arreglos de percusión.",
+        "icono": "🥁",
+        "color": "#3b82f6",
+        "hilosCount": 142,
+        "mensajesCount": 890
+      },
+      {
+        "id": "baile",
+        "titulo": "Cuerpo de Baile",
+        "descripcion": "Coreografías, trajes, espaldares, técnica de bastón, maquillaje y preparación física.",
+        "icono": "💃",
+        "color": "#ec4899",
+        "hilosCount": 118,
+        "mensajesCount": 734
+      },
+      {
+        "id": "tribuna",
+        "titulo": "Hinchada & Tribuna",
+        "descripcion": "Cánticos, banderas, color, aguante en la baranda y la pasión de cada colegio posadeño.",
+        "icono": "📣",
+        "color": "#f59e0b",
+        "hilosCount": 95,
+        "mensajesCount": 612
+      },
+      {
+        "id": "simulador",
+        "titulo": "Sugerencias para el Simulador",
+        "descripcion": "Ideas de nuevos eventos, características para próximas versiones y feedback del juego.",
+        "icono": "💡",
+        "color": "#10b981",
+        "hilosCount": 64,
+        "mensajesCount": 420
+      }
+    ],
+    "hilosDestacados": [
+      {
+        "id": "hilo-01",
+        "canalId": "banda",
+        "titulo": "¿Cuál es la chancha o surdo con mejor pegada de este año?",
+        "autor": "RedoblePosadas",
+        "fecha": "Hace 2 horas",
+        "votos": 48,
+        "respuestas": 23,
+        "colegioTag": "Banda"
+      },
+      {
+        "id": "hilo-02",
+        "canalId": "baile",
+        "titulo": "Mejores técnicas para no perder el equilibrio con espaldares de más de 5 kg",
+        "autor": "BastoneraSol",
+        "fecha": "Ayer",
+        "votos": 62,
+        "respuestas": 31,
+        "colegioTag": "Danza"
+      },
+      {
+        "id": "hilo-03",
+        "canalId": "simulador",
+        "titulo": "Propuesta: ¿Podrían agregar clima variable (lluvia/viento) en los desfiles?",
+        "autor": "MisioneroGamer",
+        "fecha": "Hace 2 días",
+        "votos": 89,
+        "respuestas": 44,
+        "colegioTag": "Juego"
+      },
+      {
+        "id": "hilo-04",
+        "canalId": "tribuna",
+        "titulo": "El cántico más pegadizo de la última década en el 4to tramo",
+        "autor": "AguanteCostanera",
+        "fecha": "Hace 3 días",
+        "votos": 73,
+        "respuestas": 52,
+        "colegioTag": "Tribuna"
+      }
+    ]
+  },
+  "guia": [
+    {
+      "id": "faq-01",
+      "pregunta": "¿Qué costo tiene la entrada a las noches de calle?",
+      "respuesta": "El acceso a las cuatro noches de calle a lo largo de la Costanera de Posadas es 100% libre y gratuito para toda la comunidad.",
+      "categoria": "Acceso"
+    },
+    {
+      "id": "faq-02",
+      "pregunta": "¿Dónde se ubican los cuatro palcos principales?",
+      "respuesta": "Están distribuidos a lo largo del 4to tramo: Palco 1 (Rotonda del Papa), Palco 2 (Ex Estación), Palco 3 (Paseo de Artesanos) y Palco 4 (Teatrino).",
+      "categoria": "Ubicación"
+    },
+    {
+      "id": "faq-03",
+      "pregunta": "¿Se permite el ingreso con silbatos, pirotecnia o botellas de vidrio?",
+      "respuesta": "Está terminantemente prohibido por ordenanza municipal el ingreso con pirotecnia sonora, silbatos y envases de vidrio por seguridad de los participantes y público.",
+      "categoria": "Seguridad"
+    },
+    {
+      "id": "faq-04",
+      "pregunta": "¿Dónde puedo consultar el orden de salida de los colegios?",
+      "respuesta": "El orden de desfile oficial fiscalizado por APES y la Municipalidad se publica en nuestras redes sociales y en este portal informativo 48 hs antes de cada pasada.",
+      "categoria": "Cronograma"
+    }
+  ],
+  "ajustes": {
+    "tickerActivo": true,
+    "tickerLineas": [
+      "🔴 EN VIVO: Seguí todas las novedades de la Estudiantina Posadeña 2026",
+      "🥁 Pruebas Piloto completadas con éxito en el 4to tramo",
+      "👑 Próximo evento: Noches de Calle oficiales en la Costanera de Posadas"
+    ],
+    "subtituloSitio": "El portal informativo independiente de la fiesta estudiantil más grande del nordeste argentino"
+  }
+}

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Comunidad &amp; Noticias | Estudiantina de Posadas (estudiantina.online)</title>
+  <meta name="description" content="Portal oficial de la comunidad de la Estudiantina de Posadas. Noticias, cronograma, debates y guia.">
+  <meta name="theme-color" content="#0a0b0f">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://estudiantina.online/comunidad">
+  <meta property="og:title" content="Comunidad &amp; Noticias | Estudiantina de Posadas">
+  <meta property="og:locale" content="es_AR">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%81%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="stylesheet" href="css/comunidad.css?v=20260909_5">
+</head>
+<body>
+
+  <!-- BARRA FLOTANTE MODO ADMINISTRADOR -->
+  <aside id="admin-bar" class="admin-bar" style="display:none;" aria-label="Barra de Administración">
+    <div class="admin-bar-inner">
+      <div class="admin-bar-left">
+        <span class="admin-badge-crown">&#x1F451;</span>
+        <strong class="admin-title">MODO ADMINISTRADOR</strong>
+        <span class="admin-sep">|</span>
+        <span id="admin-bar-user" class="admin-user-tag">admin</span>
+      </div>
+      <div class="admin-bar-actions">
+        <button type="button" id="btn-admin-open-composer" class="btn-admin-bar-action" title="Redactar nueva noticia">
+          <span>✍️</span><span>Noticia</span>
+        </button>
+        <button type="button" id="btn-admin-open-threads" class="btn-admin-bar-action" title="Gestionar debates del foro">
+          <span>💬</span><span>Debates</span>
+        </button>
+        <button type="button" id="btn-admin-open-cronograma" class="btn-admin-bar-action" title="Editar cronograma de la temporada">
+          <span>📅</span><span>Cronograma</span>
+        </button>
+        <button type="button" id="btn-admin-open-guia" class="btn-admin-bar-action" title="Editar guías y preguntas frecuentes">
+          <span>💡</span><span>Guías</span>
+        </button>
+        <button type="button" id="btn-admin-open-settings" class="btn-admin-bar-action" title="Ajustes del sitio y marquesina">
+          <span>⚙️</span><span>Ajustes</span>
+        </button>
+        <button type="button" id="btn-admin-open-panel" class="btn-admin-bar-action" title="Panel de control completo y moderación">
+          <span>🛡️</span><span>Panel Completo</span>
+          <span id="admin-reports-badge" class="admin-badge-reports" style="display:none;">0</span>
+        </button>
+        <button type="button" id="btn-admin-logout" class="btn-admin-bar-logout" title="Cerrar sesión de administrador">
+          <span>Salir</span>
+          <span>✕</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- BREAKING NEWS TICKER -->
+  <div class="breaking-ticker" id="breaking-ticker">
+    <div class="ticker-label"><span class="ticker-dot"></span>EN VIVO</div>
+    <div class="ticker-track-wrap">
+      <div class="ticker-track" id="ticker-track">
+        <span>&#x1F941; Temporada 2026 en marcha &mdash; Pruebas Piloto iniciadas en la Costanera de Posadas</span>
+        <span>&#x1F483; Cuerpos de Baile: Novedades coreograficas y nuevas tematicas para las Noches de Calle</span>
+        <span>&#x1F3AE; Simulador v2026 ya disponible &mdash; Modo Cuerpo de Baile con eventos exclusivos</span>
+        <span>&#x1F4C5; Noches de Calle oficiales: Septiembre - Octubre 2026</span>
+        <span>&#x1F451; Gran Cierre en el Anfiteatro Manuel Antonio Ramirez &mdash; Octubre 2026</span>
+      </div>
+    </div>
+    <button class="ticker-close" id="ticker-close" title="Cerrar">&#x2715;</button>
+  </div>
+
+  <!-- HEADER PRINCIPAL -->
+  <header class="site-header">
+    <div class="header-top-bar">
+      <div class="header-top-inner">
+        <div class="header-top-left">
+          <span class="header-date" id="header-date">Cargando fecha...</span>
+          <span class="header-separator">|</span>
+          <span class="header-location">&#x1F4CD; Posadas, Misiones</span>
+        </div>
+        <div class="header-top-right">
+          <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="header-social">&#x1F4F7; @estudiantina.online</a>
+          <a href="index.html" class="header-btn-game"><span>&#x1F3AE;</span><span>Ir al Simulador</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-masthead">
+      <div class="header-masthead-inner">
+        <a href="comunidad.html" class="masthead-brand" aria-label="Estudiantina Online Comunidad">
+          <div class="masthead-text-group">
+            <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
+          </div>
+        </a>
+        <a href="index.html" class="header-btn-game-mobile" title="Ir al Simulador de Carrera">
+          <span>&#x1F3AE;</span><span>Simulador</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="section-nav" aria-label="Secciones del portal">
+      <div class="section-nav-inner">
+        <a href="#noticias" class="section-nav-link active">Noticias</a>
+        <a href="#cronograma" class="section-nav-link">Cronograma</a>
+        <a href="#guia" class="section-nav-link">Guia del Espectador</a>
+        <a href="#foro" class="section-nav-link">Foro</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="filter-strip" id="filter-strip">
+    <div class="filter-strip-inner">
+      <div class="filter-search-box">
+        <span class="filter-search-icon">&#x1F50D;</span>
+        <input type="text" id="search-input" class="filter-search-input" placeholder="Buscar noticias..." aria-label="Buscar noticias">
+      </div>
+
+      <!-- BOTÓN DE 3 RAYITAS PARA MOBILE -->
+      <button type="button" id="btn-filter-drawer-toggle" class="btn-filter-drawer-toggle" aria-label="Abrir filtros de categorías" aria-expanded="false" aria-controls="filter-drawer">
+        <span class="hamburger-bars" aria-hidden="true">
+          <span class="hbar"></span>
+          <span class="hbar"></span>
+          <span class="hbar"></span>
+        </span>
+        <span class="filter-btn-text">Filtros</span>
+        <span id="active-filter-badge" class="active-filter-badge">Todas</span>
+      </button>
+
+      <!-- CHIPS DESKTOP -->
+      <div class="filter-chips" role="tablist" id="category-pills">
+        <button class="filter-chip active" data-category="todas" role="tab" aria-selected="true">Todas</button>
+        <button class="filter-chip" data-category="noches-de-calle" role="tab" aria-selected="false">&#x1F389; Noches de Calle</button>
+        <button class="filter-chip" data-category="baile" role="tab" aria-selected="false">&#x1F483; Cuerpo de Baile</button>
+        <button class="filter-chip" data-category="banda" role="tab" aria-selected="false">&#x1F941; Banda de Musica</button>
+        <button class="filter-chip" data-category="simulador" role="tab" aria-selected="false">&#x1F3AE; Simulador</button>
+        <button class="filter-chip" data-category="informacion" role="tab" aria-selected="false">&#x1F4A1; Guias e Info</button>
+      </div>
+      <span id="news-count" class="filter-count">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- DRAWER / BOTTOM SHEET DE FILTROS EN MOBILE (Desplegado con 3 rayitas) -->
+  <div id="filter-drawer-overlay" class="filter-drawer-overlay" aria-hidden="true">
+    <div id="filter-drawer" class="filter-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <div class="filter-drawer-handle" aria-hidden="true"></div>
+      <div class="filter-drawer-header">
+        <div class="drawer-header-title-wrap">
+          <span class="drawer-header-icon">&#x2699;&#xFE0F;</span>
+          <h3 id="drawer-title" class="drawer-title">Filtrar Noticias</h3>
+        </div>
+        <button type="button" id="btn-close-filter-drawer" class="btn-close-drawer" aria-label="Cerrar filtros">&#x2715;</button>
+      </div>
+      <div class="filter-drawer-content">
+        <p class="drawer-subtitle">Seleccioná una categoría para explorar las publicaciones:</p>
+        <div class="filter-drawer-options" id="drawer-category-options">
+          <button type="button" class="drawer-chip active" data-category="todas">
+            <span class="drawer-chip-icon">&#x1F4F0;</span>
+            <span class="drawer-chip-label">Todas las noticias</span>
+            <span class="drawer-chip-check">&#x2713;</span>
+          </button>
+          <button type="button" class="drawer-chip" data-category="noches-de-calle">
+            <span class="drawer-chip-icon">&#x1F389;</span>
+            <span class="drawer-chip-label">Noches de Calle</span>
+            <span class="drawer-chip-check">&#x2713;</span>
+          </button>
+          <button type="button" class="drawer-chip" data-category="baile">
+            <span class="drawer-chip-icon">&#x1F483;</span>
+            <span class="drawer-chip-label">Cuerpo de Baile</span>
+            <span class="drawer-chip-check">&#x2713;</span>
+          </button>
+          <button type="button" class="drawer-chip" data-category="banda">
+            <span class="drawer-chip-icon">&#x1F941;</span>
+            <span class="drawer-chip-label">Banda de Musica</span>
+            <span class="drawer-chip-check">&#x2713;</span>
+          </button>
+          <button type="button" class="drawer-chip" data-category="simulador">
+            <span class="drawer-chip-icon">&#x1F3AE;</span>
+            <span class="drawer-chip-label">Simulador</span>
+            <span class="drawer-chip-check">&#x2713;</span>
+          </button>
+          <button type="button" class="drawer-chip" data-category="informacion">
+            <span class="drawer-chip-icon">&#x1F4A1;</span>
+            <span class="drawer-chip-label">Guias e Info</span>
+            <span class="drawer-chip-check">&#x2713;</span>
+          </button>
+        </div>
+      </div>
+      <div class="filter-drawer-footer">
+        <button type="button" id="btn-reset-filters" class="btn-reset-filters">Restablecer (Todas)</button>
+        <button type="button" id="btn-apply-filters" class="btn-apply-filters">Ver noticias</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="portal-main">
+
+    <!-- SECCION NOTICIAS -->
+    <section id="noticias" class="section-noticias">
+      <div class="editorial-layout">
+        <div class="editorial-main">
+          <div id="hero-article" class="hero-article"></div>
+          <!-- Barra Editorial para Administrador -->
+          <div id="admin-news-toolbar" class="admin-news-toolbar" style="display:none;">
+            <button type="button" id="btn-admin-compose-news-inline" class="btn-admin-compose-inline">
+              <span>&#x270D;&#xFE0F;</span><span>Redactar Nueva Noticia en el Portal</span>
+            </button>
+          </div>
+          <div class="subsection-label">
+            <span class="subsection-label-bar"></span>
+            <span>Mas Noticias</span>
+          </div>
+          <div id="news-grid" class="news-grid" aria-live="polite"></div>
+        </div>
+
+        <aside class="editorial-sidebar">
+          <div class="sidebar-block">
+            <div class="sidebar-block-header">
+              <span class="sidebar-block-icon">&#x1F525;</span>
+              <h3 class="sidebar-block-title">Trending</h3>
+            </div>
+            <div id="trending-list" class="trending-list"></div>
+          </div>
+
+          <div class="sidebar-block">
+            <div class="sidebar-block-header">
+              <span class="sidebar-block-icon">&#x1F4C5;</span>
+              <h3 class="sidebar-block-title">Proximas Fechas</h3>
+            </div>
+            <div class="schedule-compact-list">
+              <div class="schedule-compact-item">
+                <div class="schedule-compact-icon">&#x23F1;</div>
+                <div><strong>Pruebas Piloto</strong><span>Septiembre 2026 &mdash; Costanera</span></div>
+                <span class="schedule-compact-badge live">En curso</span>
+              </div>
+              <div class="schedule-compact-item">
+                <div class="schedule-compact-icon">&#x1F941;</div>
+                <div><strong>Noches de Calle</strong><span>Sep&ndash;Oct 2026 &mdash; 4 Tramos</span></div>
+                <span class="schedule-compact-badge upcoming">Proximo</span>
+              </div>
+              <div class="schedule-compact-item">
+                <div class="schedule-compact-icon">&#x1F451;</div>
+                <div><strong>Cierre en Anfiteatro</strong><span>Octubre 2026 &mdash; Ramirez</span></div>
+                <span class="schedule-compact-badge">Cierre</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-block sidebar-game-promo">
+            <span class="sidebar-game-emoji">&#x1F3AE;</span>
+            <h4 class="sidebar-game-title">Juga el Simulador</h4>
+            <p class="sidebar-game-desc">Crea tu carrera en la Estudiantina. Banda de Musica o Cuerpo de Baile.</p>
+            <a href="index.html" class="sidebar-game-btn">Jugar ahora &rarr;</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SECCION CRONOGRAMA -->
+    <section id="cronograma" class="section-full-width section-cronograma">
+      <div class="section-inner">
+        <div class="section-header-row">
+          <div class="section-header-left">
+            <div class="section-header-label">📍 Cronograma</div>
+            <h2 class="section-heading">Temporada 2026</h2>
+          </div>
+          <div class="section-header-right-actions">
+            <button type="button" id="btn-admin-manage-cronograma" class="btn-admin-section-edit" style="display:none;" title="Editar fechas y eventos">
+              <span>✏️</span><span>Editar Cronograma</span>
+            </button>
+            <span class="section-badge-tag">Costanera de Posadas</span>
+          </div>
+        </div>
+        <div class="cronograma-grid" id="cronograma-grid">
+          <article class="cronograma-card featured">
+            <div class="cronograma-card-number">01</div>
+            <div class="cronograma-card-icon">&#x23F1;</div>
+            <h3>Pruebas Piloto</h3>
+            <div class="cronograma-meta">
+              <span>&#x1F4C5; Septiembre 2026</span>
+              <span>&#x1F4CD; Costanera &mdash; 4to Tramo</span>
+              <span>&#x23F0; 14:00 a 23:00 hs</span>
+            </div>
+            <p>Ensayos generales con cronometro oficial y ajuste de desplazamientos frente a los palcos de fiscalizacion.</p>
+            <div class="cronograma-card-status status-live">En desarrollo</div>
+          </article>
+          <article class="cronograma-card">
+            <div class="cronograma-card-number">02</div>
+            <div class="cronograma-card-icon">&#x1F941;</div>
+            <h3>Noches de Calle</h3>
+            <div class="cronograma-meta">
+              <span>&#x1F4C5; Sep &ndash; Oct 2026</span>
+              <span>&#x1F4CD; 4 Tramos de la Costanera</span>
+              <span>&#x23F0; 18:00 a 04:30 hs</span>
+            </div>
+            <p>Desfile oficial competitivo con mas de 30 colegios posadenos y evaluacion por jurados fiscales.</p>
+            <div class="cronograma-card-status status-upcoming">Proximamente</div>
+          </article>
+          <article class="cronograma-card">
+            <div class="cronograma-card-number">03</div>
+            <div class="cronograma-card-icon">&#x1F451;</div>
+            <h3>Show en Anfiteatro</h3>
+            <div class="cronograma-meta">
+              <span>&#x1F4C5; Octubre 2026</span>
+              <span>&#x1F4CD; Anfiteatro Manuel A. Ramirez</span>
+              <span>&#x23F0; 17:00 a 05:00 hs</span>
+            </div>
+            <p>El gran cierre de gala sobre el escenario de piedra con vista al Rio Parana.</p>
+            <div class="cronograma-card-status">Cierre de Temporada</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCION GUIA FAQ -->
+    <section id="guia" class="section-full-width section-guia">
+      <div class="section-inner">
+        <div class="section-header-row">
+          <div class="section-header-left">
+            <div class="section-header-label">💡 FAQ</div>
+            <h2 class="section-heading">Guia del Espectador</h2>
+          </div>
+          <div class="section-header-right-actions">
+            <button type="button" id="btn-admin-manage-guia" class="btn-admin-section-edit" style="display:none;" title="Editar preguntas y respuestas de la guía">
+              <span>✏️</span><span>Editar Guía & FAQ</span>
+            </button>
+          </div>
+        </div>
+        <div class="faq-two-col">
+          <div class="faq-list" id="faq-list">
+            <div class="faq-item active">
+              <button class="faq-question" type="button"><span>Que es la Estudiantina de Posadas y como se vive?</span><span class="faq-arrow">&#x25BC;</span></button>
+              <div class="faq-answer">Es la maxima fiesta juvenil y cultural de la provincia de Misiones, realizada anualmente sobre la ribera del rio Parana. Mas de 30 instituciones secundarias desfilan con imponentes bandas de musica y escuadras de danza.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" type="button"><span>Cuales son las recomendaciones para ir en familia?</span><span class="faq-arrow">&#x25BC;</span></button>
+              <div class="faq-answer">Llevar silletas para ubicarse en las zonas habilitadas, botellas de agua para hidratacion continua y abrigo liviano para la madrugada. Acudir con anticipacion para buenas ubicaciones frente a los palcos.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" type="button"><span>Como se califica a los colegios en cada rubro?</span><span class="faq-arrow">&#x25BC;</span></button>
+              <div class="faq-answer">Un jurado fiscalizador evalua ritmo, sincronizacion, complejidad de figuras y potencia sonora en Banda de Musica; coreografia, despliegue escenico, vestuario y expresion en Cuerpo de Baile; ademas de puntualidad y conducta.</div>
+            </div>
+            <div class="faq-item">
+              <button class="faq-question" type="button"><span>Como puedo aportar noticias o sugerencias?</span><span class="faq-arrow">&#x25BC;</span></button>
+              <div class="faq-answer">Podes escribirnos a <a href="mailto:contacto@estudiantina.online" style="color:#38bdf8">contacto@estudiantina.online</a> o enviarnos mensaje en Instagram <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" style="color:#f59e0b">@estudiantina.online</a>.</div>
+            </div>
+          </div>
+          <div class="faq-side-card">
+            <span class="faq-side-emoji">&#x1F3DF;</span>
+            <h4>Primera vez en la Estudiantina?</h4>
+            <p>La Costanera de Posadas se convierte en el escenario mas vibrante de Misiones cada ano. Mas de 30 colegios, miles de estudiantes y una ciudad entera detras de sus jovenes.</p>
+            <div class="faq-side-stats">
+              <div class="faq-stat"><span class="faq-stat-num">30+</span><span>Colegios</span></div>
+              <div class="faq-stat"><span class="faq-stat-num">4</span><span>Tramos</span></div>
+              <div class="faq-stat"><span class="faq-stat-num">12+</span><span>Horas</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCION FORO -->
+    <section id="foro" class="section-full-width section-foro">
+      <div class="section-inner">
+        <div class="section-header-row forum-header-row">
+          <div class="section-header-left">
+            <div class="section-header-label">&#x1F4AC; Comunidad &amp; Hinchadas</div>
+            <h2 class="section-heading">Foro de Debate</h2>
+            <p class="section-subtext">Espacio oficial para debatir arreglos de percusion, coreografias y toda la pasion de los colegios.</p>
+          </div>
+          
+          <div class="forum-header-actions">
+            <!-- Bloque de usuario Google / Login -->
+            <div id="forum-user-bar" class="forum-user-bar">
+              <!-- Estado NO autenticado -->
+              <button type="button" id="btn-google-login" class="btn-google-login" aria-label="Ingresar con Google">
+                <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Ingresar con Google</span>
+              </button>
+
+              <!-- Estado AUTENTICADO -->
+              <div id="forum-user-profile" class="forum-user-profile" style="display:none;">
+                <img id="user-avatar-img" class="user-avatar-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%2338bdf8'/%3E%3C/svg%3E" alt="Avatar de usuario" />
+                <div class="user-profile-info">
+                  <span id="user-profile-name" class="user-profile-name">Usuario</span>
+                  <span id="user-profile-school-badge" class="user-profile-school-badge">&#x1F941; El Janssen</span>
+                </div>
+                <button type="button" id="btn-logout" class="btn-logout" title="Cerrar sesion">&#x2715;</button>
+              </div>
+            </div>
+
+            <button id="btn-propose-topic" class="btn-propose-topic" type="button">
+              <span>&#x270D;&#xFE0F;</span><span>Iniciar Debate</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- FILTRO DE CANALES TEMATICOS -->
+        <div class="subsection-label" style="margin-top:1.5rem">
+          <span class="subsection-label-bar"></span><span>Canales Tematicos</span>
+        </div>
+        <div id="channels-grid" class="channels-grid"></div>
+
+        <!-- BARRA DE HERRAMIENTAS Y ORDEN DE HILOS -->
+        <div class="forum-toolbar">
+          <div class="forum-sort-tabs" role="tablist">
+            <button type="button" id="tab-sort-top" class="forum-sort-tab active" data-sort="top">
+              <span>&#x1F525;</span><span>Mas Votados</span>
+            </button>
+            <button type="button" id="tab-sort-recent" class="forum-sort-tab" data-sort="recientes">
+              <span>&#x23F1;&#xFE0F;</span><span>Recientes</span>
+            </button>
+          </div>
+          <div class="forum-filter-indicator">
+            <span id="forum-active-channel-name" class="forum-channel-pill">Todos los canales</span>
+            <span id="forum-threads-count" class="forum-count-badge">Cargando...</span>
+          </div>
+        </div>
+
+        <!-- LISTA DE DEBATES / HILOS -->
+        <div id="threads-container" class="threads-container" aria-live="polite"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="portal-footer">
+    <div class="footer-inner">
+      <div class="footer-main-grid">
+        <!-- Columna Marca -->
+        <div class="footer-col-brand">
+          <a href="comunidad.html" class="footer-brand-link">
+            <span class="footer-brand-icon">&#x1F941;</span>
+            <div class="footer-brand-title">
+              <span class="footer-brand-name">estudiantina<span class="footer-brand-domain">.online</span></span>
+              <span class="footer-brand-sub">Portal de Comunidad &amp; Noticias</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc">
+            El espacio digital oficial de la fiesta de la juventud misionera. Noticias exclusivas, debates de hinchadas, cronograma de las Noches de Calle y el Simulador 2026.
+          </p>
+          <div class="footer-pills-row">
+            <span class="footer-pill">&#x1F4CD; Costanera de Posadas</span>
+            <span class="footer-pill">&#x1F941; 33 Colegios Oficiales</span>
+          </div>
+        </div>
+
+        <!-- Columna Secciones del Portal -->
+        <div class="footer-col-nav">
+          <h4 class="footer-col-title">Secciones</h4>
+          <ul class="footer-nav-list">
+            <li><a href="#noticias" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F0;</span> Noticias &amp; Cronicas</a></li>
+            <li><a href="#cronograma" class="footer-nav-link"><span class="footer-link-icon">&#x1F4C5;</span> Cronograma de Calle</a></li>
+            <li><a href="#guia" class="footer-nav-link"><span class="footer-link-icon">&#x2753;</span> Guia &amp; Preguntas</a></li>
+            <li><a href="#foro" class="footer-nav-link"><span class="footer-link-icon">&#x1F4AC;</span> Foro de Debate</a></li>
+          </ul>
+        </div>
+
+        <!-- Columna Ecosistema Estudiantina -->
+        <div class="footer-col-nav">
+          <h4 class="footer-col-title">Ecosistema</h4>
+          <ul class="footer-nav-list">
+            <li><a href="index.html" class="footer-nav-link"><span class="footer-link-icon">&#x1F3AE;</span> Ir al Simulador</a></li>
+            <li><a href="index.html#ranking" class="footer-nav-link"><span class="footer-link-icon">&#x1F3C6;</span> Salon de la Fama</a></li>
+            <li><a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F7;</span> Instagram Oficial</a></li>
+            <li><a href="index.html#terms" class="footer-nav-link"><span class="footer-link-icon">&#x2696;&#xFE0F;</span> Terminos &amp; Condiciones</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Barra inferior / Copyright -->
+      <div class="footer-bottom-bar">
+        <p class="footer-copy">
+          &copy; 2026 <strong>estudiantina.online</strong> &mdash; Obra cultural independiente sin fines de lucro. Desarrollado con pasi&oacute;n posade&ntilde;a.
+          <button type="button" id="btn-footer-admin-trigger" class="footer-admin-trigger" title="Acceso de Administración">&#x1F510; Acceso Admin</button>
+        </p>
+        <button type="button" id="btn-footer-back-to-top" class="footer-back-to-top" aria-label="Volver arriba">
+          <span>Subir</span>
+          <span class="arrow-up">&#x2191;</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL LECTOR DE NOTICIAS — PROFESIONAL FULLSCREEN -->
+  <div id="modal-reader" class="article-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="reader-title">
+    <!-- Barra de progreso de lectura -->
+    <div class="reader-progress-bar" id="reader-progress-bar"></div>
+
+    <div class="article-modal-card">
+      <!-- Barra superior del reader -->
+      <div class="reader-topbar">
+        <button id="btn-close-reader" class="reader-back-btn" aria-label="Volver">
+          <span class="reader-back-arrow">←</span>
+          <span>Volver</span>
+        </button>
+        <span id="reader-category-top" class="reader-topbar-cat"></span>
+        <div class="reader-topbar-actions">
+          <a id="btn-reader-open-tab" class="reader-topbar-btn reader-open-tab-btn" href="#" target="_blank" title="Abrir en pestaña completa">↗ Pestaña completa</a>
+          <button type="button" id="btn-reader-admin-edit" class="reader-topbar-btn reader-admin-btn" style="display:none;" title="Editar esta noticia">✏️ Editar</button>
+          <button type="button" id="btn-reader-admin-del" class="reader-topbar-btn reader-admin-del-btn" style="display:none;" title="Eliminar esta noticia">🗑️</button>
+          <button id="btn-share-article" class="reader-topbar-btn" title="Compartir">📱 Compartir</button>
+        </div>
+      </div>
+
+      <!-- Portada hero del artículo -->
+      <div id="reader-cover-wrap" class="reader-cover-hero" style="display:none;">
+        <img id="reader-cover-img" class="reader-cover-img" src="" alt="Portada de la noticia" loading="lazy" />
+        <div class="reader-cover-gradient"></div>
+      </div>
+
+      <!-- Cabecera del artículo -->
+      <div class="reader-article-header">
+        <div class="reader-badges-row">
+          <span id="reader-category" class="reader-cat-badge">Noticia</span>
+          <span id="reader-badge-label" class="reader-breaking-badge" style="display:none;"></span>
+        </div>
+        <h2 id="reader-title" class="article-modal-title">Título</h2>
+        <p id="reader-resumen-lead" class="reader-lead-text"></p>
+        <div class="reader-byline">
+          <div class="reader-byline-left">
+            <div class="reader-author-avatar" id="reader-author-avatar">📰</div>
+            <div class="reader-author-info">
+              <span id="reader-author-name" class="reader-author-name"></span>
+              <span id="reader-meta" class="reader-meta-text">Fecha y autor</span>
+            </div>
+          </div>
+          <div class="reader-byline-right">
+            <span id="reader-read-time" class="reader-read-time">3 min</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs del reader -->
+      <div class="reader-tabs-bar" id="reader-tabs-bar">
+        <button type="button" class="reader-tab active" data-reader-tab="articulo">📰 Artículo</button>
+        <button type="button" class="reader-tab" data-reader-tab="galeria">🖼️ Galería</button>
+        <button type="button" class="reader-tab" data-reader-tab="relacionadas">🔗 Relacionadas</button>
+      </div>
+
+      <!-- Tab: Artículo -->
+      <div id="reader-tab-articulo" class="reader-tab-panel active">
+        <div id="reader-body" class="article-modal-body"></div>
+      </div>
+
+      <!-- Tab: Galería -->
+      <div id="reader-tab-galeria" class="reader-tab-panel" style="display:none;">
+        <div id="reader-gallery-grid" class="reader-gallery-grid"></div>
+      </div>
+
+      <!-- Tab: Relacionadas -->
+      <div id="reader-tab-relacionadas" class="reader-tab-panel" style="display:none;">
+        <div id="reader-related-grid" class="reader-related-grid"></div>
+      </div>
+
+      <!-- Tags row -->
+      <div id="reader-tags-row" class="reader-tags-row"></div>
+
+      <!-- Footer del reader -->
+      <div class="article-modal-footer">
+        <a id="btn-reader-footer-open-tab" class="btn-modal-action btn-open-tab-footer" href="#" target="_blank">
+          <span>Abrir en Pestaña Completa</span> <span>↗</span>
+        </a>
+        <button id="btn-close-reader-action" class="btn-modal-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE DE HILO & COMENTARIOS -->
+  <div id="modal-thread" class="thread-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="thread-modal-title">
+    <div class="thread-modal-card">
+      <div class="thread-modal-header">
+        <div class="thread-modal-header-info">
+          <span id="thread-modal-channel" class="thread-channel-badge">Canal</span>
+          <h3 id="thread-modal-title" class="thread-modal-title">Titulo del Debate</h3>
+        </div>
+        <button id="btn-close-thread-modal" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
+      </div>
+
+      <div class="thread-modal-body">
+        <!-- Post Original -->
+        <article class="thread-main-post">
+          <div class="thread-author-bar">
+            <img id="thread-modal-avatar" class="thread-author-avatar" src="" alt="Avatar" />
+            <div class="thread-author-info">
+              <span id="thread-modal-author" class="thread-author-name">Autor</span>
+              <span id="thread-modal-school" class="thread-author-school">&#x1F941; Colegio</span>
+            </div>
+            <span id="thread-modal-date" class="thread-post-date">Fecha</span>
+          </div>
+          <div id="thread-modal-content" class="thread-post-content"></div>
+          <div class="thread-post-actions">
+            <button type="button" id="btn-vote-main-thread" class="btn-thread-vote">
+              <span class="vote-icon">&#x25B2;</span>
+              <span id="thread-modal-votes-count" class="vote-num">0</span>
+              <span class="vote-label">Votos</span>
+            </button>
+            <button type="button" id="btn-report-main-thread" class="btn-thread-report" title="Reportar contenido">&#x1F6A9; Denunciar</button>
+            <button type="button" id="btn-admin-del-main-thread" class="btn-thread-report" style="display:none; border-color:rgba(239,68,68,0.4); color:#fca5a5;" title="Eliminar hilo (Admin)">&#x1F5D1;&#xFE0F; Eliminar Hilo (Admin)</button>
+          </div>
+        </article>
+
+        <!-- Sección de Respuestas -->
+        <div class="thread-replies-section">
+          <div class="replies-header">
+            <h4 class="replies-title">&#x1F4AC; Respuestas (<span id="thread-modal-replies-count">0</span>)</h4>
+          </div>
+          <div id="thread-replies-list" class="thread-replies-list">
+            <!-- Respuestas renderizadas dinamicamente -->
+          </div>
+        </div>
+
+        <!-- Formulario de Respuesta -->
+        <div class="thread-reply-box-wrap">
+          <div id="thread-reply-unauth" class="thread-reply-unauth" style="display:none;">
+            <p>Inicia sesion con tu cuenta de Google para participar del debate.</p>
+            <button type="button" id="btn-reply-google-auth" class="btn-google-login" style="margin-top:8px">
+              <span>Ingresar con Google</span>
+            </button>
+          </div>
+          <form id="form-thread-reply" class="form-thread-reply">
+            <div class="reply-input-row">
+              <img id="reply-user-avatar" class="reply-user-avatar" src="" alt="Tu avatar" />
+              <textarea id="reply-input-content" class="reply-input-textarea" rows="2" placeholder="Escribi tu comentario o aporte..." required></textarea>
+            </div>
+            <div class="reply-action-row">
+              <span id="reply-school-hint" class="reply-school-hint">&#x1F4CD; Comentando como hincha</span>
+              <button type="submit" id="btn-submit-reply" class="btn-submit-reply">Responder &#x27A4;</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREAR DEBATE -->
+  <div id="modal-topic" class="topic-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="topic-modal-title">
+    <div class="topic-modal-card">
+      <div class="topic-modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">&#x270D;&#xFE0F;</span>
+          <h3 id="topic-modal-title">Iniciar Nuevo Debate</h3>
+        </div>
+        <button id="btn-close-topic" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
+      </div>
+      <form id="form-topic" class="topic-form">
+        <div class="topic-form-group">
+          <label for="topic-canal" class="topic-form-label">Canal Tematico</label>
+          <select id="topic-canal" class="topic-form-select" required>
+            <option value="banda">&#x1F941; Banda de Musica</option>
+            <option value="baile">&#x1F483; Cuerpo de Baile</option>
+            <option value="hinchadas">&#x1F4E2; Tribunas &amp; Hinchadas</option>
+            <option value="simulador">&#x1F3AE; Sugerencias para el Simulador</option>
+            <option value="general">&#x1F4AC; General &amp; Comunidad</option>
+          </select>
+        </div>
+        <div class="topic-form-group">
+          <label for="topic-school" class="topic-form-label">Tu Colegio (Hincha o Participante)</label>
+          <select id="topic-school" class="topic-form-select" required>
+            <!-- Opciones cargadas dinamicamente con los 33 colegios -->
+          </select>
+        </div>
+        <div class="topic-form-group">
+          <label for="topic-title" class="topic-form-label">Titulo del Debate</label>
+          <input type="text" id="topic-title" class="topic-form-input" placeholder="Ej: ¿Cual fue el mejor corte de redoble en la prueba piloto?" required minlength="5" maxlength="120">
+        </div>
+        <div class="topic-form-group">
+          <label for="topic-desc" class="topic-form-label">Contenido o Pregunta</label>
+          <textarea id="topic-desc" class="topic-form-textarea" rows="4" placeholder="Comparti tu punto de vista, datos, analisis o vivencias de la calle..." required minlength="10" maxlength="2500"></textarea>
+        </div>
+        <button type="submit" class="btn-propose-topic" style="width:100%;justify-content:center;padding:0.9rem;font-size:0.92rem">Publicar Debate &#x1F680;</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN GOOGLE & SELECCION DE COLEGIO -->
+  <div id="modal-google-auth" class="auth-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="auth-modal-title">
+    <div class="auth-modal-card">
+      <div class="auth-modal-header">
+        <span class="auth-modal-icon">&#x1F941;</span>
+        <h3 id="auth-modal-title" class="auth-modal-title">Identificate para Participar</h3>
+        <p class="auth-modal-desc">Inicia sesion con tu cuenta de Google y elegi tu colegio para debatir y votar.</p>
+        <button id="btn-close-auth-modal" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
+      </div>
+      <div class="auth-modal-body">
+        <div class="topic-form-group">
+          <label for="auth-select-school" class="topic-form-label">&#x1F3DF;&#xFE0F; Selecciona tu Colegio Oficial</label>
+          <select id="auth-select-school" class="topic-form-select" required>
+            <!-- Poblado con los 33 colegios -->
+          </select>
+        </div>
+
+        <div class="google-login-action-wrap">
+          <div id="google-gis-container" class="google-gis-container"></div>
+          
+          <div class="auth-divider"><span>O ingreso rapido</span></div>
+          
+          <button type="button" id="btn-quick-login" class="btn-quick-login">
+            <span>&#x26A1;</span><span>Ingresar con Google (Perfil Hincha)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="modal-admin-login" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-login-title">
+    <div class="admin-modal-card">
+      <div class="admin-modal-header">
+        <span class="admin-modal-icon">&#x1F510;</span>
+        <h3 id="admin-login-title" class="admin-modal-title">Acceso de Administración</h3>
+        <p class="admin-modal-desc">Panel exclusivo para redactores y moderadores de estudiantina.online</p>
+        <button id="btn-close-admin-login" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
+      </div>
+      <form id="form-admin-login" class="admin-form">
+        <div class="admin-login-hint">
+          <span>💡 Acceso local: <strong>admin</strong> &bull; Clave: <strong>Estudiantina2026!</strong> o <strong>admin123</strong></span>
+        </div>
+        <div class="topic-form-group">
+          <label for="admin-login-user" class="topic-form-label">Usuario Administrador</label>
+          <input type="text" id="admin-login-user" class="topic-form-input" placeholder="admin" required autocomplete="username">
+        </div>
+        <div class="topic-form-group">
+          <label for="admin-login-password" class="topic-form-label">Contraseña</label>
+          <div class="password-input-wrap">
+            <input type="password" id="admin-login-password" class="topic-form-input" placeholder="Ingresá tu contraseña" required autocomplete="current-password">
+            <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar">&#x1F441;&#xFE0F;</button>
+          </div>
+        </div>
+        <div id="admin-login-error" class="admin-login-error" style="display:none;"></div>
+        <button type="submit" id="btn-submit-admin-login" class="btn-admin-primary">
+          <span>Ingresar al Modo Administrador</span> <span>&#x27A4;</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITOR / PUBLICADOR DE NOTICIAS — MULTI-TAB CON BLOQUES -->
+  <div id="modal-admin-editor-noticia" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-editor-title">
+    <div class="admin-modal-card admin-modal-wide editor-modal-fullscreen">
+      <!-- Cabecera del editor -->
+      <div class="admin-modal-header editor-modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">📰</span>
+          <h3 id="admin-editor-title">Publicar Nueva Noticia</h3>
+        </div>
+        <div class="editor-header-actions">
+          <span id="editor-status-label" class="editor-status-label">Sin guardar</span>
+          <button id="btn-close-admin-editor" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
+        </div>
+      </div>
+
+      <!-- Tabs del editor -->
+      <div class="editor-tabs-bar">
+        <button type="button" class="editor-tab active" data-editor-tab="contenido">
+          <span>✍️</span><span>Contenido</span>
+        </button>
+        <button type="button" class="editor-tab" data-editor-tab="portada">
+          <span>🖼️</span><span>Portada &amp; Datos</span>
+        </button>
+        <button type="button" class="editor-tab" data-editor-tab="preview">
+          <span>👁️</span><span>Previsualizar</span>
+        </button>
+      </div>
+
+      <form id="form-admin-noticia" class="editor-form-body">
+
+        <!-- ════ TAB 1: CONTENIDO ════ -->
+        <div id="editor-tab-contenido" class="editor-tab-panel active">
+          <div class="editor-content-columns">
+            <!-- Columna Izquierda: Titulo y bajada -->
+            <div class="editor-meta-quick">
+              <div class="topic-form-group">
+                <label for="news-input-title" class="topic-form-label">📝 Título Periodístico</label>
+                <input type="text" id="news-input-title" class="topic-form-input editor-title-input" placeholder="Ej: Récord de sincronización en el cuarto tramo de la Costanera" required minlength="8" maxlength="160">
+              </div>
+              <div class="topic-form-group">
+                <label for="news-input-resumen" class="topic-form-label">🗞️ Bajada / Lead (aparece en portada)</label>
+                <textarea id="news-input-resumen" class="topic-form-textarea" rows="3" placeholder="Resumen conciso que aparecerá en la portada y como lead del artículo..." required minlength="15" maxlength="350"></textarea>
+              </div>
+            </div>
+
+            <!-- Bloque Editor -->
+            <div class="editor-blocks-section">
+              <div class="editor-blocks-header">
+                <span class="editor-blocks-label">📄 Cuerpo del artículo por bloques</span>
+                <div class="editor-blocks-add-btns">
+                  <button type="button" class="btn-add-block" id="btn-add-text-block" title="Agregar párrafo de texto">
+                    <span>¶</span> Párrafo
+                  </button>
+                  <button type="button" class="btn-add-block btn-add-block-img" id="btn-add-image-block" title="Insertar imagen inline">
+                    <span>🖼️</span> Imagen
+                  </button>
+                  <button type="button" class="btn-add-block btn-add-block-quote" id="btn-add-quote-block" title="Agregar cita destacada">
+                    <span>💬</span> Cita
+                  </button>
+                </div>
+              </div>
+              <!-- Lista de bloques renderizada por JS -->
+              <div id="editor-blocks-list" class="editor-blocks-list">
+                <!-- Bloque inicial vacío, se agrega via JS -->
+              </div>
+              <p class="editor-blocks-hint">Usá los botones de arriba para agregar párrafos, imágenes o citas. Las imágenes admiten URL externa.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ TAB 2: PORTADA & METADATOS ════ -->
+        <div id="editor-tab-portada" class="editor-tab-panel" style="display:none;">
+          <!-- Imagen de Portada -->
+          <div class="editor-cover-section">
+            <h4 class="editor-section-title">📷 Imagen de Portada</h4>
+            <div class="editor-cover-preview-wrap">
+              <div id="news-image-preview-wrap" class="news-image-preview-wrap-new" style="display:none;">
+                <img id="news-image-preview" src="" alt="Vista previa de portada">
+                <button type="button" id="btn-remove-news-img" class="btn-remove-news-img-new">✕ Quitar</button>
+              </div>
+              <div class="editor-cover-no-img" id="editor-cover-no-img">
+                <span>🖼️</span>
+                <span>Sin imagen de portada</span>
+              </div>
+            </div>
+            <div class="news-image-input-row">
+              <input type="url" id="news-input-image" class="topic-form-input" placeholder="https://ejemplo.com/foto.jpg">
+              <label class="btn-news-upload-label" title="Subir foto desde tu dispositivo">
+                <span>📁 Subir</span>
+                <input type="file" id="news-input-file" accept="image/*" style="display:none;">
+              </label>
+            </div>
+            <!-- Presets rápidos -->
+            <div class="news-presets-wrap">
+              <span class="news-presets-title">Fotos rápidas:</span>
+              <div class="news-presets-buttons">
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80">🥁 Banda</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80">💃 Baile</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80">🎆 Costanera</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80">📢 Tribuna</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80">🎮 Juego</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80">🎉 Fiesta</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadatos -->
+          <div class="editor-meta-section">
+            <h4 class="editor-section-title">🗂️ Categoría y Clasificación</h4>
+            <div class="form-row-2col">
+              <div class="topic-form-group">
+                <label for="news-input-rubro" class="topic-form-label">Rubro / Sección</label>
+                <select id="news-input-rubro" class="topic-form-select" required>
+                  <option value="Noches de Calle" data-slug="noches-de-calle">&#x1F3DF;&#xFE0F; Noches de Calle</option>
+                  <option value="Banda de Música" data-slug="banda">&#x1F941; Banda de Música</option>
+                  <option value="Cuerpo de Baile" data-slug="baile">&#x1F483; Cuerpo de Baile</option>
+                  <option value="Simulador" data-slug="simulador">&#x1F3AE; Simulador Oficial</option>
+                  <option value="Información" data-slug="informacion">&#x1F4A1; Guías &amp; Información</option>
+                </select>
+              </div>
+              <div class="topic-form-group">
+                <label for="news-input-badge" class="topic-form-label">Badge de Urgencia</label>
+                <select id="news-input-badge" class="topic-form-select">
+                  <option value="ÚLTIMO MOMENTO">&#x1F525; ÚLTIMO MOMENTO</option>
+                  <option value="DESTACADO">&#x2B50; DESTACADO</option>
+                  <option value="OFICIAL">&#x1F3DB;&#xFE0F; OFICIAL</option>
+                  <option value="CRÓNICA">&#x1F4DD; CRÓNICA</option>
+                  <option value="UPDATE">&#x1F680; ACTUALIZACIÓN</option>
+                  <option value="NOTICIA">📰 NOTICIA</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row-2col">
+              <div class="topic-form-group">
+                <label for="news-input-autor" class="topic-form-label">✍️ Firma / Autor</label>
+                <input type="text" id="news-input-autor" class="topic-form-input" placeholder="Ej: Redacción Comunidad" value="Redacción Oficial">
+              </div>
+              <div class="topic-form-group">
+                <label for="news-input-tags" class="topic-form-label">🏷️ Tags (separados por coma)</label>
+                <input type="text" id="news-input-tags" class="topic-form-input" placeholder="Ej: Costanera, Palco 1, Posadas" value="Costanera, Posadas">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════ TAB 3: PREVISUALIZACIÓN ════ -->
+        <div id="editor-tab-preview" class="editor-tab-panel" style="display:none;">
+          <div class="editor-preview-container">
+            <div class="editor-preview-notice">
+              <span>👁️</span> Vista previa del artículo tal como se verá en el lector
+            </div>
+            <div id="editor-preview-content" class="editor-preview-content"></div>
+          </div>
+        </div>
+
+        <!-- Footer fijo del editor -->
+        <div class="editor-sticky-footer">
+          <div class="editor-footer-left">
+            <span id="editor-blocks-count" class="editor-blocks-count">0 bloques</span>
+          </div>
+          <div class="editor-footer-right">
+            <button type="button" id="btn-editor-preview-quick" class="btn-editor-preview-toggle">
+              👁️ Vista Previa
+            </button>
+            <button type="submit" id="btn-submit-create-news" class="btn-admin-primary btn-editor-publish">
+              <span>Publicar Noticia</span> <span>🚀</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL PANEL DE CONTROL Y MODERACIÓN -->
+  <div id="modal-admin-panel" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-panel-title">
+    <div class="admin-modal-card admin-modal-wide">
+      <div class="admin-modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">&#x1F6E1;&#xFE0F;</span>
+          <h3 id="admin-panel-title">Panel de Control &amp; Moderación</h3>
+        </div>
+        <button id="btn-close-admin-panel" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
+      </div>
+      <div class="admin-panel-tabs" role="tablist">
+        <button type="button" class="admin-panel-tab active" data-tab="reports">
+          <span>⚠️</span><span>Denuncias</span>
+          <span id="tab-reports-badge" class="admin-badge-reports" style="display:none;">0</span>
+        </button>
+        <button type="button" class="admin-panel-tab" data-tab="news">
+          <span>📰</span><span>Noticias</span>
+        </button>
+        <button type="button" class="admin-panel-tab" data-tab="threads">
+          <span>💬</span><span>Debates del Foro</span>
+        </button>
+        <button type="button" class="admin-panel-tab" data-tab="cronograma">
+          <span>📅</span><span>Cronograma</span>
+        </button>
+        <button type="button" class="admin-panel-tab" data-tab="guia">
+          <span>💡</span><span>Guías & FAQ</span>
+        </button>
+        <button type="button" class="admin-panel-tab" data-tab="site">
+          <span>⚙️</span><span>Ajustes del Sitio</span>
+        </button>
+        <button type="button" class="admin-panel-tab" data-tab="password">
+          <span>🔒</span><span>Seguridad & Clave</span>
+        </button>
+      </div>
+
+      <!-- Tab 1: Denuncias y Reportes -->
+      <div id="admin-tab-reports" class="admin-tab-content active">
+        <div id="admin-reports-container" class="admin-reports-container">
+          <div class="admin-loading-state">Cargando denuncias...</div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Noticias -->
+      <div id="admin-tab-news" class="admin-tab-content" style="display:none;">
+        <div class="admin-news-list-header">
+          <span>Artículos activos en el portal</span>
+          <button type="button" id="btn-admin-add-news-from-panel" class="btn-admin-sm-action">➕ Redactar Nueva</button>
+        </div>
+        <div id="admin-news-table-wrap" class="admin-news-table-wrap">
+          <div class="admin-loading-state">Cargando lista de noticias...</div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Debates del Foro -->
+      <div id="admin-tab-threads" class="admin-tab-content" style="display:none;">
+        <div class="admin-news-list-header">
+          <span>Hilos de discusión y debates de la comunidad</span>
+          <div class="admin-header-tools">
+            <input type="text" id="admin-threads-search-input" class="admin-table-search" placeholder="Filtrar por título, autor o colegio...">
+          </div>
+        </div>
+        <div id="admin-threads-table-wrap" class="admin-news-table-wrap">
+          <div class="admin-loading-state">Cargando debates del foro...</div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Cronograma Oficial -->
+      <div id="admin-tab-cronograma" class="admin-tab-content" style="display:none;">
+        <div class="admin-news-list-header">
+          <span>Fases y fechas de la Temporada 2026</span>
+          <button type="button" id="btn-admin-add-phase" class="btn-admin-sm-action">➕ Agregar Fase</button>
+        </div>
+        <div id="admin-cronograma-list-wrap" class="admin-dynamic-list-wrap">
+          <div class="admin-loading-state">Cargando cronograma...</div>
+        </div>
+        <div class="admin-save-footer-row">
+          <button type="button" id="btn-save-admin-cronograma" class="btn-admin-primary">
+            <span>💾 Guardar Cronograma Oficial</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 5: Guías & FAQ -->
+      <div id="admin-tab-guia" class="admin-tab-content" style="display:none;">
+        <div class="admin-news-list-header">
+          <span>Preguntas frecuentes y guía del espectador</span>
+          <button type="button" id="btn-admin-add-faq" class="btn-admin-sm-action">➕ Agregar Pregunta</button>
+        </div>
+        <div id="admin-guia-list-wrap" class="admin-dynamic-list-wrap">
+          <div class="admin-loading-state">Cargando preguntas frecuentes...</div>
+        </div>
+        <div class="admin-save-footer-row">
+          <button type="button" id="btn-save-admin-guia" class="btn-admin-primary">
+            <span>💾 Guardar Guías & FAQ</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 6: Ajustes del Sitio -->
+      <div id="admin-tab-site" class="admin-tab-content" style="display:none;">
+        <form id="form-admin-site-settings" class="admin-form" style="max-width:680px; margin:1rem auto;">
+          <div class="topic-form-group">
+            <label class="topic-form-label" style="display:flex; align-items:center; justify-content:space-between;">
+              <span>🔴 Marquesina de Último Momento (Breaking Ticker)</span>
+              <label class="admin-toggle-switch">
+                <input type="checkbox" id="site-setting-ticker-active" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </label>
+            <p class="admin-field-hint">Ingresá los mensajes rotativos que se mostrarán arriba del sitio (un mensaje por línea):</p>
+            <textarea id="site-setting-ticker-lines" class="topic-form-textarea" rows="5" placeholder="🥁 Temporada 2026 en marcha...&#10;💃 Cuerpos de Baile: Novedades..."></textarea>
+          </div>
+
+          <div class="topic-form-group">
+            <label for="site-setting-tagline" class="topic-form-label">Subtítulo / Bajada del Portal (Cabecera)</label>
+            <input type="text" id="site-setting-tagline" class="topic-form-input" placeholder="Portal de Comunidad & Noticias">
+          </div>
+
+          <div class="form-row-2col">
+            <div class="topic-form-group">
+              <label for="site-setting-instagram" class="topic-form-label">Instagram Oficial</label>
+              <input type="text" id="site-setting-instagram" class="topic-form-input" placeholder="@estudiantina.online">
+            </div>
+            <div class="topic-form-group">
+              <label for="site-setting-email" class="topic-form-label">Email de Contacto</label>
+              <input type="email" id="site-setting-email" class="topic-form-input" placeholder="contacto@estudiantina.online">
+            </div>
+          </div>
+
+          <button type="submit" id="btn-save-admin-settings" class="btn-admin-primary" style="margin-top:10px;">
+            <span>💾 Guardar Ajustes del Sitio</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Tab 3: Cambiar Contraseña -->
+      <div id="admin-tab-password" class="admin-tab-content" style="display:none;">
+        <form id="form-admin-change-pwd" class="admin-form" style="max-width:440px;margin:1rem auto;">
+          <div class="topic-form-group">
+            <label for="pwd-actual" class="topic-form-label">Contraseña Actual</label>
+            <input type="password" id="pwd-actual" class="topic-form-input" required autocomplete="current-password">
+          </div>
+          <div class="topic-form-group">
+            <label for="pwd-nueva" class="topic-form-label">Nueva Contraseña (mínimo 6 caracteres)</label>
+            <input type="password" id="pwd-nueva" class="topic-form-input" required minlength="6" autocomplete="new-password">
+          </div>
+          <div class="topic-form-group">
+            <label for="pwd-confirmar" class="topic-form-label">Confirmar Nueva Contraseña</label>
+            <input type="password" id="pwd-confirmar" class="topic-form-input" required minlength="6" autocomplete="new-password">
+          </div>
+          <button type="submit" id="btn-submit-change-pwd" class="btn-admin-primary" style="margin-top:10px;">
+            <span>Actualizar Contraseña</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN ADMINISTRATIVA -->
+  <div id="modal-admin-confirm" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-confirm-title">
+    <div class="admin-modal-card admin-confirm-card">
+      <div class="admin-confirm-header">
+        <div class="admin-confirm-icon-wrap">
+          <span class="admin-confirm-icon">&#x26A0;&#xFE0F;</span>
+        </div>
+        <h3 id="admin-confirm-title" class="admin-confirm-title">¿Eliminar Noticia?</h3>
+        <p id="admin-confirm-msg" class="admin-confirm-msg">Esta acción eliminará el artículo permanentemente del portal y no se puede deshacer.</p>
+      </div>
+      <div class="admin-confirm-actions">
+        <button type="button" id="btn-cancel-admin-confirm" class="btn-admin-cancel-action">Cancelar</button>
+        <button type="button" id="btn-ok-admin-confirm" class="btn-admin-danger-action">🗑️ Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-notification" class="toast-notification">Copiado</div>
+
+  <script type="module" src="js/comunidad.js?v=20260908_admin_2"></script>
+  <script>
+    (function(){
+      var d = new Date();
+      var opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+      var el = document.getElementById('header-date');
+      if(el) el.textContent = d.toLocaleDateString('es-AR', opts);
+      var tc = document.getElementById('ticker-close');
+      var tk = document.getElementById('breaking-ticker');
+      if(tc && tk){
+        tc.addEventListener('click', function(){
+          tk.style.maxHeight = '0';
+          tk.style.overflow = 'hidden';
+          tk.style.border = 'none';
+          tk.style.padding = '0';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

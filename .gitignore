@@ -1,0 +1,47 @@
+# =============================================================================
+# .gitignore — Estudiantina de Posadas
+# =============================================================================
+
+# ── Bases de datos SQLite (generadas en producción/local) ────────────────────
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/estudiantina.db
+
+# ── Datos reales (se excluyen por seguridad; usar *.example.json de referencia)
+data/ranking.json
+data/foro.json
+data/comunidad.json
+
+# ── Archivos personales y documentos sensibles ───────────────────────────────
+data/*.pdf
+data/*.jpeg
+data/*.jpg
+data/*.png
+data/WhatsApp*
+
+# ── Dependencias Node.js ─────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log
+
+# ── Entorno y secretos ───────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.key
+
+# ── Archivos de sistema ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Archivos temporales de editores ──────────────────────────────────────────
+*.swp
+*.swo
+*~
+.vscode/settings.json
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/

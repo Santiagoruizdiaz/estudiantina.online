@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Noticia | Estudiantina de Posadas (estudiantina.online)</title>
+  <meta name="description" content="Cobertura periodística oficial de la Estudiantina de Posadas. Noticias, crónicas y galerías de fotos.">
+  <meta name="theme-color" content="#0a0b0f">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Estudiantina Posadas Online">
+  <meta property="og:url" content="https://estudiantina.online/noticia">
+  <meta property="og:title" id="og-title" content="Noticia | Estudiantina Posadas">
+  <meta property="og:description" id="og-desc" content="Leé la cobertura completa en estudiantina.online">
+  <meta property="og:image" id="og-image" content="https://estudiantina.online/assets/noticias/noticia-01.webp">
+  <meta property="og:locale" content="es_AR">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%81%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/comunidad.css?v=20260908_4">
+  <link rel="stylesheet" href="css/noticia.css?v=20260908_4">
+</head>
+<body class="page-noticia">
+
+  <!-- HEADER PRINCIPAL DEL SITIO (Idéntico a Comunidad y Home) -->
+  <header class="site-header">
+    <div class="header-top-bar">
+      <div class="header-top-inner">
+        <div class="header-top-left">
+          <span class="header-date" id="header-date">Martes, 8 de Septiembre de 2026</span>
+          <span class="header-separator">|</span>
+          <span class="header-location">&#x1F4CD; Posadas, Misiones</span>
+        </div>
+        <div class="header-top-right">
+          <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="header-social">&#x1F4F7; @estudiantina.online</a>
+          <a href="index.html" class="header-btn-game"><span>&#x1F3AE;</span><span>Ir al Simulador</span></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-masthead">
+      <div class="header-masthead-inner">
+        <a href="comunidad.html" class="masthead-brand" aria-label="Estudiantina Online Comunidad">
+          <span class="masthead-icon">&#x1F941;</span>
+          <div class="masthead-text-group">
+            <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
+            <span class="masthead-tagline">Portal de Comunidad &amp; Noticias</span>
+          </div>
+        </a>
+        <a href="index.html" class="header-btn-game-mobile" title="Ir al Simulador de Carrera">
+          <span>&#x1F3AE;</span><span>Simulador</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="section-nav" aria-label="Secciones del portal">
+      <div class="section-nav-inner">
+        <a href="comunidad.html#noticias" class="section-nav-link active">Noticias</a>
+        <a href="comunidad.html#cronograma" class="section-nav-link">Cronograma</a>
+        <a href="comunidad.html#guia" class="section-nav-link">Guía del Espectador</a>
+        <a href="comunidad.html#foro" class="section-nav-link">Foro</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- SUBBARRA STICKY DE LECTURA (Con barra de progreso, volver, compartir y moderación) -->
+  <aside class="noticia-subnav" id="noticia-subnav">
+    <div id="noticia-progress-bar" class="noticia-progress-bar"></div>
+    <div class="noticia-subnav-inner">
+      <div class="noticia-subnav-left">
+        <a href="comunidad.html#noticias" class="noticia-back-btn" id="btn-back-comunidad" title="Volver a la portada de noticias">
+          <span class="back-arrow">←</span>
+          <span>Volver a Noticias</span>
+        </a>
+        <span id="noticia-subnav-cat" class="noticia-subnav-cat">Noticia</span>
+      </div>
+
+      <div class="noticia-subnav-right">
+        <!-- Acciones Admin (visibles solo si admin logueado) -->
+        <button type="button" id="btn-noticia-admin-edit" class="noticia-nav-btn noticia-nav-btn-admin-edit" style="display:none;" title="Editar esta noticia">
+          <span>✏️</span><span>Editar</span>
+        </button>
+        <button type="button" id="btn-noticia-admin-del" class="noticia-nav-btn noticia-nav-btn-admin-del" style="display:none;" title="Eliminar noticia">
+          <span>🗑️</span>
+        </button>
+        <!-- Compartir -->
+        <button type="button" id="btn-noticia-nav-share" class="noticia-nav-btn noticia-nav-btn-share" title="Compartir noticia">
+          <span>📱</span><span>Compartir</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL DEL ARTÍCULO -->
+  <main class="noticia-main">
+    <div class="noticia-article-container">
+
+      <!-- Breadcrumbs de navegación -->
+      <nav class="noticia-breadcrumbs" aria-label="Ruta de navegación">
+        <a href="index.html">Inicio</a>
+        <span class="sep">›</span>
+        <a href="comunidad.html">Comunidad &amp; Noticias</a>
+        <span class="sep">›</span>
+        <a href="comunidad.html#noticias" id="noticia-breadcrumb-cat">Categoría</a>
+        <span class="sep">›</span>
+        <span class="current" id="noticia-breadcrumb-title">Cargando artículo...</span>
+      </nav>
+
+      <!-- Estado de Carga -->
+      <div id="noticia-loading-state" style="text-align:center; padding: 4rem 1rem; color:var(--text-muted);">
+        <div style="font-size:2.5rem; margin-bottom:1rem; animation:pulseBreaking 1.5s infinite;">📰</div>
+        <p style="font-size:1.1rem; font-weight:600;">Cargando cobertura periodística...</p>
+      </div>
+
+      <!-- Artículo Completo -->
+      <article id="noticia-article-content" style="display:none;">
+
+        <!-- Cabecera del Artículo -->
+        <header class="noticia-header">
+          <div class="noticia-meta-badges">
+            <span id="noticia-cat-pill" class="noticia-cat-pill">Noticias</span>
+            <span id="noticia-breaking-pill" class="noticia-breaking-pill" style="display:none;">ÚLTIMO MOMENTO</span>
+          </div>
+
+          <h1 id="noticia-headline" class="noticia-headline">Título del Artículo</h1>
+          <p id="noticia-lead" class="noticia-lead-paragraph">Resumen y bajada periodística del artículo.</p>
+
+          <!-- Byline & Compartir Rápido -->
+          <div class="noticia-byline">
+            <div class="noticia-author-box">
+              <div class="noticia-author-avatar" id="noticia-author-avatar">📰</div>
+              <div class="noticia-author-info">
+                <span id="noticia-author-name" class="noticia-author-name">Redacción Oficial</span>
+                <span id="noticia-author-meta" class="noticia-author-meta">📅 08/09/2026 · ⏱️ 3 min de lectura · Posadas, Misiones</span>
+              </div>
+            </div>
+
+            <div class="noticia-share-quick-bar">
+              <a href="#" id="btn-share-whatsapp" class="btn-quick-share share-whatsapp" target="_blank" rel="noopener noreferrer" title="Compartir en WhatsApp">🟢</a>
+              <a href="#" id="btn-share-x" class="btn-quick-share share-x" target="_blank" rel="noopener noreferrer" title="Compartir en X / Twitter">✖️</a>
+              <button type="button" id="btn-share-copy" class="btn-quick-share share-copy" title="Copiar enlace">🔗</button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Portada Principal -->
+        <figure id="noticia-cover-figure" class="noticia-cover-figure" style="display:none;">
+          <img id="noticia-cover-img" class="noticia-cover-img" src="" alt="Portada de la noticia" loading="eager">
+          <figcaption id="noticia-cover-caption" class="noticia-cover-caption">Foto: Archivo Estudiantina Posadas</figcaption>
+        </figure>
+
+        <!-- Pestañas de la Noticia -->
+        <div class="noticia-tabs-wrapper">
+          <div class="noticia-tabs-nav" role="tablist">
+            <button type="button" class="noticia-tab-btn active" data-tab="articulo" role="tab" aria-selected="true">
+              <span>📰</span><span>Artículo Completo</span>
+            </button>
+            <button type="button" class="noticia-tab-btn" data-tab="galeria" role="tab" aria-selected="false">
+              <span>🖼️</span><span>Galería de Fotos</span>
+              <span id="noticia-tab-gallery-count" class="tab-badge" style="display:none; font-size:0.75rem; background:var(--bg-elevated); padding:2px 6px; border-radius:10px;">0</span>
+            </button>
+            <button type="button" class="noticia-tab-btn" data-tab="debate" role="tab" aria-selected="false">
+              <span>💬</span><span>Comunidad &amp; Debate</span>
+            </button>
+            <button type="button" class="noticia-tab-btn" data-tab="relacionadas" role="tab" aria-selected="false">
+              <span>🔗</span><span>Más Noticias</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pestaña 1: Artículo Completo -->
+        <div id="noticia-tab-articulo" class="noticia-tab-panel active" role="tabpanel">
+          <div id="noticia-body-editorial" class="noticia-body-editorial">
+            <!-- Bloques de contenido inyectados dinámicamente -->
+          </div>
+
+          <!-- Tags -->
+          <div id="noticia-tags-box" class="noticia-tags-box">
+            <span class="noticia-tags-label">Temas:</span>
+            <div id="noticia-tags-list" style="display:flex; gap:0.4rem; flex-wrap:wrap;"></div>
+          </div>
+
+          <!-- Banner CTA al Debate -->
+          <div class="noticia-debate-cta">
+            <h3>💬 ¿Qué opinás sobre esta cobertura?</h3>
+            <p>Sumate al foro de la comunidad estudiantil, compartí tu opinión y votá en los debates de los colegios.</p>
+            <a href="comunidad.html#foro" class="btn-cta-foro">
+              <span>Entrar al Foro de la Comunidad</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Pestaña 2: Galería de Fotos -->
+        <div id="noticia-tab-galeria" class="noticia-tab-panel" role="tabpanel">
+          <h3 style="font-family:var(--font-display); font-size:1.3rem; margin-bottom:0.75rem; color:var(--text-white);">
+            🖼️ Galería Fotográfica del Evento
+          </h3>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">Hacé click en cualquier imagen para verla en pantalla completa en alta resolución.</p>
+          <div id="noticia-gallery-grid" class="noticia-gallery-grid">
+            <!-- Items de la galería inyectados dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Pestaña 3: Comunidad & Debate -->
+        <div id="noticia-tab-debate" class="noticia-tab-panel" role="tabpanel">
+          <div class="noticia-debate-cta" style="margin-top:0;">
+            <span style="font-size:2.8rem; display:block; margin-bottom:0.5rem;">🥁</span>
+            <h3>Debate Oficial de la Estudiantina</h3>
+            <p>Los comentarios y opiniones sobre esta noticia forman parte del foro en tiempo real de estudiantina.online.</p>
+            <div style="display:flex; justify-content:center; gap:0.8rem; flex-wrap:wrap; margin-top:1.5rem;">
+              <a href="comunidad.html#foro" class="btn-cta-foro">
+                <span>💬 Ir al Foro de Debates</span>
+              </a>
+              <a href="comunidad.html#noticias" class="noticia-back-btn">
+                <span>Ver Más Noticias</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pestaña 4: Más Noticias -->
+        <div id="noticia-tab-relacionadas" class="noticia-tab-panel" role="tabpanel">
+          <div id="noticia-tab-related-grid" class="noticia-related-grid">
+            <!-- Noticias relacionadas inyectadas dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Sección de Artículos Relacionados al pie -->
+        <section class="noticia-related-section">
+          <h3 class="noticia-related-title">
+            <span>📰</span>
+            <span>Más Cobertura de la Estudiantina</span>
+          </h3>
+          <div id="noticia-bottom-related-grid" class="noticia-related-grid">
+            <!-- Noticias relacionadas inyectadas dinámicamente -->
+          </div>
+        </section>
+
+      </article>
+
+    </div>
+  </main>
+
+  <!-- BARRA FLOTANTE MOBILE -->
+  <div class="noticia-mobile-bar" id="noticia-mobile-bar">
+    <a href="comunidad.html#noticias" class="noticia-mobile-bar-btn">
+      <span>←</span><span>Noticias</span>
+    </a>
+    <a href="#" id="btn-mobile-whatsapp" class="noticia-mobile-bar-btn btn-whatsapp" target="_blank" rel="noopener noreferrer">
+      <span>WhatsApp</span>
+    </a>
+    <button type="button" id="btn-mobile-share" class="noticia-mobile-bar-btn">
+      <span>Compartir 📱</span>
+    </button>
+    <button type="button" id="btn-mobile-top" class="noticia-mobile-bar-btn btn-top" title="Subir al inicio">
+      <span>↑</span>
+    </button>
+  </div>
+
+  <!-- MODAL LIGHTBOX PARA ZOOM DE FOTOS -->
+  <div id="noticia-lightbox" class="noticia-lightbox-modal" role="dialog" aria-hidden="true">
+    <div class="noticia-lightbox-content">
+      <button type="button" id="btn-close-lightbox" class="noticia-lightbox-close" aria-label="Cerrar imagen">✕</button>
+      <img id="noticia-lightbox-img" class="noticia-lightbox-img" src="" alt="Foto en alta resolución">
+      <div id="noticia-lightbox-caption" class="noticia-lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICACIONES -->
+  <div id="toast-notification" class="toast-notification" role="status" aria-live="polite"></div>
+
+  <!-- FOOTER OFICIAL DEL PORTAL (Exacta paridad e identidad de estudiantina.online) -->
+  <footer class="portal-footer">
+    <div class="footer-inner">
+      <div class="footer-main-grid">
+        <!-- Columna Marca -->
+        <div class="footer-col-brand">
+          <a href="comunidad.html" class="footer-brand-link">
+            <span class="footer-brand-icon">&#x1F941;</span>
+            <div class="footer-brand-title">
+              <span class="footer-brand-name">estudiantina<span class="footer-brand-domain">.online</span></span>
+              <span class="footer-brand-sub">Portal de Comunidad &amp; Noticias</span>
+            </div>
+          </a>
+          <p class="footer-brand-desc">
+            El espacio digital oficial de la fiesta de la juventud misionera. Noticias exclusivas, debates de hinchadas, cronograma de las Noches de Calle y el Simulador 2026.
+          </p>
+          <div class="footer-pills-row">
+            <span class="footer-pill">&#x1F4CD; Costanera de Posadas</span>
+            <span class="footer-pill">&#x1F941; 33 Colegios Oficiales</span>
+          </div>
+        </div>
+
+        <!-- Columna Secciones del Portal -->
+        <div class="footer-col-nav">
+          <h4 class="footer-col-title">Secciones</h4>
+          <ul class="footer-nav-list">
+            <li><a href="comunidad.html#noticias" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F0;</span> Noticias &amp; Crónicas</a></li>
+            <li><a href="comunidad.html#cronograma" class="footer-nav-link"><span class="footer-link-icon">&#x1F4C5;</span> Cronograma de Calle</a></li>
+            <li><a href="comunidad.html#guia" class="footer-nav-link"><span class="footer-link-icon">&#x2753;</span> Guía &amp; Preguntas</a></li>
+            <li><a href="comunidad.html#foro" class="footer-nav-link"><span class="footer-link-icon">&#x1F4AC;</span> Foro de Debate</a></li>
+          </ul>
+        </div>
+
+        <!-- Columna Ecosistema Estudiantina -->
+        <div class="footer-col-nav">
+          <h4 class="footer-col-title">Ecosistema</h4>
+          <ul class="footer-nav-list">
+            <li><a href="index.html" class="footer-nav-link"><span class="footer-link-icon">&#x1F3AE;</span> Ir al Simulador</a></li>
+            <li><a href="index.html#ranking" class="footer-nav-link"><span class="footer-link-icon">&#x1F3C6;</span> Salón de la Fama</a></li>
+            <li><a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F7;</span> Instagram Oficial</a></li>
+            <li><a href="index.html#terms" class="footer-nav-link"><span class="footer-link-icon">&#x2696;&#xFE0F;</span> Términos &amp; Condiciones</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Barra inferior / Copyright -->
+      <div class="footer-bottom-bar">
+        <p class="footer-copy">
+          &copy; 2026 <strong>estudiantina.online</strong> &mdash; Obra cultural independiente sin fines de lucro. Desarrollado con pasi&oacute;n posade&ntilde;a.
+          <a href="comunidad.html#admin" id="btn-footer-admin-trigger" class="footer-admin-trigger" title="Acceso de Administración">&#x1F510; Acceso Admin</a>
+        </p>
+        <button type="button" id="btn-footer-back-to-top" class="footer-back-to-top" aria-label="Volver arriba">
+          <span>Subir</span>
+          <span class="arrow-up">&#x2191;</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/noticia.js?v=20260908_4"></script>
+</body>
+</html>

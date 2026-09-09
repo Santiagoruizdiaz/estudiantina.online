@@ -1,0 +1,21 @@
+{
+  "name": "estudiantina-posadas-simulador",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Simulador de Carrera online para la Estudiantina de Posadas fiel a Copero",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "estudiantina",
+    "posadas",
+    "misiones",
+        "simulador",
+    "juego",
+    "copero"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}
