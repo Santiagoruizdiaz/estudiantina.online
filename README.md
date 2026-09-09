@@ -76,8 +76,8 @@ estudiantina/
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/santiagoruizdiaz/estudiantina.git
-cd estudiantina
+git clone https://github.com/santiagoruizdiaz/estudiantina.online.git
+cd estudiantina.online
 
 # 2. Crear los archivos de datos desde los ejemplos
 cp data/ranking.example.json data/ranking.json
