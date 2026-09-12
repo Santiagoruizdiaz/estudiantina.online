@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Foro de Debate Estudiantil | estudiantina.online</title>
+  <meta name="description" content="Espacio oficial de debate de la Estudiantina de Posadas. Opiná sobre arreglos de percusión, coreografías de baile, carrozas y la pasión de los 33 colegios.">
+  <meta name="theme-color" content="#090a0f">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Estudiantina Posadas Online">
+  <meta property="og:url" content="https://estudiantina.online/foro">
+  <meta property="og:title" content="Foro de Debate Estudiantil | estudiantina.online">
+  <meta property="og:description" content="Espacio de intercambio, ritmos y opiniones para hinchadas y participantes de los 33 colegios posadeños.">
+  <meta property="og:image" content="https://estudiantina.online/assets/og-cover.png">
+  <meta property="og:locale" content="es_AR">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
+
+  <!-- Fuentes Oficiales -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <!-- Hojas de Estilos -->
+  <link rel="stylesheet" href="css/comunidad.css?v=20260912_3">
+  <link rel="stylesheet" href="css/foro.css?v=20260912_5">
+</head>
+<body class="page-foro">
+
+  <!-- BARRA DE ADMINISTRADOR (Visible solo cuando hay sesión admin) -->
+  <aside id="admin-top-bar" class="admin-top-bar" aria-label="Barra de herramientas de administrador" style="display:none;">
+    <div class="admin-bar-inner">
+      <div class="admin-bar-left">
+        <span class="admin-badge">⚡ MODO MODERADOR</span>
+        <span class="admin-user-label">Sesión: <strong id="admin-bar-user">admin</strong></span>
+      </div>
+      <div class="admin-bar-actions">
+        <button type="button" id="btn-admin-logout" class="btn-admin-bar-logout" title="Cerrar sesión de administrador">
+          <span>Salir</span>
+          <span>✕</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- HEADER DEDICADO DEL FORO (ESTILO APP / REDDIT) -->
+  <header class="foro-app-header">
+    <div class="foro-app-header-inner">
+      
+      <!-- Lado Izquierdo: Volver a Noticias + Logo Foro -->
+      <div class="foro-header-brand-group">
+        <a href="comunidad.html" class="foro-back-link" title="Volver al Portal de Noticias">
+          <span class="back-arrow">←</span>
+          <span class="back-text">Noticias</span>
+        </a>
+        <a href="foro.html" class="foro-brand-title" aria-label="Estudiantina Online Foro">
+          <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
+          <span class="foro-tag-pill">FORO</span>
+        </a>
+      </div>
+
+      <!-- Centro (Desktop): Buscador estilo Reddit -->
+      <div class="foro-header-search-wrap">
+        <span class="foro-search-lens" aria-hidden="true">🔍</span>
+        <input type="search" id="forum-search-input" class="foro-header-search-input" placeholder="Buscar debates, colegios, arreglos..." autocomplete="off" aria-label="Buscar en el foro">
+        <button type="button" id="btn-forum-search-clear" class="forum-search-clear" aria-label="Limpiar búsqueda" style="display:none;">✕</button>
+      </div>
+
+      <!-- Lado Derecho: Simulador + Login / Avatar + Botón Publicar -->
+      <div class="foro-header-user-actions">
+        <a href="index.html" class="foro-game-btn" title="Ir al Simulador de Carrera">
+          <span>🎮</span><span class="game-btn-text">Simulador</span>
+        </a>
+
+        <!-- Barra de usuario Google -->
+        <div id="forum-user-bar" class="forum-user-bar">
+          <button type="button" id="btn-google-login" class="btn-google-login-pill" aria-label="Identificarse con Google">
+            <svg class="google-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Ingresar</span>
+          </button>
+          
+          <div id="forum-user-profile" class="forum-user-profile" style="display:none;">
+            <img id="user-avatar-img" class="user-avatar-img" src="" alt="Avatar" />
+            <div class="user-profile-info">
+              <span id="user-profile-name" class="user-profile-name">Usuario</span>
+              <span id="user-profile-school-badge" class="user-profile-school-badge">🥁 El Janssen</span>
+            </div>
+            <button type="button" id="btn-logout" class="btn-logout" title="Cerrar sesión">✕</button>
+          </div>
+        </div>
+
+        <button id="btn-propose-topic" class="btn-new-topic-header" type="button">
+          <span>✍️</span><span>Nuevo Debate</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Buscador compacto en Mobile -->
+    <div class="foro-mobile-search-strip">
+      <div class="foro-header-search-wrap">
+        <span class="foro-search-lens" aria-hidden="true">🔍</span>
+        <input type="search" id="forum-search-input-mobile" class="foro-header-search-input" placeholder="Buscar debates, colegios..." autocomplete="off" aria-label="Buscar en mobile">
+      </div>
+    </div>
+  </header>
+
+  <!-- BARRA DE CANALES HORIZONTAL STICKY (ESTILO SUBREDDITS REDDIT MOBILE) -->
+  <div class="foro-channels-strip-wrap">
+    <div class="foro-channels-strip-inner">
+      <div id="channels-grid" class="channels-grid-scrollable" role="tablist" aria-label="Canales temáticos">
+        <!-- Generados dinámicamente por JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR PRINCIPAL DEL FEED (REDDIT STYLE) -->
+  <main class="foro-main-layout">
+    <div class="foro-layout-container">
+      
+      <!-- FEED DE DEBATES -->
+      <section class="foro-feed-section" aria-label="Feed de debates">
+
+        <!-- BARRA DE ORDEN (REDDIT SORT PILLS) -->
+        <div class="forum-sort-bar-reddit">
+          <div class="sort-pills-group" role="tablist" aria-label="Ordenar publicaciones">
+            <button type="button" id="tab-sort-top" class="sort-pill-btn active" data-sort="top" role="tab" aria-selected="true">
+              <span>🔥</span><span>Más Votados</span>
+            </button>
+            <button type="button" id="tab-sort-recent" class="sort-pill-btn" data-sort="recientes" role="tab" aria-selected="false">
+              <span>⏱️</span><span>Recientes</span>
+            </button>
+          </div>
+          <div class="feed-active-indicator">
+            <span id="forum-active-channel-name" class="active-channel-text">Todos los debates</span>
+            <span id="forum-threads-count" class="threads-count-pill">Cargando...</span>
+          </div>
+        </div>
+
+        <!-- LISTA DE DEBATES / HILOS REDDIT STYLE -->
+        <div id="threads-container" class="threads-container" aria-live="polite">
+          <!-- Tarjetas renderizadas por JS -->
+        </div>
+
+        <!-- BOTÓN CARGAR MÁS DEBATES -->
+        <div id="forum-load-more-wrap" class="forum-load-more-wrap" style="display:none;">
+          <button type="button" id="btn-load-more-threads" class="btn-load-more-threads">
+            <span>📥</span><span>Cargar más debates</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- SIDEBAR LATERAL DESKTOP: REGLAS Y ACERCA DE -->
+      <aside class="foro-desktop-sidebar" aria-label="Información de la comunidad">
+        
+        <!-- Tarjeta Acerca de la Comunidad -->
+        <div class="sidebar-reddit-card">
+          <div class="reddit-card-header">
+            <span class="reddit-card-icon">🏛️</span>
+            <h3>Acerca de la Estudiantina</h3>
+          </div>
+          <p class="reddit-card-desc">
+            Espacio de debate libre y fraterno entre hinchadas y participantes de la mayor fiesta de los estudiantes misioneros.
+          </p>
+          <div class="reddit-card-stats-grid">
+            <div class="card-stat">
+              <span class="card-stat-num">33</span>
+              <span class="card-stat-label">Colegios</span>
+            </div>
+            <div class="card-stat">
+              <span class="card-stat-num">4</span>
+              <span class="card-stat-label">Tramos Costanera</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Pacto de Convivencia -->
+        <div class="sidebar-reddit-card rules-card">
+          <div class="reddit-card-header">
+            <span class="reddit-card-icon">🤝</span>
+            <h3>Pacto de Convivencia</h3>
+          </div>
+          <ul class="rules-list">
+            <li><span class="rule-icon">🥁</span><span>Alentá a tu colegio con pasión y respeto sin agresiones.</span></li>
+            <li><span class="rule-icon">✨</span><span>Reconocé los arreglos musicales y esfuerzo de los demás.</span></li>
+            <li><span class="rule-icon">🛡️</span><span>Contenido tóxico es moderado y eliminado proactivamente.</span></li>
+          </ul>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- MODAL DETALLE DE HILO & COMENTARIOS (REDDIT FULL POST VIEW) -->
+  <div id="modal-thread" class="thread-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="thread-modal-title">
+    <div class="thread-modal-card reddit-post-modal">
+      <div class="thread-modal-header">
+        <div class="thread-modal-header-info">
+          <button id="btn-close-thread" class="btn-modal-back-reddit" aria-label="Volver al feed">
+            <span>←</span><span>Volver</span>
+          </button>
+          <span id="thread-modal-channel" class="thread-channel-badge">Canal</span>
+          <span id="thread-modal-date" class="thread-modal-date">Hace unos momentos</span>
+        </div>
+        <button type="button" id="btn-share-thread-modal" class="btn-share-thread-modal" title="Compartir este debate">
+          <span>↗ Compartir</span>
+        </button>
+      </div>
+      
+      <div class="thread-modal-body">
+        <!-- Post Principal -->
+        <div class="thread-original-post">
+          <div class="thread-op-author-row">
+            <img id="thread-op-avatar" class="thread-author-avatar" src="" alt="Avatar" />
+            <div class="thread-author-info">
+              <div class="thread-op-names">
+                <span id="thread-op-school" class="thread-author-school">Colegio</span>
+                <span class="meta-dot">&bull;</span>
+                <span id="thread-op-name" class="thread-author-name">Autor</span>
+              </div>
+            </div>
+          </div>
+          <h2 id="thread-modal-title" class="thread-op-title">Título del Debate</h2>
+          <div id="thread-op-content" class="thread-op-text"></div>
+          
+          <div class="thread-op-actions-bar">
+            <button type="button" id="btn-vote-thread" class="reddit-vote-capsule modal-vote-btn" aria-label="Votar debate">
+              <span class="vote-icon">▲</span>
+              <span id="thread-modal-votes">0</span>
+            </button>
+            <span id="thread-modal-replies-count" class="thread-replies-indicator">💬 0 respuestas</span>
+            <button type="button" id="btn-report-thread" class="btn-report-thread-modal" title="Reportar contenido">
+              <span>🚩 Reportar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sección de Respuestas -->
+        <div class="thread-replies-section">
+          <h3 class="thread-replies-heading">Comentarios</h3>
+          
+          <!-- Formulario de Respuesta -->
+          <form id="form-reply" class="thread-reply-form">
+            <div class="reply-input-wrap">
+              <img id="reply-user-avatar" class="reply-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%2338bdf8'/%3E%3C/svg%3E" alt="Mi Avatar" />
+              <textarea id="reply-input-content" class="reply-input-textarea" rows="2" placeholder="Agregá un comentario o tu opinión..." required></textarea>
+            </div>
+            <div class="reply-action-row">
+              <span id="reply-school-hint" class="reply-school-hint">📍 Comentando como hincha</span>
+              <button type="submit" id="btn-submit-reply" class="btn-submit-reply">Comentar ➤</button>
+            </div>
+          </form>
+
+          <div id="thread-replies-list" class="thread-replies-list">
+            <!-- Respuestas renderizadas aquí -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREAR DEBATE -->
+  <div id="modal-topic" class="topic-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="topic-modal-title">
+    <div class="topic-modal-card">
+      <div class="topic-modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon">✍️</span>
+          <h3 id="topic-modal-title">Iniciar Nuevo Debate</h3>
+        </div>
+        <button id="btn-close-topic" class="btn-close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <form id="form-topic" class="topic-form">
+        <div class="topic-form-group">
+          <label for="topic-canal" class="topic-form-label">Canal Temático</label>
+          <select id="topic-canal" class="topic-form-select" required>
+            <option value="banda">🥁 Banda de Música</option>
+            <option value="baile">💃 Cuerpo de Baile</option>
+            <option value="hinchadas">📢 Tribunas &amp; Hinchadas</option>
+            <option value="simulador">🎮 Sugerencias para el Simulador</option>
+            <option value="general">💬 General &amp; Comunidad</option>
+          </select>
+        </div>
+        <div class="topic-form-group">
+          <label for="topic-school" class="topic-form-label">Tu Colegio (Hincha o Participante)</label>
+          <select id="topic-school" class="topic-form-select" required>
+            <!-- Cargado con los 33 colegios oficiales -->
+          </select>
+        </div>
+        <div class="topic-form-group">
+          <label for="topic-title" class="topic-form-label">Título del Debate</label>
+          <input type="text" id="topic-title" class="topic-form-input" placeholder="Ej: ¿Cuál fue el mejor corte de redoble en la prueba piloto?" required minlength="5" maxlength="120">
+        </div>
+        <div class="topic-form-group">
+          <label for="topic-desc" class="topic-form-label">Contenido o Pregunta</label>
+          <textarea id="topic-desc" class="topic-form-textarea" rows="4" placeholder="Compartí tu punto de vista, datos, análisis o vivencias de la calle..." required minlength="10" maxlength="2500"></textarea>
+        </div>
+        <button type="submit" class="btn-propose-topic" style="width:100%;justify-content:center;padding:0.9rem;font-size:0.92rem">Publicar Debate 🚀</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN GOOGLE & SELECCIÓN DE COLEGIO -->
+  <div id="modal-google-auth" class="auth-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="auth-modal-title">
+    <div class="auth-modal-card">
+      <div class="auth-modal-header">
+        <span class="auth-modal-icon">🥁</span>
+        <h3 id="auth-modal-title" class="auth-modal-title">Identificate para Participar</h3>
+        <p class="auth-modal-desc">Iniciá sesión con tu cuenta de Google y elegí tu colegio para debatir y votar.</p>
+        <button id="btn-close-auth-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="auth-modal-body">
+        <div class="topic-form-group">
+          <label for="auth-select-school" class="topic-form-label">🏟️ Seleccioná tu Colegio Oficial</label>
+          <select id="auth-select-school" class="topic-form-select" required>
+            <!-- Poblado con los 33 colegios -->
+          </select>
+        </div>
+
+        <div class="google-login-action-wrap">
+          <div id="google-gis-container" class="google-gis-container"></div>
+          
+          <div class="auth-divider"><span>O ingreso rápido</span></div>
+          
+          <button type="button" id="btn-quick-login" class="btn-quick-login">
+            <span>⚡</span><span>Ingresar como Hincha (Perfil Rápido)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="modal-admin-login" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-login-title">
+    <div class="admin-modal-card">
+      <div class="admin-modal-header">
+        <span class="admin-modal-icon">🔐</span>
+        <h3 id="admin-login-title" class="admin-modal-title">Acceso de Administración</h3>
+        <p class="admin-modal-desc">Panel exclusivo para moderadores de estudiantina.online</p>
+        <button id="btn-close-admin-login" class="btn-close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <form id="form-admin-login" class="admin-form">
+        <div class="admin-login-hint">
+          <span>💡 Acceso local: <strong>admin</strong> &bull; Clave: <strong>Estudiantina2026!</strong></span>
+        </div>
+        <div class="topic-form-group">
+          <label for="admin-login-user" class="topic-form-label">Usuario Administrador</label>
+          <input type="text" id="admin-login-user" class="topic-form-input" placeholder="admin" required autocomplete="username">
+        </div>
+        <div class="topic-form-group">
+          <label for="admin-login-password" class="topic-form-label">Contraseña</label>
+          <input type="password" id="admin-login-password" class="topic-form-input" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <div id="admin-login-error" class="admin-login-error" style="display:none;"></div>
+        <button type="submit" id="btn-submit-admin-login" class="btn-submit-admin-login">Iniciar Sesión 🔓</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER LIMPIO DEL FORO -->
+  <footer class="foro-footer">
+    <div class="foro-footer-inner">
+      <div class="foro-footer-brand">
+        <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
+        <p>Comunidad y foro de debate independiente de la Estudiantina de Posadas.</p>
+      </div>
+      <div class="foro-footer-links">
+        <a href="comunidad.html" class="foro-footer-link">📰 Noticias &amp; Comunidad</a>
+        <a href="index.html" class="foro-footer-link">🎮 Ir al Simulador</a>
+        <a href="index.html#ranking" class="foro-footer-link">🏆 Salón de la Fama</a>
+        <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="foro-footer-link">📷 Instagram</a>
+        <button type="button" id="btn-footer-admin-trigger" class="foro-footer-admin-btn">🔐 Acceso Admin</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BOTÓN FLOTANTE ESTILO REDDIT (FAB MOBILE) -->
+  <button type="button" id="btn-fab-topic" class="btn-fab-topic" aria-label="Iniciar nuevo debate" title="Crear nuevo debate">
+    <span class="fab-icon">✍️</span>
+    <span class="fab-label">Crear Debate</span>
+  </button>
+
+  <!-- NOTIFICACIONES TOAST -->
+  <div id="toast-notification" class="toast-notification">Copiado</div>
+
+  <!-- SCRIPTS MODULARES -->
+  <script type="module" src="js/foro.js?v=20260912_5"></script>
+</body>
+</html>

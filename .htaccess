@@ -54,6 +54,7 @@ Options -Indexes
   # Enrutar páginas amigables
   RewriteRule ^comunidad/?$ comunidad.html [L]
   RewriteRule ^noticia/?$ noticia.html [L]
+  RewriteRule ^foro/?$ foro.html [L]
 
   # Si el archivo o directorio solicitado no existe físicamente, servir index.html
   RewriteCond %{REQUEST_FILENAME} !-f

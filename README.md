@@ -1,18 +1,20 @@
 # 🥁 Estudiantina de Posadas — Portal Oficial
 
-> Plataforma web completa para la Estudiantina de Posadas (Misiones, Argentina):  
-> **simulador de carrera**, **portal de noticias**, **foro de comunidad** y **salón de la fama**.
+> Plataforma web oficial y ecosistema interactivo de la fiesta estudiantil más representativa de Misiones (Posadas, Argentina):  
+> **Simulador de carrera RPG/Copero**, **portal de noticias**, **foro de debate comunitario** y **salón de la fama**.
 
 ---
 
 ## 📋 ¿Qué es esto?
 
-La [Estudiantina de Posadas](https://estudiantina.online) es el desfile juvenil más importante de Misiones. Este proyecto es su portal web oficial, con dos secciones principales:
+La [Estudiantina de Posadas](https://estudiantina.online) es el desfile juvenil y fiesta estudiantil más importante de la provincia de Misiones. Este proyecto centraliza su ecosistema digital en cuatro pilares:
 
 | Sección | URL | Descripción |
 |---|---|---|
-| 🎮 Simulador | `/` → `index.html` | Juego de carrera escolar estilo Copero |
-| 📰 Comunidad | `/comunidad` → `comunidad.html` | Noticias, foro y cronograma |
+| 🎮 **Simulador** | `/` → `index.html` | Juego de rol y carrera escolar de 5 temporadas (Banda de Música y Cuerpo de Baile). |
+| 📰 **Comunidad** | `/comunidad` → `comunidad.html` | Portal de noticias, cobertura en vivo, crónicas y cronograma oficial. |
+| 💬 **Foro** | `/foro` → `foro.html` | Espacio de debate con canales temáticos, votos, comentarios y login Google OAuth. |
+| 📄 **Noticias** | `/noticia?id=...` → `noticia.html` | Lector de noticias individuales con SEO dinámico y redes sociales. |
 
 ---
 
@@ -22,46 +24,63 @@ La [Estudiantina de Posadas](https://estudiantina.online) es el desfile juvenil 
 estudiantina/
 │
 ├── 📄 index.html           # Simulador de Carrera (SPA principal)
-├── 📄 comunidad.html       # Portal de Comunidad & Noticias
+├── 📄 comunidad.html       # Portal de Noticias & Cobertura
+├── 📄 foro.html            # Foro de Debate Estudiantil
 ├── 📄 noticia.html         # Página de lectura de noticia individual
 │
-├── 🎨 styles.css           # Estilos del Simulador (6300+ líneas, Dark Minimal)
+├── 🎨 styles.css           # Estilos del Simulador (Dark Minimal / Neon posadeño)
 │
 ├── 📁 css/
-│   ├── comunidad.css       # Estilos del Portal de Comunidad (5600+ líneas)
-│   └── noticia.css         # Estilos de la página de noticia
+│   ├── comunidad.css       # Estilos del Portal de Noticias y administración
+│   ├── foro.css            # Estilos del Foro de Debate y canales
+│   └── noticia.css         # Estilos de la página de lectura individual
 │
 ├── 📁 js/
 │   ├── app.js              # Núcleo del simulador (pantallas, flujo, UI)
 │   ├── simulador.js        # Motor de simulación de carrera escolar
-│   ├── eventos.js          # Banco de eventos de Banda de Música
-│   ├── eventos_baile.js    # Banco de eventos de Cuerpo de Baile
-│   ├── colegios.js         # Datos de los 30+ colegios participantes
-│   ├── roles.js            # Definición de roles (Director, Percusionista, etc.)
+│   ├── eventos.js          # Banco de eventos narrativos de Banda de Música
+│   ├── eventos_baile.js    # Banco de eventos narrativos de Cuerpo de Baile
+│   ├── colegios.js         # Datos de los 30+ colegios posadeños participantes
+│   ├── roles.js            # Roles (Director, Scola, Chancha, Cuerpo de Baile, etc.)
 │   ├── ranking.js          # Lógica del Salón de la Fama y Rankings
-│   ├── comunidad.js        # Portal de noticias, foro y admin (frontend)
-│   └── noticia.js          # Lector de artículo individual
+│   ├── comunidad.js        # Lógica del portal de noticias y administración
+│   ├── foro.js             # Lógica del foro: canales, hilos, upvotes, comentarios
+│   └── noticia.js          # Lector dinámico de artículos individuales
 │
 ├── 📁 api/
-│   ├── ranking.php         # API REST: jugadores y ranking (Hostinger)
-│   ├── comunidad.php       # API REST: noticias y metadatos
-│   ├── foro.php            # API REST: foro de debate (SQLite)
-│   └── admin.php           # API REST: panel de administración (token-based)
+│   ├── ranking.php         # API REST: jugadores, ranking y persistencia (PHP/Hostinger)
+│   ├── comunidad.php       # API REST: noticias, cronograma y metadatos
+│   ├── foro.php            # API REST: foro de debate (SQLite PDO con WAL)
+│   └── admin.php           # API REST: panel de administración y moderación
 │
 ├── 📁 data/
-│   ├── comunidad.example.json   # Estructura de noticias (ejemplo)
-│   ├── ranking.example.json     # Estructura de jugadores (ejemplo)
-│   └── foro.db             # Base de datos SQLite (excluida del repo)
+│   ├── comunidad.example.json   # Semilla estructurada de noticias
+│   ├── ranking.example.json     # Semilla estructurada de jugadores
+│   └── foro.db                  # Base de datos SQLite (excluida del control de versiones)
+│
+├── 📁 scripts/
+│   ├── check-syntax.mjs         # Validador estático de sintaxis JS y JSON
+│   ├── test-runner.mjs          # Suite de pruebas automatizadas (Node test runner)
+│   └── antigravity-stop-gate.mjs # Verificación de Quality Gates
+│
+├── 📁 tests/
+│   ├── test-api.mjs             # Pruebas de integración de endpoints REST
+│   ├── test-foro.mjs            # Pruebas de API y seguridad del foro
+│   └── test-simulador.mjs       # Pruebas unitarias de colegios, roles y eventos
+│
+├── 📁 docs/
+│   ├── QUALITY-GATES-CHECKLIST.md # Checklist formal de Quality Gates (G0 a G8)
+│   └── ADR/                       # Architectural Decision Records
 │
 ├── 📁 assets/
 │   └── iannavajas.png      # Logo del patrocinador oficial
 │
-├── 🔧 server.js            # Servidor de desarrollo local (Node.js nativo)
+├── 🔧 server.js            # Servidor dual-runtime local (Node.js 22+ nativo)
 ├── 🔧 .htaccess            # Configuración Apache/LiteSpeed para Hostinger
-├── 📦 package.json         # Scripts npm
-├── 🌐 robots.txt           # Directivas SEO
-├── 🗺️ sitemap.xml          # Mapa del sitio para Google
-└── 📱 site.webmanifest     # PWA manifest
+├── 📦 package.json         # Configuración y scripts npm
+├── 🌐 robots.txt           # Directivas SEO y crawlers
+├── 🗺️ sitemap.xml          # Mapa del sitio optimizado para motores de búsqueda
+└── 📱 site.webmanifest     # Web App Manifest PWA
 ```
 
 ---
@@ -88,21 +107,30 @@ npm start
 # → Servidor corriendo en http://localhost:3000
 ```
 
-> El servidor (`server.js`) sirve todos los archivos estáticos Y actúa como API mock
-> idéntica a la API PHP de producción en Hostinger. No se necesita instalar nada más.
+> El servidor (`server.js`) sirve todos los archivos estáticos y reproduce con paridad exacta
+> las respuestas y lógica de la API PHP de producción en Hostinger, incluyendo persistencia en SQLite.
+
+### Scripts Disponibles
+
+```bash
+npm start              # Inicia el servidor local de desarrollo
+npm test               # Ejecuta la suite completa de pruebas automatizadas
+npm run check          # Chequeo estático de sintaxis (JS y JSON)
+npm run quality-gate   # Ejecución del Quality Gate formal
+```
 
 ### Variables de Entorno (Opcionales)
 
 ```bash
 PORT=3000                    # Puerto del servidor (default: 3000)
-ADMIN_SECRET=tu_clave_aqui   # Clave para el panel de administración
+ADMIN_SECRET=tu_clave_aqui   # Clave secreta para el panel de administración
 ```
 
 ---
 
 ## 🎮 Cómo Funciona el Simulador
 
-El simulador es una **Single Page Application (SPA)** completamente en vanilla HTML/CSS/JS con 4 pantallas:
+El simulador es una experiencia SPA modular e interactiva con 4 fases:
 
 ```
 Pantalla 1 → Pantalla 2 → Pantalla 3 → Pantalla 4
@@ -111,82 +139,66 @@ Pantalla 1 → Pantalla 2 → Pantalla 3 → Pantalla 4
                Rol, Rubro)  de eventos) + Rankings)
 ```
 
-### Pantalla 1 — Intro
-- Selección de modo: **Banda de Música** o **Cuerpo de Baile**
-- Acceso al Salón de la Fama (rankings históricos)
-
-### Pantalla 2 — Identidad
-- Elegir **colegio** (30+ instituciones posadeñas con datos reales)
-- Elegir **rol** (Director, Percusionista, Trompetista, Bailarina, etc.)
-- Elegir **rubro** (Banda, Baile, ambos)
-
-### Pantalla 3 — Simulador de Carrera
-- **5 temporadas** de decisiones narrativas (estilo Copero/FIFA)
-- Cada decisión afecta atributos: OVR, COOP, RITM, DISC, etc.
-- Sistema de **transferencias** entre colegios
-- **Leaderboard** en tiempo real del colegio
-- Tabla histórica de estadísticas por año
-
-### Pantalla 4 — Ficha de Egresado
-- **Card coleccionable** estilo FIFA con el perfil del jugador
-- Sistema de **logros** desbloqueables
-- Opción de **descargar la ficha como imagen** (html2canvas)
-- Acceso a **Rankings**: Top OVR, Top Copas, Colegios más populares
+1. **Intro**: Selección de rubro (**Banda de Música** o **Cuerpo de Baile**) y acceso al Salón de la Fama.
+2. **Identidad**: Elección de colegio entre más de 30 instituciones posadeñas reales y selección de rol específico.
+3. **Carrera**: 5 temporadas escolares con eventos narrativos interactivos donde cada decisión balancea atributos (`OVR`, `RITM`, `COOP`, `DISC`), opciones de transferencias y cálculo de copas.
+4. **Ficha de Egresado**: Generación de tarjeta coleccionable estilo FIFA card con opción de descarga como imagen (vía `html2canvas`) y publicación al ranking oficial.
 
 ---
 
-## 📰 Portal de Comunidad
+## 📰 Portal de Noticias y Cobertura
 
-El portal (`comunidad.html`) es un **sitio de noticias tipo periódico deportivo** con:
+El portal (`comunidad.html`) ofrece una cobertura periodística completa:
 
-| Sección | Descripción |
-|---|---|
-| 📰 Noticias | Hero article + grid de cards con imágenes |
-| 📅 Cronograma | Fechas de la temporada 2026 |
-| 💬 Foro | Sistema de debate con login Google OAuth |
-| ❓ FAQ | Guía del espectador |
-
-### Sistema de Noticias
-- Las noticias se cargan desde `api/comunidad.php` (producción) o `data/comunidad.json` (local)
-- Soporte para imágenes, categorías, tags, tiempo de lectura y bloques de contenido
-- **Panel de admin** protegido por token para crear/editar/borrar noticias
-
-### Foro de Debate
-- Login con **Google OAuth** (sin Firebase, usando `accounts.google.com/gsi/client`)
-- Usuarios guardados en SQLite por `google_id`
-- Hilos, respuestas, likes y moderación por admin
+- **Artículos destacados y cronología**: Cobertura de las noches de calle en la Costanera y Noche de Anfiteatro Manuel Antonio Ramírez.
+- **Cronograma 2026**: Fechas, pruebas piloto y horarios actualizados.
+- **Panel de administración**: Creación, edición y eliminación de noticias protegido mediante token de seguridad.
 
 ---
 
-## 🔌 API Endpoints
+## 💬 Foro de Debate Estudiantil
 
-El servidor local (`server.js`) y la API PHP de producción exponen los mismos endpoints:
+El foro (`foro.html`) es un espacio temático de intercambio con alta protección y moderación:
 
-| Método | Endpoint | Descripción |
-|---|---|---|
-| `GET` | `/api/ranking` | Obtener todos los jugadores y rankings |
-| `POST` | `/api/ranking` | Guardar ficha de egresado |
-| `GET` | `/api/comunidad` | Obtener noticias |
-| `GET` | `/api/foro` | Obtener hilos del foro |
-| `POST` | `/api/foro` | Crear hilo, responder, dar like |
-| `POST` | `/api/admin` | Acciones de administrador (token requerido) |
+- **Canales temáticos**: General, Banda de Música, Cuerpo de Baile, Noches de Calle y Propuestas.
+- **Autenticación**: Google Identity Services (GSI / OAuth 2.0) sin overhead de librerías externas.
+- **Interacciones**: Hilos de debate, respuestas, sistema de upvotes comunitarios y reporte de contenido.
+- **Seguridad**: Inmunidad contra XSS mediante sanitización estricta (`escapeHtml`) y Prepared Statements en SQLite.
+
+---
+
+## 🔌 API Endpoints (Paridad Node ↔ PHP)
+
+Tanto en desarrollo local (`server.js`) como en producción (`api/*.php`), los contratos son idénticos:
+
+| Método | Endpoint | Acción / Parámetros | Descripción |
+|---|---|---|---|
+| `GET` | `/api/ranking` | — | Lista de egresados y rankings históricos |
+| `POST` | `/api/ranking` | Body JSON | Guardar nueva ficha de egresado |
+| `GET` | `/api/comunidad` | — | Listado de noticias y cronograma oficial |
+| `GET` | `/api/foro` | `action=canales` | Lista de canales y conteo de hilos |
+| `GET` | `/api/foro` | `action=hilos[&canal=...][&q=...]` | Listado paginado de hilos y búsqueda |
+| `GET` | `/api/foro` | `action=hilo&id=...` | Detalle de un hilo con sus comentarios |
+| `POST` | `/api/foro` | `action=crear_hilo` | Crear nuevo hilo (requiere auth) |
+| `POST` | `/api/foro` | `action=comentar` | Responder en un hilo (requiere auth) |
+| `POST` | `/api/foro` | `action=votar` | Alternar upvote en hilo o comentario |
+| `POST` | `/api/foro` | `action=reportar` | Reportar contenido para moderación |
+| `POST` | `/api/admin` | Header `Authorization` | Operaciones administrativas y moderación |
 
 ---
 
 ## 🌐 Despliegue en Hostinger
 
-El proyecto está configurado para **Hostinger** con Apache/LiteSpeed:
+El proyecto está optimizado para servidores Apache / LiteSpeed en **Hostinger**:
 
-1. **Subir todos los archivos** al `public_html/` via FTP o el panel de Hostinger
-2. **Crear los datos** en el servidor:
+1. **Subir archivos** al directorio raíz `public_html/`.
+2. **Generar archivos de datos iniciales**:
    ```bash
    cp data/ranking.example.json data/ranking.json
    cp data/comunidad.example.json data/comunidad.json
    ```
-3. **Configurar el token de admin** en `api/admin.php`
-4. El `.htaccess` ya maneja todo el routing, compresión Gzip y headers de seguridad
-
-> ⚠️ La carpeta `data/` está protegida por `.htaccess` para que nadie acceda directamente a los JSON desde el navegador.
+3. **Permisos de SQLite**: Asegurar permisos de lectura y escritura para el usuario web en `data/` (`data/foro.db` se crea automáticamente con modo WAL).
+4. **Protección `.htaccess`**: La carpeta `/data/` se encuentra bloqueada para acceso HTTP directo, garantizando la privacidad de las bases de datos.
 
 ---
 
@@ -194,22 +206,22 @@ El proyecto está configurado para **Hostinger** con Apache/LiteSpeed:
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | HTML5 + CSS3 Vanilla + JavaScript ES Modules |
-| Tipografía | Google Fonts: Outfit, Inter, Plus Jakarta Sans |
-| Estilos | CSS Variables, Grid, Flexbox, Glassmorphism, Dark theme |
-| Animaciones | CSS Keyframes y transitions nativas (sin librerías) |
-| Backend local | Node.js 22+ nativo (sin dependencias) |
-| Backend prod. | PHP 8+ en Hostinger |
-| Base de datos | SQLite (foro) + JSON plano (noticias/ranking) |
-| Auth | Google OAuth 2.0 (GSI Client Library) |
-| Export imagen | html2canvas (CDN) |
+| **Frontend** | HTML5 semántico + CSS3 Vanilla (Custom Properties) + JavaScript ES Modules nativos |
+| **Tipografía** | Google Fonts: Outfit, Inter, Plus Jakarta Sans |
+| **Diseño** | Dark Minimal con toques Neón Posadeño, Glassmorphism y Mobile-First |
+| **Backend Local** | Node.js 22+ nativo con `node:sqlite` (`DatabaseSync`), cero dependencias de build |
+| **Backend Prod.** | PHP 8.1+ con PDO SQLite (modo WAL) en Hostinger |
+| **Base de Datos** | SQLite (`data/foro.db`) + archivos JSON estructurados con réplica de seguridad |
+| **Autenticación** | Google Identity Services (GSI / OAuth 2.0) |
+| **Exportación** | `html2canvas` para generación de Fichas de Egresado coleccionables |
+| **Calidad y Tests** | Node Test Runner, análisis estático y Quality Gates integrados |
 
 ---
 
-## 👥 Créditos
+## 👥 Créditos y Patrocinio
 
-- **Patrocinador Oficial**: [Ian Navajas Barbería](https://www.instagram.com/iannavajas_/) — código `estudiantina` para 20% de descuento
-- **Datos de colegios**: Instituciones participantes reales de la Estudiantina de Posadas 2026
+- **Patrocinador Oficial**: [Ian Navajas Barbería](https://www.instagram.com/iannavajas_/) — Beneficio con código `estudiantina`
+- **Comunidad y Colegios**: A todas las instituciones y estudiantes de la Estudiantina de Posadas 2026.
 
 ---
 

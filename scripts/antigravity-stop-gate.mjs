@@ -11,8 +11,10 @@ function run(command, args) {
 
 const checks = [];
 
-// Lightweight non-destructive checks only
-checks.push(["git diff --check", run("git", ["diff", "--check"])]);
+const isGitRepo = run("git", ["rev-parse", "--is-inside-work-tree"]);
+if (isGitRepo) {
+  checks.push(["git diff --check", run("git", ["diff", "--check"])]);
+}
 
 const hasPackageJson = run("node", ["-e", "require('fs').accessSync('package.json')"]);
 if (hasPackageJson) {

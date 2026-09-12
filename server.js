@@ -107,6 +107,15 @@ function getForoDb() {
       );
     `);
 
+    // Índices secundarios para acelerar consultas del foro con alta concurrencia
+    foroDb.exec(`
+      CREATE INDEX IF NOT EXISTS idx_hilos_canal ON hilos(canal_id);
+      CREATE INDEX IF NOT EXISTS idx_hilos_creado ON hilos(creado_en);
+      CREATE INDEX IF NOT EXISTS idx_hilos_votos ON hilos(votos);
+      CREATE INDEX IF NOT EXISTS idx_comentarios_hilo ON comentarios(hilo_id);
+      CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
+    `);
+
     try { foroDb.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch (e) {}
 
     // Sembrar administrador inicial si no existe
@@ -247,6 +256,27 @@ function getForoDb() {
     }
   }
   return foroDb;
+}
+
+// Helper de Sanitización XSS (paridad con PHP htmlspecialchars ENT_QUOTES)
+function escapeHtml(str) {
+  if (typeof str !== "string") return str;
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
+// Rate-limiting en memoria: previene spam de creación de hilos (1 por 30s por google_id)
+const _rateLimitMap = new Map();
+function checkRateLimit(googleId, windowMs = 30000) {
+  const now = Date.now();
+  const last = _rateLimitMap.get(googleId) || 0;
+  if (now - last < windowMs) return false; // bloqueado
+  _rateLimitMap.set(googleId, now);
+  return true; // permitido
 }
 
 // Helpers de Seguridad de Administración
@@ -641,9 +671,9 @@ const server = http.createServer((req, res) => {
       if (action === "hilos") {
         const canal = reqUrl.searchParams.get("canal") || "todos";
         const sort = reqUrl.searchParams.get("sort") || "top";
-        const page = Math.max(1, parseInt(reqUrl.searchParams.get("page") || "1", 10));
-        const limit = 15;
-        const offset = (page - 1) * limit;
+        const limit = Math.min(50, Math.max(1, parseInt(reqUrl.searchParams.get("limit") || "10", 10)));
+        const offset = Math.max(0, parseInt(reqUrl.searchParams.get("offset") || "0", 10));
+        const q = (reqUrl.searchParams.get("q") || "").trim();
 
         let sql = "SELECT * FROM hilos WHERE oculto = 0";
         const params = [];
@@ -651,6 +681,13 @@ const server = http.createServer((req, res) => {
         if (canal !== "todos" && canal !== "") {
           sql += " AND canal_id = ?";
           params.push(canal);
+        }
+
+        // Búsqueda full-text sobre título, contenido y nombre de autor
+        if (q) {
+          sql += " AND (titulo LIKE ? OR contenido LIKE ? OR autor_nombre LIKE ?)";
+          const like = `%${q}%`;
+          params.push(like, like, like);
         }
 
         if (sort === "recientes") {
@@ -667,6 +704,7 @@ const server = http.createServer((req, res) => {
 
       if (action === "hilo") {
         const id = parseInt(reqUrl.searchParams.get("id") || "0", 10);
+        const viewerGoogleId = reqUrl.searchParams.get("googleId") || "";
         const hilo = db.prepare("SELECT * FROM hilos WHERE id = ? AND oculto = 0").get(id);
 
         if (!hilo) {
@@ -675,7 +713,27 @@ const server = http.createServer((req, res) => {
           return;
         }
 
-        const comentarios = db.prepare("SELECT * FROM comentarios WHERE hilo_id = ? AND oculto = 0 ORDER BY creado_en ASC").all(id);
+        // Incluir si el visitante ya votó el hilo principal
+        if (viewerGoogleId) {
+          const hiloVoted = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?").get(id, viewerGoogleId);
+          hilo.user_voted = hiloVoted ? 1 : 0;
+        } else {
+          hilo.user_voted = 0;
+        }
+
+        const comentariosRaw = db.prepare("SELECT * FROM comentarios WHERE hilo_id = ? AND oculto = 0 ORDER BY creado_en ASC").all(id);
+
+        // Enriquecer cada comentario con user_voted
+        const comentarios = comentariosRaw.map(c => {
+          if (viewerGoogleId) {
+            const cv = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?").get(c.id, viewerGoogleId);
+            c.user_voted = cv ? 1 : 0;
+          } else {
+            c.user_voted = 0;
+          }
+          return c;
+        });
+
         res.writeHead(200);
         res.end(JSON.stringify({ status: "ok", hilo, comentarios }));
         return;
@@ -723,10 +781,10 @@ const server = http.createServer((req, res) => {
 
           if (action === "crear_hilo") {
             const canalId = String(body.canalId || "general").trim();
-            const titulo = String(body.titulo || "").trim().slice(0, 150);
-            const contenido = String(body.contenido || "").trim().slice(0, 3000);
+            const titulo = escapeHtml(String(body.titulo || "").trim().slice(0, 150));
+            const contenido = escapeHtml(String(body.contenido || "").trim().slice(0, 3000));
             const googleId = String(body.googleId || "").trim();
-            const autorNombre = String(body.autorNombre || "").trim().slice(0, 60);
+            const autorNombre = escapeHtml(String(body.autorNombre || "").trim().slice(0, 60));
             const autorAvatar = String(body.autorAvatar || "").trim();
             const colegioId = String(body.colegioId || "janssen").trim();
 
@@ -746,6 +804,13 @@ const server = http.createServer((req, res) => {
               return;
             }
 
+            // Rate-limiting: máximo 1 debate cada 30 segundos por usuario
+            if (!checkRateLimit(googleId)) {
+              res.writeHead(429);
+              res.end(JSON.stringify({ status: "error", message: "Esperá 30 segundos entre debates. ¡No hagas spam!" }));
+              return;
+            }
+
             const info = db.prepare(`
               INSERT INTO hilos (canal_id, titulo, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id)
               VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -758,9 +823,9 @@ const server = http.createServer((req, res) => {
 
           if (action === "comentar") {
             const hiloId = parseInt(body.hiloId || 0, 10);
-            const contenido = String(body.contenido || "").trim().slice(0, 2000);
+            const contenido = escapeHtml(String(body.contenido || "").trim().slice(0, 2000));
             const googleId = String(body.googleId || "").trim();
-            const autorNombre = String(body.autorNombre || "").trim().slice(0, 60);
+            const autorNombre = escapeHtml(String(body.autorNombre || "").trim().slice(0, 60));
             const autorAvatar = String(body.autorAvatar || "").trim();
             const colegioId = String(body.colegioId || "janssen").trim();
 
@@ -1326,7 +1391,9 @@ const server = http.createServer((req, res) => {
         ? "comunidad.html" 
         : (pathname === "/noticia" 
             ? "noticia.html" 
-            : pathname.replace(/^\//, "")));
+            : (pathname === "/foro"
+                ? "foro.html"
+                : pathname.replace(/^\//, ""))));
   let filePath = path.join(__dirname, relativePath);
 
   // Normalizar ruta para evitar path traversal

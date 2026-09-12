@@ -95,6 +95,12 @@ CREATE TABLE IF NOT EXISTS votos (
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY(item_tipo, item_id, google_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_hilos_canal ON hilos(canal_id);
+CREATE INDEX IF NOT EXISTS idx_hilos_creado ON hilos(creado_en);
+CREATE INDEX IF NOT EXISTS idx_hilos_votos ON hilos(votos);
+CREATE INDEX IF NOT EXISTS idx_comentarios_hilo ON comentarios(hilo_id);
+CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
 ");
 
 // Insertar canales iniciales si está vacía la tabla
@@ -136,6 +142,16 @@ if ($checkHilos == 0) {
     ");
 }
 
+// Rate-limiting simple en sesión PHP (APCu si disponible, sino skip)
+function checkPhpRateLimit(string $googleId, int $windowSec = 30): bool {
+    if (!function_exists('apcu_fetch')) return true; // sin APCu: skip rate-limit
+    $key = 'rl_hilo_' . $googleId;
+    $last = apcu_fetch($key);
+    if ($last !== false && (time() - $last) < $windowSec) return false;
+    apcu_store($key, time(), $windowSec);
+    return true;
+}
+
 $action = $_GET["action"] ?? "";
 
 // -------------------------------------------------------------
@@ -159,9 +175,9 @@ if ($action === "canales") {
 if ($action === "hilos") {
     $canal = $_GET["canal"] ?? "todos";
     $sort = $_GET["sort"] ?? "top"; // 'top' o 'recientes'
-    $page = max(1, (int)($_GET["page"] ?? 1));
-    $limit = 15;
-    $offset = ($page - 1) * $limit;
+    $limit = min(50, max(1, (int)($_GET["limit"] ?? 10)));
+    $offset = max(0, (int)($_GET["offset"] ?? 0));
+    $q = trim($_GET["q"] ?? "");
 
     $sql = "SELECT h.* FROM hilos h WHERE h.oculto = 0";
     $params = [];
@@ -169,6 +185,15 @@ if ($action === "hilos") {
     if ($canal !== "todos" && !empty($canal)) {
         $sql .= " AND h.canal_id = ?";
         $params[] = $canal;
+    }
+
+    // Búsqueda full-text sobre título, contenido y nombre de autor
+    if (!empty($q)) {
+        $like = "%$q%";
+        $sql .= " AND (h.titulo LIKE ? OR h.contenido LIKE ? OR h.autor_nombre LIKE ?)";
+        $params[] = $like;
+        $params[] = $like;
+        $params[] = $like;
     }
 
     if ($sort === "recientes") {
@@ -190,6 +215,7 @@ if ($action === "hilos") {
 // -------------------------------------------------------------
 if ($action === "hilo") {
     $id = (int)($_GET["id"] ?? 0);
+    $viewerGoogleId = trim($_GET["googleId"] ?? "");
     $stmt = $pdo->prepare("SELECT * FROM hilos WHERE id = ? AND oculto = 0");
     $stmt->execute([$id]);
     $hilo = $stmt->fetch();
@@ -200,9 +226,30 @@ if ($action === "hilo") {
         exit;
     }
 
+    // user_voted en el hilo principal
+    if ($viewerGoogleId) {
+        $chk = $pdo->prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?");
+        $chk->execute([$id, $viewerGoogleId]);
+        $hilo["user_voted"] = $chk->fetchColumn() ? 1 : 0;
+    } else {
+        $hilo["user_voted"] = 0;
+    }
+
     $stmtComentarios = $pdo->prepare("SELECT * FROM comentarios WHERE hilo_id = ? AND oculto = 0 ORDER BY creado_en ASC");
     $stmtComentarios->execute([$id]);
-    $comentarios = $stmtComentarios->fetchAll();
+    $comentariosRaw = $stmtComentarios->fetchAll();
+
+    // Enriquecer comentarios con user_voted
+    $comentarios = array_map(function($c) use ($pdo, $viewerGoogleId) {
+        if ($viewerGoogleId) {
+            $chkC = $pdo->prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?");
+            $chkC->execute([$c["id"], $viewerGoogleId]);
+            $c["user_voted"] = $chkC->fetchColumn() ? 1 : 0;
+        } else {
+            $c["user_voted"] = 0;
+        }
+        return $c;
+    }, $comentariosRaw);
 
     echo json_encode(["status" => "ok", "hilo" => $hilo, "comentarios" => $comentarios]);
     exit;
@@ -274,7 +321,14 @@ if ($action === "crear_hilo" && $method === "POST") {
         exit;
     }
 
-    // Sanitización básica contra XSS
+    // Rate-limiting: 1 debate cada 30 segundos por usuario
+    if (!checkPhpRateLimit($googleId, 30)) {
+        http_response_code(429);
+        echo json_encode(["status" => "error", "message" => "Esperá 30 segundos entre debates. ¡No hagas spam!"]);
+        exit;
+    }
+
+    // Sanitización XSS
     $titulo = htmlspecialchars($titulo, ENT_QUOTES, "UTF-8");
     $contenido = htmlspecialchars($contenido, ENT_QUOTES, "UTF-8");
     $autorNombre = htmlspecialchars($autorNombre, ENT_QUOTES, "UTF-8");

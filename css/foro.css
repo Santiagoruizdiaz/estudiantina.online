@@ -1,0 +1,1139 @@
+/* ==========================================================================
+   FORO DE DEBATE ESTUDIANTIL — REDDIT MOBILE & DESKTOP STANDALONE
+   Proyecto: Estudiantina de Posadas (estudiantina.online)
+   Estética: Dark Minimal / Neón Posadeño (Reddit Mobile Experience)
+   ========================================================================== */
+
+:root {
+  --foro-bg:           #090a0f;
+  --foro-card:         #12141e;
+  --foro-card-hover:   #171b29;
+  --foro-border:       rgba(255, 255, 255, 0.08);
+  --foro-border-hover: rgba(56, 189, 248, 0.35);
+  --foro-cyan:         #38bdf8;
+  --foro-cyan-glow:    rgba(56, 189, 248, 0.2);
+  --foro-gold:         #fbbf24;
+  --foro-gold-glow:    rgba(251, 191, 36, 0.2);
+  --foro-pill-bg:      rgba(255, 255, 255, 0.05);
+  --foro-pill-hover:   rgba(255, 255, 255, 0.1);
+  --foro-text:         #f8fafc;
+  --foro-text-muted:   #94a3b8;
+  --foro-text-subtle:  #64748b;
+  --foro-header-h:     60px;
+}
+
+body.page-foro {
+  background-color: var(--foro-bg);
+  color: var(--foro-text);
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-body, 'Plus Jakarta Sans', 'Inter', sans-serif);
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   HEADER DEDICADO DEL FORO (ESTILO APP / REDDIT)
+   -------------------------------------------------------------------------- */
+.foro-app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(9, 10, 15, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--foro-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.foro-app-header-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  height: var(--foro-header-h);
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+/* Marca y botón Volver */
+.foro-header-brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.foro-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--foro-border);
+  color: var(--foro-text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.foro-back-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.foro-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.foro-brand-title .brand-logo {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.foro-brand-title .brand-domain {
+  color: var(--foro-cyan);
+}
+
+.foro-tag-pill {
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.05));
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: var(--foro-cyan);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* Buscador central estilo Reddit */
+.foro-header-search-wrap {
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.foro-search-lens {
+  position: absolute;
+  left: 12px;
+  font-size: 0.88rem;
+  color: var(--foro-text-subtle);
+  pointer-events: none;
+}
+
+.foro-header-search-input {
+  width: 100%;
+  height: 38px;
+  background: #11141e;
+  border: 1px solid var(--foro-border);
+  border-radius: 9999px;
+  padding: 0 36px 0 38px;
+  color: #fff;
+  font-size: 0.86rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.foro-header-search-input:focus {
+  outline: none;
+  background: #161926;
+  border-color: var(--foro-cyan);
+  box-shadow: 0 0 12px var(--foro-cyan-glow);
+}
+
+.forum-search-clear {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--foro-text-subtle);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* Acciones usuario derecha */
+.foro-header-user-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.foro-game-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--foro-border);
+  color: var(--foro-text-muted);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 9999px;
+  transition: all 0.2s;
+}
+
+.foro-game-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+.btn-google-login-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--foro-border);
+  color: #fff;
+  border-radius: 9999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-google-login-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ocultamiento absoluto del botón de Google cuando hay sesión */
+.forum-user-bar.is-authenticated #btn-google-login,
+body.has-user #btn-google-login,
+#btn-google-login[hidden],
+#btn-google-login.is-hidden {
+  display: none !important;
+}
+
+.forum-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--foro-border);
+  border-radius: 9999px;
+  padding: 3px 10px 3px 4px;
+  max-width: 180px;
+  min-width: 0;
+}
+
+/* Ocultamiento del perfil cuando NO hay sesión */
+.forum-user-bar:not(.is-authenticated) #forum-user-profile,
+body:not(.has-user) #forum-user-profile,
+#forum-user-profile[hidden],
+#forum-user-profile.is-hidden {
+  display: none !important;
+}
+
+.user-avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1e293b;
+  flex-shrink: 0;
+}
+
+.user-profile-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.user-profile-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95px;
+}
+
+.user-profile-school-badge {
+  font-size: 0.68rem;
+  color: var(--foro-accent);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95px;
+}
+
+.btn-logout {
+  background: none;
+  border: none;
+  color: var(--foro-text-subtle);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.btn-logout:hover {
+  color: #ef4444;
+}
+
+.btn-new-topic-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border: none;
+  color: #fff;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+.btn-new-topic-header:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.55);
+}
+
+.foro-mobile-search-strip {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   BARRA HORIZONTAL DE CANALES (REDDIT SUBREDDITS TABS)
+   -------------------------------------------------------------------------- */
+.foro-channels-strip-wrap {
+  position: sticky;
+  top: var(--foro-header-h);
+  z-index: 90;
+  background: rgba(14, 16, 24, 0.98);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--foro-border);
+  padding: 6px 0;
+  /* Degradado sutil a la derecha para indicar scroll táctil horizontal */
+  mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 30px), transparent 100%);
+}
+
+.foro-channels-strip-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+.channels-grid-scrollable {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+
+.channels-grid-scrollable::-webkit-scrollbar {
+  display: none;
+}
+
+.channels-grid-scrollable .channel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--foro-border);
+  color: var(--foro-text-muted);
+  border-radius: 9999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.channels-grid-scrollable .channel-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.channels-grid-scrollable .channel-chip.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--foro-cyan);
+  color: var(--foro-cyan);
+  box-shadow: 0 0 14px var(--foro-cyan-glow);
+}
+
+.channel-count {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 7px;
+  border-radius: 9999px;
+}
+
+.channel-chip.active .channel-count {
+  background: rgba(56, 189, 248, 0.25);
+  color: var(--foro-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   INTRO / BANNER COMPACTO
+   -------------------------------------------------------------------------- */
+.foro-community-intro-strip {
+  background: radial-gradient(circle at 80% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+              linear-gradient(180deg, rgba(17, 20, 30, 0.7) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 1.25rem 0;
+}
+
+.intro-strip-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.intro-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: var(--foro-gold);
+  margin-bottom: 3px;
+}
+
+.intro-heading {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 3px;
+}
+
+.intro-subtext {
+  font-size: 0.85rem;
+  color: var(--foro-text-muted);
+  margin: 0;
+}
+
+.intro-stats {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--foro-border);
+  border-radius: 10px;
+  padding: 5px 14px;
+}
+
+.stat-pill strong {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.stat-pill span {
+  font-size: 0.68rem;
+  color: var(--foro-text-subtle);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   LAYOUT FEED & SIDEBAR DESKTOP
+   -------------------------------------------------------------------------- */
+.foro-main-layout {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 5rem;
+}
+
+.foro-layout-container {
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  gap: 1.8rem;
+  align-items: start;
+}
+
+.foro-feed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Barra de orden estilo Reddit */
+.forum-sort-bar-reddit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--foro-border);
+  border-radius: 12px;
+  padding: 6px 12px;
+}
+
+.sort-pills-group {
+  display: flex;
+  gap: 6px;
+}
+
+.sort-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  color: var(--foro-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.sort-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.sort-pill-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.feed-active-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.active-channel-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--foro-text-muted);
+}
+
+.threads-count-pill {
+  font-size: 0.72rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--foro-border);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  color: var(--foro-text-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   TARJETAS DE DEBATE ESTILO REDDIT MOBILE
+   -------------------------------------------------------------------------- */
+.threads-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.thread-card {
+  background: var(--foro-card);
+  border: 1px solid var(--foro-border);
+  border-radius: 14px;
+  padding: 1rem 1.2rem 0.9rem;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s,
+              background-color 0.18s,
+              box-shadow 0.18s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.thread-card:hover {
+  background: var(--foro-card-hover);
+  border-color: var(--foro-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.thread-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.thread-author-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.thread-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #1e293b;
+}
+
+.thread-author-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.thread-author-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  flex-wrap: wrap;
+}
+
+.thread-school-badge {
+  font-weight: 700;
+  color: #fff;
+  padding-left: 6px;
+  line-height: 1.2;
+}
+
+.meta-dot {
+  color: var(--foro-text-subtle);
+  font-size: 0.7rem;
+}
+
+.thread-author-name {
+  color: var(--foro-text-muted);
+}
+
+.thread-time {
+  color: var(--foro-text-subtle);
+}
+
+.thread-sub-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thread-channel-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--foro-cyan);
+  background: rgba(56, 189, 248, 0.1);
+  padding: 1px 7px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
+.thread-title {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: #fff;
+  margin: 0;
+  word-break: break-word;
+}
+
+.thread-excerpt {
+  font-size: 0.88rem;
+  color: var(--foro-text-muted);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+}
+
+/* Barra de acciones Reddit */
+.reddit-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 0.4rem;
+  margin-top: 0.15rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.reddit-vote-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--foro-pill-bg);
+  border: 1px solid var(--foro-border);
+  border-radius: 9999px;
+  height: 33px;
+  padding: 0 12px;
+  color: var(--foro-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.reddit-vote-capsule:hover {
+  background: var(--foro-pill-hover);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.reddit-vote-capsule.voted {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: var(--foro-gold);
+  color: var(--foro-gold);
+}
+
+.btn-vote-arrow {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.reddit-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--foro-pill-bg);
+  border: 1px solid var(--foro-border);
+  border-radius: 9999px;
+  height: 33px;
+  padding: 0 13px;
+  color: var(--foro-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reddit-action-pill:hover {
+  background: var(--foro-pill-hover);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pill-icon {
+  font-size: 0.88rem;
+}
+
+/* --------------------------------------------------------------------------
+   SIDEBAR LATERAL DESKTOP (COMMUNITY CARD)
+   -------------------------------------------------------------------------- */
+.foro-desktop-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: calc(var(--foro-header-h) + 60px);
+}
+
+.sidebar-reddit-card {
+  background: var(--foro-card);
+  border: 1px solid var(--foro-border);
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.reddit-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.reddit-card-header h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.reddit-card-desc {
+  font-size: 0.82rem;
+  color: var(--foro-text-muted);
+  line-height: 1.45;
+  margin: 0 0 1rem;
+}
+
+.reddit-card-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--foro-border);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.card-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-stat-num {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.card-stat-label {
+  font-size: 0.68rem;
+  color: var(--foro-text-subtle);
+  text-transform: uppercase;
+}
+
+.rules-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.rules-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--foro-text-muted);
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   BOTÓN FLOTANTE (FAB MOBILE)
+   -------------------------------------------------------------------------- */
+.btn-fab-topic {
+  position: fixed;
+  bottom: 22px;
+  right: 20px;
+  z-index: 999;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: #fff;
+  border: none;
+  border-radius: 9999px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-family: inherit;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.5),
+              0 0 15px rgba(56, 189, 248, 0.35);
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-fab-topic:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 28px rgba(2, 132, 199, 0.65);
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER LIMPIO DEL FORO
+   -------------------------------------------------------------------------- */
+.foro-footer {
+  background: #07080c;
+  border-top: 1px solid var(--foro-border);
+  padding: 2.5rem 1.25rem 3.5rem;
+}
+
+.foro-footer-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.foro-footer-brand .brand-logo {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.foro-footer-brand p {
+  font-size: 0.8rem;
+  color: var(--foro-text-subtle);
+  margin: 4px 0 0;
+}
+
+.foro-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.foro-footer-link {
+  color: var(--foro-text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.foro-footer-link:hover {
+  color: #fff;
+}
+
+.foro-footer-admin-btn {
+  background: none;
+  border: 1px solid var(--foro-border);
+  color: var(--foro-text-subtle);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.foro-footer-admin-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+   MODAL DE DEBATE ESTILO REDDIT POST
+   -------------------------------------------------------------------------- */
+.reddit-post-modal {
+  max-width: 720px;
+  border-radius: 16px;
+}
+
+.btn-modal-back-reddit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--foro-border);
+  color: #fff;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thread-op-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-report-thread-modal {
+  background: none;
+  border: none;
+  color: var(--foro-text-subtle);
+  font-size: 0.78rem;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   ADAPTACIONES REDDIT MOBILE PURAS (< 960px y < 640px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .foro-layout-container {
+    grid-template-columns: 1fr;
+  }
+
+  .foro-desktop-sidebar {
+    display: none;
+  }
+
+  .foro-header-search-wrap {
+    display: none;
+  }
+
+  /* Ocultar banner intro redundante en mobile para que los debates se vean de inmediato */
+  .foro-community-intro-strip {
+    display: none !important;
+  }
+
+  .foro-mobile-search-strip {
+    display: block;
+    padding: 6px 12px 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    background: var(--foro-bg);
+  }
+
+  .foro-mobile-search-strip .foro-header-search-wrap {
+    display: flex;
+    max-width: 100%;
+  }
+
+  .foro-mobile-search-strip .foro-header-search-input {
+    height: 35px;
+    font-size: 0.82rem;
+    background: #111420;
+    padding: 0 32px 0 34px;
+  }
+
+  .foro-mobile-search-strip .foro-search-lens {
+    left: 11px;
+    font-size: 0.8rem;
+  }
+
+  .btn-new-topic-header {
+    display: none; /* En mobile se usa el FAB */
+  }
+
+  .foro-game-btn {
+    display: none !important; /* Ocultar botón del simulador en cabecera mobile para dar espacio */
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --foro-header-h: 52px;
+  }
+
+  .foro-app-header-inner {
+    padding: 0 0.75rem;
+    gap: 8px;
+  }
+
+  /* Botón Volver solo con flecha para ahorrar espacio */
+  .foro-back-link {
+    padding: 5px 8px;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .foro-back-link .back-text {
+    display: none;
+  }
+
+  .foro-header-brand-group {
+    gap: 7px;
+  }
+
+  .foro-brand-title .brand-logo {
+    font-size: 1.05rem;
+  }
+
+  .foro-tag-pill {
+    font-size: 0.6rem;
+    padding: 1px 5px;
+  }
+
+  /* Botón login Google compacto que no desborde */
+  .btn-google-login-pill {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    gap: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .btn-google-login-pill span {
+    font-size: 0.75rem;
+  }
+
+  .foro-channels-strip-inner {
+    padding: 0 0.75rem;
+  }
+
+  .foro-channels-strip-wrap {
+    padding: 5px 0;
+  }
+
+  .channels-grid-scrollable .channel-chip {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    gap: 6px;
+  }
+
+  .foro-main-layout {
+    padding: 0.65rem 0.65rem 5.5rem;
+  }
+
+  .forum-sort-bar-reddit {
+    padding: 4px 8px;
+  }
+
+  .sort-pill-btn {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+
+  .thread-card {
+    padding: 0.85rem 0.9rem 0.75rem;
+    border-radius: 12px;
+  }
+
+  .thread-title {
+    font-size: 0.96rem;
+    line-height: 1.3;
+  }
+
+  .thread-excerpt {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    -webkit-line-clamp: 2;
+  }
+
+  .reddit-action-bar {
+    gap: 6px;
+  }
+
+  .reddit-vote-capsule, .reddit-action-pill {
+    height: 31px;
+    padding: 0 10px;
+    font-size: 0.75rem;
+  }
+
+  .btn-fab-topic {
+    bottom: 16px;
+    right: 16px;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+}

@@ -23,6 +23,12 @@ class ComunidadApp {
     this.adminToken = localStorage.getItem("comunidad_admin_token") || null;
     this.adminUser = localStorage.getItem("comunidad_admin_user") || null;
 
+    // Paginación del foro
+    this._forumPage = 0;
+    this._forumPageSize = 10;
+    this._forumHasMore = false;
+    this._forumSearchQuery = "";
+
     this.cacheDom();
     this.initEvents();
     this.initGoogleAuth();
@@ -92,6 +98,12 @@ class ComunidadApp {
     this.tabSortRecent         = document.getElementById("tab-sort-recent");
     this.forumActiveChannelName= document.getElementById("forum-active-channel-name");
     this.forumThreadsCount     = document.getElementById("forum-threads-count");
+
+    // Foro: Búsqueda y paginación
+    this.forumSearchInput      = document.getElementById("forum-search-input");
+    this.btnForumSearchClear   = document.getElementById("btn-forum-search-clear");
+    this.forumLoadMoreWrap     = document.getElementById("forum-load-more-wrap");
+    this.btnLoadMoreThreads    = document.getElementById("btn-load-more-threads");
 
     // Modal Crear Debate
     this.modalTopic            = document.getElementById("modal-topic");
@@ -295,7 +307,7 @@ class ComunidadApp {
     if (window.google && window.google.accounts && window.google.accounts.id) {
       try {
         window.google.accounts.id.initialize({
-          client_id: "77491039824-demo.apps.googleusercontent.com", // Reemplazable con Client ID de Google Cloud
+          client_id: "835470646102-o3cek7j04044toj84llkr6867du14mj8.apps.googleusercontent.com",
           callback: this.handleGoogleCredential.bind(this),
           auto_select: false
         });
@@ -634,6 +646,7 @@ class ComunidadApp {
         this.activeSort = "top";
         this.tabSortTop.classList.add("active");
         if (this.tabSortRecent) this.tabSortRecent.classList.remove("active");
+        this._forumPage = 0;
         this.loadThreads();
       });
     }
@@ -642,7 +655,42 @@ class ComunidadApp {
         this.activeSort = "recientes";
         this.tabSortRecent.classList.add("active");
         if (this.tabSortTop) this.tabSortTop.classList.remove("active");
+        this._forumPage = 0;
         this.loadThreads();
+      });
+    }
+
+    // Búsqueda del foro en tiempo real
+    if (this.forumSearchInput) {
+      let _searchDebounce = null;
+      this.forumSearchInput.addEventListener("input", () => {
+        const q = this.forumSearchInput.value.trim();
+        if (this.btnForumSearchClear) {
+          this.btnForumSearchClear.style.display = q ? "inline-flex" : "none";
+        }
+        clearTimeout(_searchDebounce);
+        _searchDebounce = setTimeout(() => {
+          this._forumSearchQuery = q;
+          this._forumPage = 0;
+          this.loadThreads();
+        }, 350);
+      });
+    }
+    if (this.btnForumSearchClear) {
+      this.btnForumSearchClear.addEventListener("click", () => {
+        if (this.forumSearchInput) this.forumSearchInput.value = "";
+        this.btnForumSearchClear.style.display = "none";
+        this._forumSearchQuery = "";
+        this._forumPage = 0;
+        this.loadThreads();
+      });
+    }
+
+    // Botón "Cargar más debates"
+    if (this.btnLoadMoreThreads) {
+      this.btnLoadMoreThreads.addEventListener("click", () => {
+        this._forumPage++;
+        this.loadThreads(true);
       });
     }
 
@@ -1487,6 +1535,20 @@ class ComunidadApp {
   // FORO DE DEBATE EN TIEMPO REAL (SQLITE)
   // -------------------------------------------------------------
   async loadForum() {
+    // Si la URL contiene enlaces directos a hilos o canales, redirigir a la pestaña dedicada del foro
+    const urlParams = new URLSearchParams(window.location.search);
+    const hiloId = urlParams.get("hilo");
+    const canalId = urlParams.get("canal");
+    if (hiloId) {
+      window.location.replace(`foro.html?hilo=${encodeURIComponent(hiloId)}`);
+      return;
+    }
+    if (canalId) {
+      window.location.replace(`foro.html?canal=${encodeURIComponent(canalId)}`);
+      return;
+    }
+
+    if (!this.channelsGrid && !this.threadsContainer) return;
     await this.loadChannels();
     await this.loadThreads();
   }
@@ -1537,30 +1599,49 @@ class ComunidadApp {
           this.forumActiveChannelName.textContent = match ? match.titulo : "Canal";
         }
 
+        this._forumPage = 0;
         this.loadThreads();
       });
     });
   }
 
-  async loadThreads() {
+  async loadThreads(append = false) {
     if (!this.threadsContainer) return;
-    this.threadsContainer.innerHTML = `
-      <div style="text-align:center; padding:2rem; color:var(--text-muted)">
-        <span>&#x23F3; Cargando debates de la comunidad...</span>
-      </div>`;
+
+    if (!append) {
+      this.threadsContainer.innerHTML = `
+        <div style="text-align:center; padding:2rem; color:var(--text-muted)">
+          <span>&#x23F3; Cargando debates de la comunidad...</span>
+        </div>`;
+    }
+
+    const offset = this._forumPage * this._forumPageSize;
+    const limit = this._forumPageSize;
+    const searchParam = this._forumSearchQuery ? `&q=${encodeURIComponent(this._forumSearchQuery)}` : "";
 
     try {
-      const res = await fetch(`/api/foro?action=hilos&canal=${this.activeCanal}&sort=${this.activeSort}`);
+      const res = await fetch(`/api/foro?action=hilos&canal=${this.activeCanal}&sort=${this.activeSort}&limit=${limit}&offset=${offset}${searchParam}`);
       const data = await res.json();
       if (data.status === "ok" && Array.isArray(data.hilos)) {
-        this.renderThreads(data.hilos);
+        this._forumHasMore = data.hilos.length === limit;
+        if (append) {
+          this.appendThreads(data.hilos);
+        } else {
+          this.renderThreads(data.hilos);
+        }
+        // Mostrar u ocultar botón "Cargar más"
+        if (this.forumLoadMoreWrap) {
+          this.forumLoadMoreWrap.style.display = this._forumHasMore ? "flex" : "none";
+        }
       }
     } catch (e) {
       console.warn("Error cargando hilos:", e);
-      this.threadsContainer.innerHTML = `
-        <div style="text-align:center; padding:2rem; color:var(--text-muted)">
-          <p>No se pudieron cargar los debates. Verificá tu conexión.</p>
-        </div>`;
+      if (!append) {
+        this.threadsContainer.innerHTML = `
+          <div style="text-align:center; padding:2rem; color:var(--text-muted)">
+            <p>No se pudieron cargar los debates. Verificá tu conexión.</p>
+          </div>`;
+      }
     }
   }
 
@@ -1678,6 +1759,57 @@ class ComunidadApp {
     }
   }
 
+  // Agrega hilos adicionales al contenedor sin borrar los existentes (paginación progresiva)
+  appendThreads(hilos) {
+    if (!this.threadsContainer || hilos.length === 0) return;
+    const frag = document.createDocumentFragment();
+    hilos.forEach(h => {
+      const col = this.getColegio(h.colegio_id);
+      const hasVoted = this.userVotes.has(`hilo_${h.id}`);
+      const avatarSrc = h.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${h.autor_google_id}`;
+      const timeAgo = this.formatTimeAgo(h.creado_en);
+      const div = document.createElement("div");
+      div.innerHTML = `<article class="thread-item ${h.fijado ? "pinned" : ""}" data-thread-id="${h.id}">
+          <div class="thread-left">
+            <div class="vote-box ${hasVoted ? "voted" : ""}" data-item-id="${h.id}" data-item-type="hilo" title="Votar positivo">
+              <span class="vote-arrow">&#x25B2;</span>
+              <span class="vote-count">${h.votos || 0}</span>
+            </div>
+            <div class="thread-content-block">
+              <div class="thread-meta-top">
+                ${h.fijado ? `<span class="thread-pinned-badge">&#x1F4CC; FIJADO</span>` : ""}
+                <img class="thread-author-avatar-mini" src="${avatarSrc}" alt="${h.autor_nombre}" />
+                <span class="thread-author-name-text">${h.autor_nombre}</span>
+                <span class="thread-school-badge">${col.escudo || "\uD83E\uDD41"} ${col.nombre}</span>
+                <span class="thread-channel-tag">${h.canal_id}</span>
+                <span class="thread-time-ago">${timeAgo}</span>
+              </div>
+              <h4 class="thread-title">${h.titulo}</h4>
+              <p class="thread-snippet">${h.contenido}</p>
+            </div>
+          </div>
+          <div class="thread-comments-badge">
+            <span>&#x1F4AC;</span>
+            <span>${h.respuestas_count || 0}</span>
+          </div>
+        </article>`;
+      const article = div.firstElementChild;
+      article.addEventListener("click", (e) => {
+        if (e.target.closest(".vote-box")) return;
+        this.openThread(article.dataset.threadId);
+      });
+      article.querySelectorAll(".vote-box").forEach(box => {
+        box.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const countSpan = box.querySelector(".vote-count");
+          this.toggleVote("hilo", box.dataset.itemId, box, countSpan);
+        });
+      });
+      frag.appendChild(article);
+    });
+    this.threadsContainer.appendChild(frag);
+  }
+
   async openThread(id) {
     this.activeThreadId = id;
     if (!this.modalThread) return;
@@ -1688,7 +1820,8 @@ class ComunidadApp {
     if (this.threadRepliesList) this.threadRepliesList.innerHTML = "<p style='color:var(--text-muted); font-size:0.85rem'>Cargando respuestas...</p>";
 
     try {
-      const res = await fetch(`/api/foro?action=hilo&id=${id}`);
+      const googleIdParam = this.currentUser ? `&googleId=${encodeURIComponent(this.currentUser.googleId)}` : "";
+      const res = await fetch(`/api/foro?action=hilo&id=${id}${googleIdParam}`);
       const data = await res.json();
       if (data.status !== "ok" || !data.hilo) {
         this.showToast("No se pudo cargar el debate");
@@ -1715,10 +1848,13 @@ class ComunidadApp {
         this.btnAdminDelMainThread.style.display = this.adminToken ? "inline-flex" : "none";
       }
 
-      // Estado del botón de voto principal
+      // Estado del botón de voto principal: priorizar user_voted del servidor
       if (this.btnVoteMainThread) {
-        const hasVoted = this.userVotes.has(`hilo_${h.id}`);
+        const serverVoted = h.user_voted === 1;
+        const localVoted = this.userVotes.has(`hilo_${h.id}`);
+        const hasVoted = serverVoted || localVoted;
         this.btnVoteMainThread.classList.toggle("voted", hasVoted);
+        if (serverVoted) this.userVotes.add(`hilo_${h.id}`);
       }
 
       // Renderizar Respuestas
@@ -1733,24 +1869,57 @@ class ComunidadApp {
             const colC = this.getColegio(c.colegio_id);
             const avatarC = c.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${c.autor_google_id}`;
             const timeC = this.formatTimeAgo(c.creado_en);
+            const commentVoted = c.user_voted === 1;
             return `
               <div class="reply-item" data-comment-id="${c.id}">
                 <img class="reply-avatar" src="${avatarC}" alt="${c.autor_nombre}" />
                 <div class="reply-body">
                   <div class="reply-header">
                     <strong class="reply-author">${c.autor_nombre}</strong>
-                    <span class="reply-school">${colC.escudo || "🥁"} ${colC.nombre}</span>
+                    <span class="reply-school">${colC.escudo || "\uD83E\uDD41"} ${colC.nombre}</span>
                     <span class="reply-time">${timeC}</span>
                     ${this.adminToken ? `
                       <button type="button" class="btn-admin-action-sm btn-admin-del-comment" data-comment-id="${c.id}" style="margin-left:auto; font-size:0.75rem; padding:2px 8px;">
-                        🗑️ Eliminar
+                        \uD83D\uDDD1\uFE0F Eliminar
                       </button>
                     ` : ""}
                   </div>
                   <p class="reply-text">${c.contenido}</p>
+                  <div class="reply-actions">
+                    <button type="button" class="reply-vote-btn ${commentVoted ? "voted" : ""}" data-comment-id="${c.id}" title="Votar este comentario">
+                      <span class="reply-vote-arrow">&#x25B2;</span>
+                      <span class="reply-vote-count">${c.votos || 0}</span>
+                    </button>
+                    <button type="button" class="reply-share-btn" data-comment-id="${c.id}" title="Compartir este debate">
+                      &#x1F517; Compartir
+                    </button>
+                  </div>
                 </div>
               </div>`;
           }).join("");
+
+          // Eventos de votos y compartir en comentarios
+          this.threadRepliesList.querySelectorAll(".reply-vote-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const cid = btn.dataset.commentId;
+              const countSpan = btn.querySelector(".reply-vote-count");
+              this.toggleVote("comentario", cid, btn, countSpan);
+            });
+          });
+
+          this.threadRepliesList.querySelectorAll(".reply-share-btn").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const shareUrl = `${window.location.origin}${window.location.pathname}?hilo=${this.activeThreadId}`;
+              if (navigator.share) {
+                navigator.share({ title: document.title, url: shareUrl }).catch(() => {});
+              } else {
+                navigator.clipboard.writeText(shareUrl);
+                this.showToast("\uD83D\uDD17 Enlace del debate copiado");
+              }
+            });
+          });
 
           if (this.adminToken) {
             this.threadRepliesList.querySelectorAll(".btn-admin-del-comment").forEach(btn => {
