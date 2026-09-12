@@ -196,6 +196,8 @@ if ($action === "hilos") {
         $params[] = $like;
     }
 
+    $viewerGoogleId = trim($_GET["googleId"] ?? "");
+
     if ($sort === "recientes") {
         $sql .= " ORDER BY h.fijado DESC, h.creado_en DESC LIMIT $limit OFFSET $offset";
     } else {
@@ -204,7 +206,18 @@ if ($action === "hilos") {
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
-    $hilos = $stmt->fetchAll();
+    $hilosRaw = $stmt->fetchAll();
+
+    $hilos = array_map(function($h) use ($pdo, $viewerGoogleId) {
+        if ($viewerGoogleId) {
+            $chk = $pdo->prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?");
+            $chk->execute([$h["id"], $viewerGoogleId]);
+            $h["user_voted"] = $chk->fetchColumn() ? 1 : 0;
+        } else {
+            $h["user_voted"] = 0;
+        }
+        return $h;
+    }, $hilosRaw);
 
     echo json_encode(["status" => "ok", "hilos" => $hilos]);
     exit;
@@ -388,8 +401,8 @@ if ($action === "comentar" && $method === "POST") {
 // -------------------------------------------------------------
 if ($action === "votar" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
-    $tipo = $body["tipo"] === "comentario" ? "comentario" : "hilo";
-    $itemId = (int)($body["itemId"] ?? 0);
+    $tipo = ($body["tipo"] ?? "") === "comentario" ? "comentario" : "hilo";
+    $itemId = (int)($body["itemId"] ?? $body["id"] ?? 0);
     $googleId = trim($body["googleId"] ?? "");
 
     if ($itemId <= 0 || empty($googleId)) {
@@ -428,8 +441,8 @@ if ($action === "votar" && $method === "POST") {
 // -------------------------------------------------------------
 if ($action === "reportar" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
-    $tipo = $body["tipo"] === "comentario" ? "comentario" : "hilo";
-    $itemId = (int)($body["itemId"] ?? 0);
+    $tipo = ($body["tipo"] ?? "") === "comentario" ? "comentario" : "hilo";
+    $itemId = (int)($body["itemId"] ?? $body["id"] ?? 0);
 
     if ($itemId <= 0) {
         http_response_code(400);

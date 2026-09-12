@@ -674,6 +674,7 @@ const server = http.createServer((req, res) => {
         const limit = Math.min(50, Math.max(1, parseInt(reqUrl.searchParams.get("limit") || "10", 10)));
         const offset = Math.max(0, parseInt(reqUrl.searchParams.get("offset") || "0", 10));
         const q = (reqUrl.searchParams.get("q") || "").trim();
+        const viewerGoogleId = reqUrl.searchParams.get("googleId") || "";
 
         let sql = "SELECT * FROM hilos WHERE oculto = 0";
         const params = [];
@@ -696,7 +697,17 @@ const server = http.createServer((req, res) => {
           sql += ` ORDER BY fijado DESC, votos DESC, creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
         }
 
-        const hilos = db.prepare(sql).all(...params);
+        const hilosRaw = db.prepare(sql).all(...params);
+        const hilos = hilosRaw.map(h => {
+          if (viewerGoogleId) {
+            const v = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?").get(h.id, viewerGoogleId);
+            h.user_voted = v ? 1 : 0;
+          } else {
+            h.user_voted = 0;
+          }
+          return h;
+        });
+
         res.writeHead(200);
         res.end(JSON.stringify({ status: "ok", hilos }));
         return;
@@ -854,7 +865,7 @@ const server = http.createServer((req, res) => {
 
           if (action === "votar") {
             const tipo = body.tipo === "comentario" ? "comentario" : "hilo";
-            const itemId = parseInt(body.itemId || 0, 10);
+            const itemId = parseInt(body.itemId || body.id || 0, 10);
             const googleId = String(body.googleId || "").trim();
 
             if (itemId <= 0 || !googleId) {
@@ -885,7 +896,7 @@ const server = http.createServer((req, res) => {
 
           if (action === "reportar") {
             const tipo = body.tipo === "comentario" ? "comentario" : "hilo";
-            const itemId = parseInt(body.itemId || 0, 10);
+            const itemId = parseInt(body.itemId || body.id || 0, 10);
             if (itemId <= 0) {
               res.writeHead(400);
               res.end(JSON.stringify({ status: "error", message: "Item inválido" }));

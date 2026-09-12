@@ -392,11 +392,33 @@ class ForoApp {
     if (this.btnCloseThread) {
       this.btnCloseThread.addEventListener("click", () => this.closeThreadModal());
     }
+    const btnCloseThreadX = document.getElementById("btn-close-thread-x");
+    if (btnCloseThreadX) {
+      btnCloseThreadX.addEventListener("click", () => this.closeThreadModal());
+    }
     if (this.modalThread) {
       this.modalThread.addEventListener("click", (e) => {
         if (e.target === this.modalThread) this.closeThreadModal();
       });
     }
+
+    // Cerrar modales con tecla Escape
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (this.modalThread && this.modalThread.classList.contains("active")) {
+          this.closeThreadModal();
+        }
+        if (this.modalTopic && this.modalTopic.classList.contains("active")) {
+          this.modalTopic.classList.remove("active");
+        }
+        if (this.modalGoogleAuth && this.modalGoogleAuth.classList.contains("active")) {
+          this.modalGoogleAuth.classList.remove("active");
+        }
+        if (this.modalAdminLogin && this.modalAdminLogin.classList.contains("active")) {
+          this.modalAdminLogin.classList.remove("active");
+        }
+      }
+    });
     if (this.formReply) {
       this.formReply.addEventListener("submit", (e) => this.handleSubmitReply(e));
     }
@@ -592,7 +614,8 @@ class ForoApp {
     try {
       const offset = this.page * this.pageSize;
       const q = encodeURIComponent(this.searchQuery);
-      const url = `/api/foro?action=hilos&canal=${encodeURIComponent(this.activeCanal)}&sort=${this.activeSort}&q=${q}&limit=${this.pageSize}&offset=${offset}`;
+      const googleIdParam = this.currentUser ? `&googleId=${encodeURIComponent(this.currentUser.googleId)}` : "";
+      const url = `/api/foro?action=hilos&canal=${encodeURIComponent(this.activeCanal)}&sort=${this.activeSort}&q=${q}&limit=${this.pageSize}&offset=${offset}${googleIdParam}`;
 
       const res = await fetch(url);
       const json = await res.json();
@@ -649,8 +672,10 @@ class ForoApp {
 
     threads.forEach(t => {
       const col = this.getColegio(t.colegio_id);
-      const isVoted = this.userVotes.has(t.id);
+      const isVoted = (t.user_voted === 1) || this.userVotes.has(t.id) || this.userVotes.has(String(t.id)) || this.userVotes.has(`hilo_${t.id}`);
       const dateText = timeAgo(t.creado_en);
+      const votosCount = (t.votos !== undefined && t.votos !== null) ? t.votos : 0;
+      const respuestasCount = t.respuestas_count ?? t.comentarios_count ?? 0;
 
       const card = document.createElement("article");
       card.className = "thread-card";
@@ -685,11 +710,11 @@ class ForoApp {
         <div class="thread-card-footer reddit-action-bar">
           <div class="reddit-vote-capsule ${isVoted ? "voted" : ""}" data-thread-id="${t.id}">
             <button type="button" class="btn-vote-arrow btn-vote-up" data-thread-id="${t.id}" aria-label="Upvote">▲</button>
-            <span class="vote-count">${t.votos || 0}</span>
+            <span class="vote-count">${votosCount}</span>
           </div>
           <button type="button" class="reddit-action-pill btn-open-replies" data-thread-id="${t.id}">
             <span class="pill-icon">💬</span>
-            <span>${t.comentarios_count || 0}</span>
+            <span>${respuestasCount}</span>
           </button>
           <button type="button" class="reddit-action-pill btn-share-thread-card" data-thread-id="${t.id}" data-thread-title="${escapeHtml(t.titulo)}" title="Compartir enlace">
             <span class="pill-icon">↗</span>
@@ -770,7 +795,7 @@ class ForoApp {
       }
       const col = this.getColegio(h.colegio_id);
 
-      if (this.threadModalTitle) this.threadModalTitle.textContent = h.titulo;
+      if (this.threadModalTitle) this.threadModalTitle.textContent = decodeEntities(h.titulo);
       if (this.threadModalChannel) this.threadModalChannel.textContent = h.canal_titulo || h.canal_id;
       if (this.threadModalDate) this.threadModalDate.textContent = timeAgo(h.creado_en);
       if (this.threadOpAvatar) this.threadOpAvatar.src = h.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${h.id}`;
@@ -781,9 +806,11 @@ class ForoApp {
       if (this.threadOpContent) {
         this.threadOpContent.innerHTML = `<p>${escapeHtml(h.contenido).replace(/\n/g, "<br>")}</p>`;
       }
-      if (this.threadModalVotes) this.threadModalVotes.textContent = h.votos || 0;
+      if (this.threadModalVotes) {
+        this.threadModalVotes.textContent = (h.votos !== undefined && h.votos !== null) ? h.votos : 0;
+      }
 
-      const isVoted = h.user_voted === 1 || this.userVotes.has(h.id);
+      const isVoted = (h.user_voted === 1) || this.userVotes.has(h.id) || this.userVotes.has(String(h.id)) || this.userVotes.has(`hilo_${h.id}`);
       if (this.btnVoteThread) {
         this.btnVoteThread.classList.toggle("voted", isVoted);
       }
@@ -814,8 +841,9 @@ class ForoApp {
 
     const html = replies.map(r => {
       const col = this.getColegio(r.colegio_id);
-      const isVoted = r.user_voted === 1;
+      const isVoted = (r.user_voted === 1) || this.userVotes.has(r.id) || this.userVotes.has(String(r.id)) || this.userVotes.has(`comentario_${r.id}`);
       const dateText = timeAgo(r.creado_en);
+      const rVotos = (r.votos !== undefined && r.votos !== null) ? r.votos : 0;
 
       return `
         <div class="reply-card" data-comment-id="${r.id}">
@@ -831,7 +859,7 @@ class ForoApp {
           <div class="reply-actions">
             <button type="button" class="reply-vote-btn ${isVoted ? "voted" : ""}" data-comment-id="${r.id}" aria-label="Votar comentario">
               <span class="vote-icon">▲</span>
-              <span class="vote-count">${r.votos || 0}</span>
+              <span class="vote-count">${rVotos}</span>
             </button>
             <button type="button" class="reply-report-btn" data-comment-id="${r.id}" title="Reportar">
               🚩
@@ -969,20 +997,46 @@ class ForoApp {
     }
   }
 
+  quickLogin() {
+    const schoolSelect = this.authSelectSchool;
+    const schoolId = (schoolSelect && schoolSelect.value) || "janssen";
+    const col = this.getColegio(schoolId);
+
+    let hinchaId = localStorage.getItem("comunidad_hincha_id");
+    if (!hinchaId) {
+      hinchaId = "hincha_" + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem("comunidad_hincha_id", hinchaId);
+    }
+
+    const user = {
+      googleId: hinchaId,
+      nombre: `Hincha de ${col.nombre}`,
+      email: "",
+      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${hinchaId}`,
+      colegioId: schoolId
+    };
+
+    this.saveUser(user);
+  }
+
   async toggleVote(id, isComment = false, commentId = null, btnEl = null) {
     if (!this.currentUser) {
       if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
-      this.showToast("Iniciá sesión para votar");
+      this.showToast("Iniciá sesión o ingresá como hincha para votar");
       return;
     }
 
     const targetType = isComment ? "comentario" : "hilo";
-    const targetId = isComment ? commentId : id;
+    const rawTargetId = isComment ? commentId : (id || this.activeThreadId);
+    const targetId = parseInt(rawTargetId, 10);
 
-    // Optimismo táctil
-    if (btnEl) {
-      btnEl.classList.add("vote-pulse");
-      setTimeout(() => btnEl.classList.remove("vote-pulse"), 350);
+    if (!targetId || isNaN(targetId)) return;
+
+    // Elemento visual que disparó la acción
+    const targetBtn = btnEl || (!isComment ? this.btnVoteThread : null);
+    if (targetBtn) {
+      targetBtn.classList.add("vote-pulse");
+      setTimeout(() => targetBtn.classList.remove("vote-pulse"), 350);
     }
 
     try {
@@ -991,6 +1045,7 @@ class ForoApp {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tipo: targetType,
+          itemId: targetId,
           id: targetId,
           googleId: this.currentUser.googleId
         })
@@ -1001,32 +1056,44 @@ class ForoApp {
         const voted = json.voted !== undefined ? json.voted : (json.data && json.data.voted);
         const total = json.votos !== undefined ? json.votos : (json.data && json.data.votos);
 
-        if (isComment) {
-          if (btnEl) {
-            btnEl.classList.toggle("voted", voted);
-            const countSpan = btnEl.querySelector(".vote-count");
-            if (countSpan && total !== undefined) countSpan.textContent = total;
-          }
+        const key = `${targetType}_${targetId}`;
+        if (voted) {
+          this.userVotes.add(key);
+          this.userVotes.add(targetId);
+          this.userVotes.add(String(targetId));
         } else {
-          if (voted) {
-            this.userVotes.add(targetId);
-          } else {
-            this.userVotes.delete(targetId);
-          }
-          localStorage.setItem("comunidad_voted_threads", JSON.stringify(Array.from(this.userVotes)));
+          this.userVotes.delete(key);
+          this.userVotes.delete(targetId);
+          this.userVotes.delete(String(targetId));
+        }
+        localStorage.setItem("comunidad_voted_threads", JSON.stringify(Array.from(this.userVotes)));
 
-          if (this.btnVoteThread) {
+        if (isComment) {
+          // Comentario: sincronizar todos los botones de este comentario
+          const commentBtns = document.querySelectorAll(`.reply-vote-btn[data-comment-id="${targetId}"]`);
+          commentBtns.forEach(b => {
+            b.classList.toggle("voted", voted);
+            const countSpan = b.querySelector(".vote-count");
+            if (countSpan && total !== undefined) countSpan.textContent = total;
+          });
+        } else {
+          // Hilo: sincronizar modal si está abierto
+          if (this.btnVoteThread && (this.activeThreadId == targetId)) {
             this.btnVoteThread.classList.toggle("voted", voted);
           }
-          if (this.threadModalVotes && total !== undefined) {
+          if (this.threadModalVotes && (this.activeThreadId == targetId) && total !== undefined) {
             this.threadModalVotes.textContent = total;
           }
-          if (btnEl) {
-            btnEl.classList.toggle("voted", voted);
-            const countSpan = btnEl.querySelector(".vote-count");
+          // Y sincronizar tarjetas en el feed
+          const feedCapsules = document.querySelectorAll(`.reddit-vote-capsule[data-thread-id="${targetId}"]`);
+          feedCapsules.forEach(cap => {
+            cap.classList.toggle("voted", voted);
+            const countSpan = cap.querySelector(".vote-count");
             if (countSpan && total !== undefined) countSpan.textContent = total;
-          }
+          });
         }
+
+        this.showToast(voted ? "¡Voto registrado! ▲" : "Voto retirado");
       } else {
         this.showToast(json.message || "No se pudo registrar el voto");
       }
@@ -1037,10 +1104,10 @@ class ForoApp {
   }
 
   shareThread(id, title) {
-    const url = `${window.location.origin}/foro?hilo=${id}`;
+    const url = `${window.location.origin}/foro.html?hilo=${id}`;
     if (navigator.share) {
       navigator.share({
-        title: `${title} | Estudiantina.online`,
+        title: `${decodeEntities(title)} | Estudiantina.online`,
         text: "Sumate al debate en el Foro de la Estudiantina de Posadas:",
         url: url
       }).catch(() => {});
@@ -1058,14 +1125,15 @@ class ForoApp {
     if (!motivo) return;
 
     try {
+      const targetId = parseInt(id, 10);
       const res = await fetch("/api/foro?action=reportar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo, id, motivo })
+        body: JSON.stringify({ tipo, itemId: targetId, id: targetId, motivo })
       });
       const json = await res.json();
       if (json.status === "ok") {
-        this.showToast("Publicación reportada para revisión de moderación. Gracias.");
+        this.showToast("Publicación reportada para revisión de moderación. Gracias 🛡️");
       } else {
         this.showToast(json.message || "No se pudo enviar el reporte");
       }
