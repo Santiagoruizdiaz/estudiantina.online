@@ -16,9 +16,11 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A5%81%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/comunidad.css?v=20260908_4">
-  <link rel="stylesheet" href="css/noticia.css?v=20260908_4">
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <link rel="stylesheet" href="css/comunidad.css?v=20260912_8">
+  <link rel="stylesheet" href="css/noticia.css?v=20260912_8">
 </head>
 <body class="page-noticia">
 
@@ -161,6 +163,7 @@
             </button>
             <button type="button" class="noticia-tab-btn" data-tab="debate" role="tab" aria-selected="false">
               <span>💬</span><span>Comunidad &amp; Debate</span>
+              <span id="noticia-tab-comments-count" class="tab-badge" style="display:none; font-size:0.75rem; background:rgba(14,165,233,0.2); color:#38bdf8; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
             </button>
             <button type="button" class="noticia-tab-btn" data-tab="relacionadas" role="tab" aria-selected="false">
               <span>🔗</span><span>Más Noticias</span>
@@ -180,15 +183,10 @@
             <div id="noticia-tags-list" style="display:flex; gap:0.4rem; flex-wrap:wrap;"></div>
           </div>
 
-          <!-- Banner CTA al Debate -->
-          <div class="noticia-debate-cta">
-            <h3>💬 ¿Qué opinás sobre esta cobertura?</h3>
-            <p>Sumate al foro de la comunidad estudiantil, compartí tu opinión y votá en los debates de los colegios.</p>
-            <a href="comunidad.html#foro" class="btn-cta-foro">
-              <span>Entrar al Foro de la Comunidad</span>
-              <span>→</span>
-            </a>
-          </div>
+          <!-- Módulo Interactivo de Comentarios & Debate Oficial -->
+          <section id="noticia-inline-comments-section" class="noticia-comments-section" aria-label="Comentarios de la noticia">
+            <!-- Inyectado dinámicamente por js/noticia.js -->
+          </section>
         </div>
 
         <!-- Pestaña 2: Galería de Fotos -->
@@ -202,21 +200,11 @@
           </div>
         </div>
 
-        <!-- Pestaña 3: Comunidad & Debate -->
+        <!-- Pestaña 3: Comunidad & Debate Oficial -->
         <div id="noticia-tab-debate" class="noticia-tab-panel" role="tabpanel">
-          <div class="noticia-debate-cta" style="margin-top:0;">
-            <span style="font-size:2.8rem; display:block; margin-bottom:0.5rem;">🥁</span>
-            <h3>Debate Oficial de la Estudiantina</h3>
-            <p>Los comentarios y opiniones sobre esta noticia forman parte del foro en tiempo real de estudiantina.online.</p>
-            <div style="display:flex; justify-content:center; gap:0.8rem; flex-wrap:wrap; margin-top:1.5rem;">
-              <a href="comunidad.html#foro" class="btn-cta-foro">
-                <span>💬 Ir al Foro de Debates</span>
-              </a>
-              <a href="comunidad.html#noticias" class="noticia-back-btn">
-                <span>Ver Más Noticias</span>
-              </a>
-            </div>
-          </div>
+          <section id="noticia-tab-comments-section" class="noticia-comments-section" aria-label="Debate oficial de la comunidad">
+            <!-- Inyectado dinámicamente por js/noticia.js -->
+          </section>
         </div>
 
         <!-- Pestaña 4: Más Noticias -->
@@ -319,7 +307,6 @@
       <div class="footer-bottom-bar">
         <p class="footer-copy">
           &copy; 2026 <strong>estudiantina.online</strong> &mdash; Obra cultural independiente sin fines de lucro. Desarrollado con pasi&oacute;n posade&ntilde;a.
-          <a href="comunidad.html#admin" id="btn-footer-admin-trigger" class="footer-admin-trigger" title="Acceso de Administración">&#x1F510; Acceso Admin</a>
         </p>
         <button type="button" id="btn-footer-back-to-top" class="footer-back-to-top" aria-label="Volver arriba">
           <span>Subir</span>
@@ -329,6 +316,6 @@
     </div>
   </footer>
 
-  <script type="module" src="js/noticia.js?v=20260908_4"></script>
+  <script type="module" src="js/noticia.js?v=20260912_8"></script>
 </body>
 </html>

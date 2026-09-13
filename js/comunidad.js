@@ -53,6 +53,7 @@ class ComunidadApp {
 
     // Dynamic sections & site elements
     this.cronogramaGrid        = document.getElementById("cronograma-grid");
+    this.scheduleCompactList   = document.getElementById("schedule-compact-list");
     this.faqList               = document.getElementById("faq-list");
     this.breakingTicker        = document.getElementById("breaking-ticker");
     this.tickerTrack           = document.getElementById("ticker-track");
@@ -169,15 +170,17 @@ class ComunidadApp {
     this.btnAdminManageCronograma = document.getElementById("btn-admin-manage-cronograma");
     this.btnAdminManageGuia     = document.getElementById("btn-admin-manage-guia");
 
-    // Modal Login Admin
+    // Modal Login Admin (Acceso Privado por Token)
     this.modalAdminLogin        = document.getElementById("modal-admin-login");
     this.btnCloseAdminLogin     = document.getElementById("btn-close-admin-login");
     this.formAdminLogin         = document.getElementById("form-admin-login");
+    this.adminLoginToken        = document.getElementById("admin-login-token");
     this.adminLoginUser         = document.getElementById("admin-login-user");
     this.adminLoginPassword     = document.getElementById("admin-login-password");
     this.btnToggleAdminPassword = document.getElementById("btn-toggle-admin-password");
     this.adminLoginError        = document.getElementById("admin-login-error");
     this.btnSubmitAdminLogin    = document.getElementById("btn-submit-admin-login");
+    this.footerCopyText         = document.getElementById("footer-copy-text");
 
     // Modal Editor Noticia
     this.modalAdminEditorNoticia = document.getElementById("modal-admin-editor-noticia");
@@ -190,6 +193,7 @@ class ComunidadApp {
     this.newsInputContenido     = document.getElementById("news-input-contenido");
     this.newsInputTags          = document.getElementById("news-input-tags");
     this.newsInputAutor         = document.getElementById("news-input-autor");
+    this.newsInputFijada        = document.getElementById("news-input-fijada");
     this.newsInputImage         = document.getElementById("news-input-image");
     this.newsInputFile          = document.getElementById("news-input-file");
     this.newsImagePreviewWrap   = document.getElementById("news-image-preview-wrap");
@@ -236,14 +240,24 @@ class ComunidadApp {
     this.siteSettingInstagram    = document.getElementById("site-setting-instagram");
     this.siteSettingEmail        = document.getElementById("site-setting-email");
 
-    this.formAdminChangePwd     = document.getElementById("form-admin-change-pwd");
-    this.pwdActual              = document.getElementById("pwd-actual");
-    this.pwdNueva               = document.getElementById("pwd-nueva");
-    this.pwdConfirmar           = document.getElementById("pwd-confirmar");
-    this.btnSubmitChangePwd     = document.getElementById("btn-submit-change-pwd");
+    this.formAdminChangePwd      = document.getElementById("form-admin-change-pwd");
+    this.pwdActual               = document.getElementById("pwd-actual");
+    this.pwdNueva                = document.getElementById("pwd-nueva");
+    this.pwdConfirmar            = document.getElementById("pwd-confirmar");
+    this.btnSubmitChangePwd      = document.getElementById("btn-submit-change-pwd");
+
+    // Tab Seguridad & Token Maestro
+    this.adminActiveTokenDisplay  = document.getElementById("admin-active-token-display");
+    this.btnToggleViewActiveToken = document.getElementById("btn-toggle-view-active-token");
+    this.btnCopyActiveToken       = document.getElementById("btn-copy-active-token");
+    this.btnCopyDirectAdminLink   = document.getElementById("btn-copy-direct-admin-link");
+
+    // Estado reactivo en memoria para editores
+    this._adminFaqs = [];
+    this._adminCronograma = [];
 
     // Botón borrar hilo en modal de debate
-    this.btnAdminDelMainThread  = document.getElementById("btn-admin-del-main-thread");
+    this.btnAdminDelMainThread   = document.getElementById("btn-admin-del-main-thread");
 
     // Modal Confirmación Administrativa
     this.modalAdminConfirm      = document.getElementById("modal-admin-confirm");
@@ -292,7 +306,7 @@ class ComunidadApp {
   }
 
   populateSchoolSelects() {
-    const optionsHtml = (COLEGIOS || []).map(c => 
+    const optionsHtml = (COLEGIOS || []).map(c =>
       `<option value="${c.id}">${c.escudo || "🥁"} ${c.nombre}</option>`
     ).join("");
 
@@ -782,9 +796,12 @@ class ComunidadApp {
     // -------------------------------------------------------------
     // EVENTOS DEL MODO ADMINISTRADOR
     // -------------------------------------------------------------
-    // Atajo de teclado: Ctrl + Shift + A (o Cmd + Shift + A)
+    // Atajo de teclado oculto: Ctrl + Shift + A (o Cmd + Shift + A o Alt + Shift + A)
     document.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "A" || e.key === "a")) {
+      const isAKey = e.key === "A" || e.key === "a" || e.code === "KeyA";
+      const isShiftModifier = (e.ctrlKey || e.metaKey || e.altKey) && e.shiftKey;
+      const isAltOnly = e.altKey && !e.ctrlKey && !e.metaKey;
+      if (isAKey && (isShiftModifier || isAltOnly)) {
         e.preventDefault();
         if (this.adminToken) {
           this.openAdminPanel();
@@ -794,7 +811,26 @@ class ComunidadApp {
       }
     });
 
-    // Disparador discreto en el pie de página
+    // Easter egg discreto: 5 clics rápidos en el pie de página
+    if (this.footerCopyText) {
+      let copyClicks = 0;
+      let copyClickTimer = null;
+      this.footerCopyText.addEventListener("click", () => {
+        copyClicks++;
+        clearTimeout(copyClickTimer);
+        copyClickTimer = setTimeout(() => { copyClicks = 0; }, 2200);
+        if (copyClicks >= 5) {
+          copyClicks = 0;
+          if (this.adminToken) {
+            this.openAdminPanel();
+          } else {
+            this.openAdminLogin();
+          }
+        }
+      });
+    }
+
+    // Disparador discreto en el pie de página (si existiera)
     if (this.btnFooterAdminTrigger) {
       this.btnFooterAdminTrigger.addEventListener("click", (e) => {
         e.preventDefault();
@@ -806,11 +842,13 @@ class ComunidadApp {
       });
     }
 
-    // Modal Login Admin: ver/ocultar contraseña
-    if (this.btnToggleAdminPassword && this.adminLoginPassword) {
+    // Modal Login Admin: ver/ocultar token secreto
+    if (this.btnToggleAdminPassword) {
       this.btnToggleAdminPassword.addEventListener("click", () => {
-        const isPwd = this.adminLoginPassword.type === "password";
-        this.adminLoginPassword.type = isPwd ? "text" : "password";
+        const inputEl = this.adminLoginToken || this.adminLoginPassword;
+        if (!inputEl) return;
+        const isPwd = inputEl.type === "password";
+        inputEl.type = isPwd ? "text" : "password";
         this.btnToggleAdminPassword.textContent = isPwd ? "🙈" : "👁️";
       });
     }
@@ -839,45 +877,27 @@ class ComunidadApp {
       this.btnAdminComposeNewsInline.addEventListener("click", () => this.openNewsEditor());
     }
     if (this.btnAdminOpenPanel) {
-      this.btnAdminOpenPanel.addEventListener("click", () => this.openAdminPanel());
+      this.btnAdminOpenPanel.addEventListener("click", () => this.openAdminPanel("reports"));
     }
     if (this.btnAdminOpenThreads) {
-      this.btnAdminOpenThreads.addEventListener("click", () => {
-        this.openAdminPanel();
-        this.switchAdminTab("threads");
-      });
+      this.btnAdminOpenThreads.addEventListener("click", () => this.openAdminPanel("threads"));
     }
     if (this.btnAdminOpenCronograma) {
-      this.btnAdminOpenCronograma.addEventListener("click", () => {
-        this.openAdminPanel();
-        this.switchAdminTab("cronograma");
-      });
+      this.btnAdminOpenCronograma.addEventListener("click", () => this.openAdminPanel("cronograma"));
     }
     if (this.btnAdminOpenGuia) {
-      this.btnAdminOpenGuia.addEventListener("click", () => {
-        this.openAdminPanel();
-        this.switchAdminTab("guia");
-      });
+      this.btnAdminOpenGuia.addEventListener("click", () => this.openAdminPanel("guia"));
     }
     if (this.btnAdminOpenSettings) {
-      this.btnAdminOpenSettings.addEventListener("click", () => {
-        this.openAdminPanel();
-        this.switchAdminTab("site");
-      });
+      this.btnAdminOpenSettings.addEventListener("click", () => this.openAdminPanel("site"));
     }
 
     // Botones de edición en cabeceras de secciones
     if (this.btnAdminManageCronograma) {
-      this.btnAdminManageCronograma.addEventListener("click", () => {
-        this.openAdminPanel();
-        this.switchAdminTab("cronograma");
-      });
+      this.btnAdminManageCronograma.addEventListener("click", () => this.openAdminPanel("cronograma"));
     }
     if (this.btnAdminManageGuia) {
-      this.btnAdminManageGuia.addEventListener("click", () => {
-        this.openAdminPanel();
-        this.switchAdminTab("guia");
-      });
+      this.btnAdminManageGuia.addEventListener("click", () => this.openAdminPanel("guia"));
     }
 
     // Modal Editor de Noticias: cerrar y enviar
@@ -920,6 +940,32 @@ class ComunidadApp {
       this.formAdminChangePwd.addEventListener("submit", (e) => this.submitChangePassword(e));
     }
 
+    // Gestión de Token Maestro
+    if (this.btnToggleViewActiveToken) {
+      this.btnToggleViewActiveToken.addEventListener("click", () => {
+        if (!this.adminActiveTokenDisplay) return;
+        const isPwd = this.adminActiveTokenDisplay.type === "password";
+        this.adminActiveTokenDisplay.type = isPwd ? "text" : "password";
+        this.btnToggleViewActiveToken.textContent = isPwd ? "🙈 Ocultar" : "👁️ Ver";
+      });
+    }
+    if (this.btnCopyActiveToken) {
+      this.btnCopyActiveToken.addEventListener("click", () => {
+        if (!this.adminToken) return;
+        navigator.clipboard.writeText(this.adminToken);
+        this.showToast("📋 Token maestro copiado al portapapeles.");
+      });
+    }
+    if (this.btnCopyDirectAdminLink) {
+      this.btnCopyDirectAdminLink.addEventListener("click", () => {
+        if (!this.adminToken) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set("admin_token", this.adminToken);
+        navigator.clipboard.writeText(url.toString());
+        this.showToast("🔗 Enlace directo copiado al portapapeles.");
+      });
+    }
+
     // Búsqueda en vivo de debates en el panel
     if (this.adminThreadsSearchInput) {
       this.adminThreadsSearchInput.addEventListener("input", () => {
@@ -929,7 +975,7 @@ class ComunidadApp {
 
     // Botones de tab Cronograma
     if (this.btnAdminAddPhase) {
-      this.btnAdminAddPhase.addEventListener("click", () => this.addCronogramaPhaseUI());
+      this.btnAdminAddPhase.addEventListener("click", () => this.addAdminCronogramaPhase());
     }
     if (this.btnSaveAdminCronograma) {
       this.btnSaveAdminCronograma.addEventListener("click", () => this.saveAdminCronograma());
@@ -937,7 +983,7 @@ class ComunidadApp {
 
     // Botones de tab Guía & FAQ
     if (this.btnAdminAddFaq) {
-      this.btnAdminAddFaq.addEventListener("click", () => this.addGuiaFaqUI());
+      this.btnAdminAddFaq.addEventListener("click", () => this.addAdminFaq());
     }
     if (this.btnSaveAdminGuia) {
       this.btnSaveAdminGuia.addEventListener("click", () => this.saveAdminGuia());
@@ -1110,30 +1156,77 @@ class ComunidadApp {
   }
 
   renderCronograma() {
-    if (!this.cronogramaGrid || !this.data) return;
-    const items = Array.isArray(this.data.cronograma) && this.data.cronograma.length > 0 ? this.data.cronograma : null;
-    if (!items) return;
+    const items = (this.data && Array.isArray(this.data.cronograma) && this.data.cronograma.length > 0) ? this.data.cronograma : [];
 
-    this.cronogramaGrid.innerHTML = items.map((item, idx) => {
-      const num = String(idx + 1).padStart(2, "0");
-      const icon = item.icono || "🥁";
-      const isFeatured = idx === 0 ? "featured" : "";
-      const statusLower = (item.estado || "").toLowerCase();
-      const statusClass = statusLower.includes("desarrollo") || statusLower.includes("curso") ? "status-live" : (statusLower.includes("próxim") || statusLower.includes("proxim") ? "status-upcoming" : "");
+    // 1. Renderizar la cuadrícula principal de Cronograma
+    if (this.cronogramaGrid) {
+      if (items.length === 0) {
+        this.cronogramaGrid.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding:2rem 0;">No hay fechas cargadas en el cronograma.</p>`;
+      } else {
+        this.cronogramaGrid.innerHTML = items.map((item, idx) => {
+          const num = String(idx + 1).padStart(2, "0");
+          const icon = item.icono || "🥁";
+          const isFeatured = idx === 0 ? "featured" : "";
+          const statusLower = (item.estado || "").toLowerCase();
+          const statusClass = statusLower.includes("desarrollo") || statusLower.includes("curso") || statusLower.includes("hoy") || statusLower.includes("vivo")
+            ? "status-live"
+            : (statusLower.includes("próxim") || statusLower.includes("proxim") ? "status-upcoming" : "");
+
+          return `
+            <article class="cronograma-card ${isFeatured}">
+              <div class="cronograma-card-number">${num}</div>
+              <div class="cronograma-card-icon">${icon}</div>
+              <h3>${item.fase || "Fase Oficial"}</h3>
+              <div class="cronograma-meta">
+                ${item.fecha ? `<span>📅 ${item.fecha}</span>` : ""}
+                ${item.lugar ? `<span>📍 ${item.lugar}</span>` : ""}
+                ${item.horario ? `<span>⏰ ${item.horario}</span>` : ""}
+              </div>
+              ${item.descripcion ? `<p>${item.descripcion}</p>` : (item.fase ? `<p>Encuentro oficial en el marco de la Estudiantina de Posadas 2026.</p>` : "")}
+              ${item.estado ? `<div class="cronograma-card-status ${statusClass}">${item.estado}</div>` : ""}
+            </article>
+          `;
+        }).join("");
+      }
+    }
+
+    // 2. Renderizar sidebar de "Próximas Fechas" sincronizado
+    this.renderSidebarProximasFechas(items);
+  }
+
+  renderSidebarProximasFechas(items) {
+    const listEl = this.scheduleCompactList || document.getElementById("schedule-compact-list") || document.querySelector(".schedule-compact-list");
+    if (!listEl) return;
+
+    if (!items || !items.length) {
+      listEl.innerHTML = `<p style="color:var(--text-muted); font-size:0.8rem; padding:0.75rem 1rem; margin:0;">No hay próximas fechas programadas.</p>`;
+      return;
+    }
+
+    listEl.innerHTML = items.map(item => {
+      const icon = item.icono || "📅";
+      const fase = item.fase || "Evento";
+      const fechaLugar = [item.fecha, item.lugar].filter(Boolean).join(" &mdash; ") || "Fecha oficial";
+      const estado = item.estado || "";
+      const statusLower = estado.toLowerCase();
+      let badgeClass = "";
+      if (statusLower.includes("curso") || statusLower.includes("desarrollo") || statusLower.includes("hoy") || statusLower.includes("vivo") || statusLower.includes("live")) {
+        badgeClass = "live";
+      } else if (statusLower.includes("próxim") || statusLower.includes("proxim") || statusLower.includes("upcoming")) {
+        badgeClass = "upcoming";
+      }
+
+      const badgeHtml = estado ? `<span class="schedule-compact-badge ${badgeClass}">${estado}</span>` : "";
 
       return `
-        <article class="cronograma-card ${isFeatured}">
-          <div class="cronograma-card-number">${num}</div>
-          <div class="cronograma-card-icon">${icon}</div>
-          <h3>${item.fase || "Fase Oficial"}</h3>
-          <div class="cronograma-meta">
-            ${item.fecha ? `<span>📅 ${item.fecha}</span>` : ""}
-            ${item.lugar ? `<span>📍 ${item.lugar}</span>` : ""}
-            ${item.horario ? `<span>⏰ ${item.horario}</span>` : ""}
+        <a href="#cronograma" class="schedule-compact-item" title="Ver ${fase} en el Cronograma Oficial">
+          <div class="schedule-compact-icon">${icon}</div>
+          <div>
+            <strong>${fase}</strong>
+            <span>${fechaLugar}</span>
           </div>
-          ${item.descripcion ? `<p>${item.descripcion}</p>` : (item.fase ? `<p>Encuentro oficial en el marco de la Estudiantina de Posadas 2026.</p>` : "")}
-          ${item.estado ? `<div class="cronograma-card-status ${statusClass}">${item.estado}</div>` : ""}
-        </article>
+          ${badgeHtml}
+        </a>
       `;
     }).join("");
   }
@@ -1215,7 +1308,14 @@ class ComunidadApp {
       return;
     }
 
-    const [heroNews, ...restNews] = filtered;
+    // Si hay alguna noticia fijada como principal, ubicarla al frente como portada hero
+    const sorted = [...filtered].sort((a, b) => {
+      const aF = a.fijada ? 1 : 0;
+      const bF = b.fijada ? 1 : 0;
+      return bF - aF;
+    });
+
+    const [heroNews, ...restNews] = sorted;
 
     if (this.heroArticle) {
       this.heroArticle.innerHTML = `
@@ -1232,6 +1332,7 @@ class ComunidadApp {
             </div>
           ` : ""}
           <div class="hero-badge-row">
+            ${heroNews.fijada ? `<span style="background:rgba(255,215,0,0.18); border:1px solid var(--border-gold); color:var(--gold-bright); font-size:0.7rem; font-weight:800; padding:3px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;">📌 Portada Principal</span>` : ""}
             ${heroNews.badge ? `<span class="hero-breaking-badge">${heroNews.badge}</span>` : ""}
             <span class="hero-cat-badge">${heroNews.categoria}</span>
           </div>
@@ -2095,6 +2196,24 @@ class ComunidadApp {
   // MÉTODOS DEL MODO ADMINISTRADOR (AUTENTICACIÓN, GESTIÓN & MODERACIÓN)
   // -------------------------------------------------------------
   async initAdmin() {
+    // 1. Detectar token pasado por URL para acceso sigiloso (?token=..., ?admin_token=..., ?admin=...)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlToken = (params.get("token") || params.get("admin_token") || params.get("admin") || "").trim();
+
+      if (urlToken) {
+        this.adminToken = urlToken;
+        // Limpiar inmediatamente el token de la barra de direcciones para no dejar rastro visible
+        params.delete("token");
+        params.delete("admin_token");
+        params.delete("admin");
+        const newSearch = params.toString() ? `?${params.toString()}` : "";
+        window.history.replaceState({}, document.title, window.location.pathname + newSearch + window.location.hash);
+      }
+    } catch (e) {
+      console.warn("Error analizando parámetros de URL para admin token:", e);
+    }
+
     if (!this.adminToken) return;
 
     try {
@@ -2103,21 +2222,39 @@ class ComunidadApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.activateAdminMode(data.admin?.usuario || this.adminUser || "admin");
+        const username = data.admin?.usuario || this.adminUser || "admin";
+        localStorage.setItem("comunidad_admin_token", this.adminToken);
+        localStorage.setItem("comunidad_admin_user", username);
+        this.activateAdminMode(username);
+        this.showToast(`¡Modo Administrador activado con éxito (${username})! 🔐`);
       } else {
         this.adminLogout(false);
       }
     } catch (err) {
       console.warn("No se pudo verificar token admin con el servidor:", err);
-      // Mantener modo admin offline si ya tenía token
+      // Mantener modo admin offline si ya tenía token guardado
       this.activateAdminMode(this.adminUser || "admin");
+    }
+  }
+
+  updateAdminBarOffset() {
+    if (this.adminBar && document.body.classList.contains("has-admin-bar")) {
+      const height = this.adminBar.offsetHeight;
+      if (height > 0) {
+        document.body.style.paddingTop = `${height}px`;
+      }
+    } else {
+      document.body.style.paddingTop = "";
     }
   }
 
   activateAdminMode(username) {
     this.adminUser = username;
     document.body.classList.add("has-admin-bar");
-    if (this.adminBar) this.adminBar.style.display = "flex";
+    if (this.adminBar) {
+      this.adminBar.style.display = "flex";
+      setTimeout(() => this.updateAdminBarOffset(), 50);
+    }
     if (this.adminNewsToolbar) this.adminNewsToolbar.style.display = "flex";
     if (this.adminBarUser) this.adminBarUser.textContent = `👤 Administrador (${username})`;
 
@@ -2127,6 +2264,8 @@ class ComunidadApp {
     this.checkAdminReportsBadge();
     this.renderNews();
     this.loadThreads();
+
+    window.addEventListener("resize", () => this.updateAdminBarOffset());
   }
 
   adminLogout(showNotice = true) {
@@ -2136,6 +2275,7 @@ class ComunidadApp {
     localStorage.removeItem("comunidad_admin_user");
 
     document.body.classList.remove("has-admin-bar");
+    document.body.style.paddingTop = "";
     if (this.adminBar) this.adminBar.style.display = "none";
     if (this.adminNewsToolbar) this.adminNewsToolbar.style.display = "none";
     if (this.btnAdminManageCronograma) this.btnAdminManageCronograma.style.display = "none";
@@ -2155,7 +2295,8 @@ class ComunidadApp {
     if (this.modalAdminLogin) {
       if (this.adminLoginError) this.adminLoginError.style.display = "none";
       this.modalAdminLogin.classList.add("active");
-      if (this.adminLoginUser) setTimeout(() => this.adminLoginUser.focus(), 100);
+      const inp = this.adminLoginToken || this.adminLoginUser;
+      if (inp) setTimeout(() => inp.focus(), 100);
     }
   }
 
@@ -2165,41 +2306,56 @@ class ComunidadApp {
 
   async submitAdminLogin(e) {
     e.preventDefault();
+    const token = (this.adminLoginToken && this.adminLoginToken.value || "").trim();
     const user = (this.adminLoginUser && this.adminLoginUser.value || "").trim();
     const pwd = (this.adminLoginPassword && this.adminLoginPassword.value || "").trim();
-    if (!user || !pwd) return;
+
+    if (!token && (!user || !pwd)) return;
 
     if (this.btnSubmitAdminLogin) {
       this.btnSubmitAdminLogin.disabled = true;
-      this.btnSubmitAdminLogin.textContent = "Verificando...";
+      this.btnSubmitAdminLogin.textContent = "Verificando token...";
     }
     if (this.adminLoginError) this.adminLoginError.style.display = "none";
 
     try {
-      const res = await fetch("/api/admin?action=login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario: user, password: pwd })
-      });
-      const data = await res.json();
+      let res, data;
+      if (token) {
+        // Validación directa de Token Maestro
+        res = await fetch("/api/admin?action=login_token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        data = await res.json();
+      } else {
+        // Fallback usuario/contraseña
+        res = await fetch("/api/admin?action=login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario: user, password: pwd })
+        });
+        data = await res.json();
+      }
+
       if (data.status === "ok" && data.token) {
         this.adminToken = data.token;
-        this.adminUser = data.usuario;
+        this.adminUser = data.usuario || "admin";
         localStorage.setItem("comunidad_admin_token", data.token);
-        localStorage.setItem("comunidad_admin_user", data.usuario);
+        localStorage.setItem("comunidad_admin_user", this.adminUser);
 
         this.closeAdminLogin();
         if (this.formAdminLogin) this.formAdminLogin.reset();
-        this.activateAdminMode(data.usuario);
-        this.showToast(`¡Bienvenido al Modo Administrador (${data.usuario})! 🔐`);
+        this.activateAdminMode(this.adminUser);
+        this.showToast(`¡Acceso Maestro Concedido (${this.adminUser})! 🔐`);
       } else {
         if (this.adminLoginError) {
-          this.adminLoginError.textContent = data.message || "Usuario o contraseña incorrectos.";
+          this.adminLoginError.textContent = data.message || "Token o credenciales no válidas.";
           this.adminLoginError.style.display = "block";
         }
       }
     } catch (err) {
-      console.error("Error en login admin:", err);
+      console.error("Error en validación de acceso admin:", err);
       if (this.adminLoginError) {
         this.adminLoginError.textContent = "Error de conexión con el servidor.";
         this.adminLoginError.style.display = "block";
@@ -2207,7 +2363,7 @@ class ComunidadApp {
     } finally {
       if (this.btnSubmitAdminLogin) {
         this.btnSubmitAdminLogin.disabled = false;
-        this.btnSubmitAdminLogin.innerHTML = '<span>Ingresar al Modo Administrador</span> <span>➔</span>';
+        this.btnSubmitAdminLogin.innerHTML = '<span>Validar Token y Entrar</span> <span>➔</span>';
       }
     }
   }
@@ -2274,6 +2430,7 @@ class ComunidadApp {
     }
     if (this.formAdminNoticia) this.formAdminNoticia.reset();
     this.updateNewsImagePreview("");
+    if (this.newsInputFijada) this.newsInputFijada.checked = false;
 
     // Reset block editor with one empty text block
     this._editorBlocks = [];
@@ -2323,6 +2480,7 @@ class ComunidadApp {
     if (this.newsInputResumen) this.newsInputResumen.value = news.resumen || "";
     if (this.newsInputTags) this.newsInputTags.value = Array.isArray(news.tags) ? news.tags.join(", ") : (news.tags || "");
     if (this.newsInputAutor) this.newsInputAutor.value = news.autor || "Redacción Oficial";
+    if (this.newsInputFijada) this.newsInputFijada.checked = !!news.fijada;
 
     const imgUrl = news.imagen || news.imagenUrl || "";
     if (this.newsInputImage) this.newsInputImage.value = imgUrl;
@@ -2438,7 +2596,7 @@ class ComunidadApp {
         content = `
           <div class="editor-block-image-wrap">
             <img class="editor-block-img-preview ${hasImg}" src="${block.value || ""}" alt="Preview">
-            <input type="url" class="editor-block-url-input" placeholder="https://url-de-la-imagen.jpg" value="${block.value || ""}"> 
+            <input type="url" class="editor-block-url-input" placeholder="https://url-de-la-imagen.jpg" value="${block.value || ""}">
             <input type="text" class="editor-block-caption-input" placeholder="Descripción de la imagen (opcional)" value="${block.caption || ""}">
           </div>`;
       } else if (block.type === "quote") {
@@ -2498,14 +2656,24 @@ class ComunidadApp {
     const title = (this.newsInputTitle && this.newsInputTitle.value) || "(Sin título)";
     const lead = (this.newsInputResumen && this.newsInputResumen.value) || "";
     const imgUrl = (this.newsInputImage && this.newsInputImage.value) || "";
+    const badge = (this.newsInputBadge && this.newsInputBadge.value) || "NOTICIA";
+    const rubro = (this.newsInputRubro && this.newsInputRubro.options[this.newsInputRubro.selectedIndex]?.value) || "Noches de Calle";
+    const fijada = this.newsInputFijada ? this.newsInputFijada.checked : false;
 
-    let html = `<h2>${title}</h2>`;
-    if (lead) html += `<p class="preview-lead">${lead}</p>`;
-    if (imgUrl) html += `<img src="${imgUrl}" alt="Portada">`;
+    let html = `
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        <span class="news-category-badge" style="background:var(--red-hot); color:#fff; padding:3px 8px; border-radius:4px; font-size:0.7rem; font-weight:800;">${badge}</span>
+        <span class="admin-table-cat">${rubro}</span>
+        ${fijada ? '<span style="background:rgba(255,215,0,0.15); color:var(--gold-bright); border:1px solid var(--border-gold); padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700;">📌 Portada Principal</span>' : ''}
+      </div>
+      <h2>${title}</h2>
+    `;
+    if (lead) html += `<p class="preview-lead" style="font-size:1.05rem; color:var(--text-light); line-height:1.5; margin-bottom:1rem;">${lead}</p>`;
+    if (imgUrl) html += `<div style="margin-bottom:1.5rem; border-radius:8px; overflow:hidden;"><img src="${imgUrl}" alt="Portada" style="width:100%; max-height:400px; object-fit:cover;"></div>`;
     html += this._editorBlocks.map(b => {
-      if (b.type === "text" && b.value) return `<p>${b.value.replace(/\n/g, '<br>')}</p>`;
-      if (b.type === "image" && b.value) return `<img src="${b.value}" alt="${b.caption || ''}">` + (b.caption ? `<em style="font-size:0.75rem;color:var(--text-muted)">${b.caption}</em>` : "");
-      if (b.type === "quote" && b.value) return `<blockquote>${b.value}</blockquote>`;
+      if (b.type === "text" && b.value) return `<p style="margin-bottom:1rem; line-height:1.6;">${b.value.replace(/\n/g, '<br>')}</p>`;
+      if (b.type === "image" && b.value) return `<div style="margin:1rem 0;"><img src="${b.value}" alt="${b.caption || ''}" style="width:100%; border-radius:6px;">${b.caption ? `<div style="font-size:0.75rem;color:var(--text-muted); margin-top:4px;">${b.caption}</div>` : ""}</div>`;
+      if (b.type === "quote" && b.value) return `<blockquote style="border-left:3px solid var(--gold-primary); padding:10px 16px; margin:1.2rem 0; font-style:italic; background:rgba(255,255,255,0.03);">${b.value}</blockquote>`;
       return "";
     }).join("");
 
@@ -2534,6 +2702,7 @@ class ComunidadApp {
     const tags = tagsRaw.split(",").map(t => t.trim()).filter(Boolean);
     const autor = (this.newsInputAutor && this.newsInputAutor.value || "Redacción Oficial").trim();
     const imagen = (this.newsInputImage && this.newsInputImage.value || "").trim();
+    const fijada = this.newsInputFijada ? this.newsInputFijada.checked : false;
 
     // Build bloques from editor state
     const bloques = this._editorBlocks.filter(b => b.value && b.value.trim());
@@ -2560,7 +2729,7 @@ class ComunidadApp {
 
     try {
       const payload = {
-        titulo, categoria, categoriaSlug, badge, autor, tiempoLectura, tags, resumen, contenido, bloques, imagen
+        titulo, categoria, categoriaSlug, badge, autor, tiempoLectura, tags, resumen, contenido, bloques, imagen, fijada
       };
       if (isEdit) payload.id = this.editingNewsId;
 
@@ -2720,14 +2889,14 @@ class ComunidadApp {
     }
   }
 
-  openAdminPanel() {
+  openAdminPanel(targetTab = "reports") {
     if (!this.adminToken) {
       this.openAdminLogin();
       return;
     }
     if (this.modalAdminPanel) {
       this.modalAdminPanel.classList.add("active");
-      this.switchAdminTab("reports");
+      this.switchAdminTab(targetTab || "reports");
     }
   }
 
@@ -2753,6 +2922,13 @@ class ComunidadApp {
     if (tabKey === "cronograma") this.loadAdminCronogramaEditor();
     if (tabKey === "guia")       this.loadAdminGuiaEditor();
     if (tabKey === "site")       this.loadAdminSiteSettings();
+    if (tabKey === "password")   this.loadAdminSecurityTab();
+  }
+
+  loadAdminSecurityTab() {
+    if (this.adminActiveTokenDisplay) {
+      this.adminActiveTokenDisplay.value = this.adminToken || "";
+    }
   }
 
   async checkAdminReportsBadge() {
@@ -3087,9 +3263,23 @@ class ComunidadApp {
   // -------------------------------------------------------------
   // TAB: CRONOGRAMA OFICIAL
   // -------------------------------------------------------------
-  loadAdminCronogramaEditor() {
+  async loadAdminCronogramaEditor() {
     if (!this.adminCronogramaListWrap) return;
-    const cronograma = Array.isArray(this.data?.cronograma) && this.data.cronograma.length > 0
+    this.adminCronogramaListWrap.innerHTML = '<div class="admin-loading-state">Cargando cronograma oficial...</div>';
+
+    if (!this.data || !Array.isArray(this.data.cronograma) || this.data.cronograma.length === 0) {
+      try {
+        const res = await fetch("/api/comunidad", { cache: "no-store" });
+        if (res.ok) {
+          const fresh = await res.json();
+          if (fresh && Array.isArray(fresh.cronograma)) this.data.cronograma = fresh.cronograma;
+        }
+      } catch (e) {
+        console.warn("No se pudo refrescar datos de cronograma:", e);
+      }
+    }
+
+    const source = (Array.isArray(this.data?.cronograma) && this.data.cronograma.length > 0)
       ? this.data.cronograma
       : [
           { fase: "Pruebas Piloto", fecha: "Septiembre 2026", lugar: "Costanera de Posadas (4to Tramo)", horario: "14:00 a 23:00 hs", estado: "En desarrollo", icono: "⏱️" },
@@ -3097,79 +3287,171 @@ class ComunidadApp {
           { fase: "Show en el Anfiteatro", fecha: "Octubre 2026", lugar: "Anfiteatro Manuel Antonio Ramírez", horario: "17:00 a 05:00 hs", estado: "Cierre de Temporada", icono: "👑" }
         ];
 
-    this.adminCronogramaListWrap.innerHTML = "";
-    cronograma.forEach((item, idx) => {
-      this.addCronogramaPhaseUI(item, idx);
+    this._adminCronograma = JSON.parse(JSON.stringify(source));
+    this.renderAdminCronogramaList();
+  }
+
+  syncAdminCronogramaFromDOM() {
+    if (!this.adminCronogramaListWrap) return;
+    const cards = this.adminCronogramaListWrap.querySelectorAll(".cronograma-phase-card");
+    cards.forEach((card, idx) => {
+      if (idx < this._adminCronograma.length) {
+        this._adminCronograma[idx].fase    = card.querySelector(".phase-input-fase")?.value.trim() || "";
+        this._adminCronograma[idx].icono   = card.querySelector(".phase-input-icono")?.value.trim() || "🥁";
+        this._adminCronograma[idx].fecha   = card.querySelector(".phase-input-fecha")?.value.trim() || "";
+        this._adminCronograma[idx].horario = card.querySelector(".phase-input-horario")?.value.trim() || "";
+        this._adminCronograma[idx].lugar   = card.querySelector(".phase-input-lugar")?.value.trim() || "";
+        this._adminCronograma[idx].estado  = card.querySelector(".phase-input-estado")?.value.trim() || "";
+      }
     });
   }
 
-  addCronogramaPhaseUI(item = {}, index = null) {
+  renderAdminCronogramaList() {
     if (!this.adminCronogramaListWrap) return;
-    const card = document.createElement("div");
-    card.className = "admin-editor-card-item cronograma-phase-card";
+    if (this._adminCronograma.length === 0) {
+      this.adminCronogramaListWrap.innerHTML = `
+        <div class="admin-empty-state">
+          <p>No hay fases en el cronograma.</p>
+          <button type="button" class="btn-admin-sm-action" id="btn-admin-add-first-phase">➕ Agregar la Primera Fase</button>
+        </div>`;
+      const addFirst = document.getElementById("btn-admin-add-first-phase");
+      if (addFirst) addFirst.addEventListener("click", () => this.addAdminCronogramaPhase());
+      return;
+    }
 
-    const idx = index !== null ? index + 1 : this.adminCronogramaListWrap.children.length + 1;
-    card.innerHTML = `
-      <div class="admin-editor-item-header">
-        <span class="admin-editor-item-title"><span>📅</span> Fase #${idx}</span>
-        <button type="button" class="btn-admin-delete-item btn-del-phase" title="Eliminar fase">✕ Quitar</button>
-      </div>
-      <div class="form-row-2col">
-        <div class="topic-form-group">
-          <label class="topic-form-label">Nombre de la Fase</label>
-          <input type="text" class="topic-form-input phase-input-fase" placeholder="Ej: Pruebas Piloto" value="${(item.fase || '').replace(/"/g, '&quot;')}" required>
+    const total = this._adminCronograma.length;
+    this.adminCronogramaListWrap.innerHTML = this._adminCronograma.map((item, idx) => {
+      const upDisabled = idx === 0 ? "disabled" : "";
+      const downDisabled = idx === total - 1 ? "disabled" : "";
+      return `
+        <div class="admin-editor-card-item cronograma-phase-card" data-index="${idx}">
+          <div class="admin-editor-item-header">
+            <span class="admin-editor-item-title"><span>📅</span> Fase #${idx + 1}</span>
+            <div class="admin-editor-item-actions">
+              <button type="button" class="btn-order-ctrl btn-order-phase-up" data-index="${idx}" title="Subir fase" ${upDisabled}>↑</button>
+              <button type="button" class="btn-order-ctrl btn-order-phase-down" data-index="${idx}" title="Bajar fase" ${downDisabled}>↓</button>
+              <button type="button" class="btn-admin-delete-item btn-del-phase" data-index="${idx}" title="Eliminar fase">✕ Quitar</button>
+            </div>
+          </div>
+          <div class="form-row-2col">
+            <div class="topic-form-group">
+              <label class="topic-form-label">Nombre de la Fase</label>
+              <input type="text" class="topic-form-input phase-input-fase" placeholder="Ej: Pruebas Piloto" value="${(item.fase || '').replace(/"/g, '&quot;')}" required>
+            </div>
+            <div class="topic-form-group">
+              <label class="topic-form-label">Ícono / Emoji</label>
+              <input type="text" class="topic-form-input phase-input-icono" placeholder="🥁" value="${(item.icono || '🥁').replace(/"/g, '&quot;')}">
+            </div>
+          </div>
+          <div class="form-row-2col">
+            <div class="topic-form-group">
+              <label class="topic-form-label">Fecha / Mes</label>
+              <input type="text" class="topic-form-input phase-input-fecha" placeholder="Ej: Septiembre 2026" value="${(item.fecha || '').replace(/"/g, '&quot;')}" required>
+            </div>
+            <div class="topic-form-group">
+              <label class="topic-form-label">Horario</label>
+              <input type="text" class="topic-form-input phase-input-horario" placeholder="Ej: 18:00 a 04:30 hs" value="${(item.horario || '').replace(/"/g, '&quot;')}">
+            </div>
+          </div>
+          <div class="form-row-2col">
+            <div class="topic-form-group">
+              <label class="topic-form-label">Lugar / Ubicación</label>
+              <input type="text" class="topic-form-input phase-input-lugar" placeholder="Ej: 4 Tramos de la Costanera" value="${(item.lugar || '').replace(/"/g, '&quot;')}">
+            </div>
+            <div class="topic-form-group">
+              <label class="topic-form-label">Estado (Etiqueta)</label>
+              <input type="text" class="topic-form-input phase-input-estado" placeholder="Ej: En desarrollo, Próximamente..." value="${(item.estado || '').replace(/"/g, '&quot;')}">
+              <div class="cronograma-status-tags">
+                <button type="button" class="btn-status-quick-tag" data-tag="En desarrollo">En desarrollo</button>
+                <button type="button" class="btn-status-quick-tag" data-tag="Próximamente">Próximamente</button>
+                <button type="button" class="btn-status-quick-tag" data-tag="Cierre de Temporada">Cierre</button>
+                <button type="button" class="btn-status-quick-tag" data-tag="Finalizado">Finalizado</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="topic-form-group">
-          <label class="topic-form-label">Ícono / Emoji</label>
-          <input type="text" class="topic-form-input phase-input-icono" placeholder="🥁" value="${(item.icono || '🥁').replace(/"/g, '&quot;')}">
-        </div>
-      </div>
-      <div class="form-row-2col">
-        <div class="topic-form-group">
-          <label class="topic-form-label">Fecha / Mes</label>
-          <input type="text" class="topic-form-input phase-input-fecha" placeholder="Ej: Septiembre 2026" value="${(item.fecha || '').replace(/"/g, '&quot;')}" required>
-        </div>
-        <div class="topic-form-group">
-          <label class="topic-form-label">Horario</label>
-          <input type="text" class="topic-form-input phase-input-horario" placeholder="Ej: 18:00 a 04:30 hs" value="${(item.horario || '').replace(/"/g, '&quot;')}">
-        </div>
-      </div>
-      <div class="form-row-2col">
-        <div class="topic-form-group">
-          <label class="topic-form-label">Lugar / Ubicación</label>
-          <input type="text" class="topic-form-input phase-input-lugar" placeholder="Ej: 4 Tramos de la Costanera" value="${(item.lugar || '').replace(/"/g, '&quot;')}">
-        </div>
-        <div class="topic-form-group">
-          <label class="topic-form-label">Estado (Etiqueta)</label>
-          <input type="text" class="topic-form-input phase-input-estado" placeholder="Ej: En desarrollo, Próximamente..." value="${(item.estado || '').replace(/"/g, '&quot;')}">
-        </div>
-      </div>
-    `;
+      `;
+    }).join("");
 
-    card.querySelector(".btn-del-phase").addEventListener("click", () => {
-      card.remove();
+    // Wire events
+    this.adminCronogramaListWrap.querySelectorAll(".btn-order-phase-up").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.dataset.index, 10);
+        this.moveAdminCronogramaPhase(i, -1);
+      });
     });
+    this.adminCronogramaListWrap.querySelectorAll(".btn-order-phase-down").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.dataset.index, 10);
+        this.moveAdminCronogramaPhase(i, 1);
+      });
+    });
+    this.adminCronogramaListWrap.querySelectorAll(".btn-del-phase").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.dataset.index, 10);
+        this.removeAdminCronogramaPhase(i);
+      });
+    });
+    this.adminCronogramaListWrap.querySelectorAll(".btn-status-quick-tag").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const card = btn.closest(".cronograma-phase-card");
+        const inp = card?.querySelector(".phase-input-estado");
+        if (inp) {
+          inp.value = btn.dataset.tag || "";
+          this.syncAdminCronogramaFromDOM();
+        }
+      });
+    });
+    this.adminCronogramaListWrap.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", () => this.syncAdminCronogramaFromDOM());
+    });
+  }
 
-    this.adminCronogramaListWrap.appendChild(card);
+  addAdminCronogramaPhase() {
+    this.syncAdminCronogramaFromDOM();
+    this._adminCronograma.push({
+      fase: "",
+      icono: "🥁",
+      fecha: "",
+      horario: "",
+      lugar: "Costanera de Posadas",
+      estado: "Próximamente"
+    });
+    this.renderAdminCronogramaList();
+    const inputs = this.adminCronogramaListWrap.querySelectorAll(".phase-input-fase");
+    const lastInput = inputs[inputs.length - 1];
+    if (lastInput) setTimeout(() => lastInput.focus(), 50);
+  }
+
+  moveAdminCronogramaPhase(idx, direction) {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= this._adminCronograma.length) return;
+    this.syncAdminCronogramaFromDOM();
+    const temp = this._adminCronograma[idx];
+    this._adminCronograma[idx] = this._adminCronograma[targetIdx];
+    this._adminCronograma[targetIdx] = temp;
+    this.renderAdminCronogramaList();
+  }
+
+  removeAdminCronogramaPhase(idx) {
+    this.syncAdminCronogramaFromDOM();
+    const target = this._adminCronograma[idx];
+    const previewName = target?.fase ? `la fase "${target.fase}"` : `la Fase #${idx + 1}`;
+    if (!confirm(`¿Deseas quitar ${previewName} del cronograma?`)) return;
+    this._adminCronograma.splice(idx, 1);
+    this.renderAdminCronogramaList();
+    this.showToast("Fase eliminada del cronograma.");
   }
 
   async saveAdminCronograma() {
     if (!this.adminToken) return;
-    const cards = this.adminCronogramaListWrap.querySelectorAll(".cronograma-phase-card");
-    const cronograma = [];
+    this.syncAdminCronogramaFromDOM();
 
-    cards.forEach(c => {
-      const fase = c.querySelector(".phase-input-fase")?.value.trim() || "";
-      const icono = c.querySelector(".phase-input-icono")?.value.trim() || "🥁";
-      const fecha = c.querySelector(".phase-input-fecha")?.value.trim() || "";
-      const horario = c.querySelector(".phase-input-horario")?.value.trim() || "";
-      const lugar = c.querySelector(".phase-input-lugar")?.value.trim() || "";
-      const estado = c.querySelector(".phase-input-estado")?.value.trim() || "";
-
-      if (fase) {
-        cronograma.push({ fase, icono, fecha, horario, lugar, estado });
-      }
-    });
+    const cronograma = this._adminCronograma.filter(p => p.fase && p.fase.trim());
+    if (cronograma.length === 0) {
+      this.showToast("El cronograma debe tener al menos una fase con nombre.");
+      return;
+    }
 
     if (this.btnSaveAdminCronograma) {
       this.btnSaveAdminCronograma.disabled = true;
@@ -3189,8 +3471,10 @@ class ComunidadApp {
       if (data.status === "ok") {
         if (!this.data) this.data = {};
         this.data.cronograma = cronograma;
+        this._adminCronograma = JSON.parse(JSON.stringify(cronograma));
         this.renderCronograma();
-        this.showToast("📅 ¡Cronograma oficial guardado con éxito!");
+        this.renderAdminCronogramaList();
+        this.showToast("📅 ¡Cronograma oficial guardado y sincronizado!");
       } else {
         this.showToast(data.message || "Error al guardar cronograma.");
       }
@@ -3208,60 +3492,149 @@ class ComunidadApp {
   // -------------------------------------------------------------
   // TAB: GUÍAS & FAQ
   // -------------------------------------------------------------
-  loadAdminGuiaEditor() {
+  async loadAdminGuiaEditor() {
     if (!this.adminGuiaListWrap) return;
-    const faqs = (Array.isArray(this.data?.faq) && this.data.faq.length > 0)
+    this.adminGuiaListWrap.innerHTML = '<div class="admin-loading-state">Cargando preguntas frecuentes...</div>';
+
+    if (!this.data || (!this.data.faq && !this.data.guia) || (Array.isArray(this.data.faq) && this.data.faq.length === 0)) {
+      try {
+        const res = await fetch("/api/comunidad", { cache: "no-store" });
+        if (res.ok) {
+          const fresh = await res.json();
+          if (fresh) {
+            if (Array.isArray(fresh.faq) && fresh.faq.length > 0) this.data.faq = fresh.faq;
+            if (Array.isArray(fresh.guia) && fresh.guia.length > 0) this.data.guia = fresh.guia;
+          }
+        }
+      } catch (e) {
+        console.warn("No se pudo refrescar datos de comunidad para guia:", e);
+      }
+    }
+
+    const source = (Array.isArray(this.data?.faq) && this.data.faq.length > 0)
       ? this.data.faq
       : ((Array.isArray(this.data?.guia) && this.data.guia.length > 0) ? this.data.guia : [
           { pregunta: "¿Qué es la Estudiantina de Posadas?", respuesta: "Es la mayor fiesta cultural y juvenil de la provincia de Misiones..." }
         ]);
 
-    this.adminGuiaListWrap.innerHTML = "";
-    faqs.forEach((item, idx) => {
-      this.addGuiaFaqUI(item, idx);
+    this._adminFaqs = JSON.parse(JSON.stringify(source));
+    this.renderAdminGuiaList();
+  }
+
+  syncAdminFaqsFromDOM() {
+    if (!this.adminGuiaListWrap) return;
+    const cards = this.adminGuiaListWrap.querySelectorAll(".guia-faq-card");
+    cards.forEach((card, idx) => {
+      if (idx < this._adminFaqs.length) {
+        const q = card.querySelector(".faq-input-pregunta")?.value.trim() || "";
+        const a = card.querySelector(".faq-input-respuesta")?.value.trim() || "";
+        this._adminFaqs[idx].pregunta = q;
+        this._adminFaqs[idx].respuesta = a;
+      }
     });
   }
 
-  addGuiaFaqUI(item = {}, index = null) {
+  renderAdminGuiaList() {
     if (!this.adminGuiaListWrap) return;
-    const card = document.createElement("div");
-    card.className = "admin-editor-card-item guia-faq-card";
+    if (this._adminFaqs.length === 0) {
+      this.adminGuiaListWrap.innerHTML = `
+        <div class="admin-empty-state">
+          <p>No hay preguntas frecuentes configuradas.</p>
+          <button type="button" class="btn-admin-sm-action" id="btn-admin-add-first-faq">➕ Agregar la Primera Pregunta</button>
+        </div>`;
+      const addFirst = document.getElementById("btn-admin-add-first-faq");
+      if (addFirst) addFirst.addEventListener("click", () => this.addAdminFaq());
+      return;
+    }
 
-    const idx = index !== null ? index + 1 : this.adminGuiaListWrap.children.length + 1;
-    card.innerHTML = `
-      <div class="admin-editor-item-header">
-        <span class="admin-editor-item-title"><span>💡</span> Pregunta #${idx}</span>
-        <button type="button" class="btn-admin-delete-item btn-del-faq" title="Eliminar pregunta">✕ Quitar</button>
-      </div>
-      <div class="topic-form-group">
-        <label class="topic-form-label">Pregunta</label>
-        <input type="text" class="topic-form-input faq-input-pregunta" placeholder="Ej: ¿Dónde estacionar?" value="${(item.pregunta || '').replace(/"/g, '&quot;')}" required>
-      </div>
-      <div class="topic-form-group">
-        <label class="topic-form-label">Respuesta Explicativa</label>
-        <textarea class="topic-form-textarea faq-input-respuesta" rows="3" placeholder="Escribí la respuesta detallada..." required>${item.respuesta || ''}</textarea>
-      </div>
-    `;
+    const total = this._adminFaqs.length;
+    this.adminGuiaListWrap.innerHTML = this._adminFaqs.map((item, idx) => {
+      const upDisabled = idx === 0 ? "disabled" : "";
+      const downDisabled = idx === total - 1 ? "disabled" : "";
+      return `
+        <div class="admin-editor-card-item guia-faq-card" data-index="${idx}">
+          <div class="admin-editor-item-header">
+            <span class="admin-editor-item-title"><span>💡</span> Pregunta #${idx + 1}</span>
+            <div class="admin-editor-item-actions">
+              <button type="button" class="btn-order-ctrl btn-order-faq-up" data-index="${idx}" title="Subir posición" ${upDisabled}>↑</button>
+              <button type="button" class="btn-order-ctrl btn-order-faq-down" data-index="${idx}" title="Bajar posición" ${downDisabled}>↓</button>
+              <button type="button" class="btn-admin-delete-item btn-del-faq" data-index="${idx}" title="Eliminar pregunta">✕ Quitar</button>
+            </div>
+          </div>
+          <div class="topic-form-group">
+            <label class="topic-form-label">Pregunta</label>
+            <input type="text" class="topic-form-input faq-input-pregunta" placeholder="Ej: ¿Dónde estacionar durante los desfiles?" value="${(item.pregunta || '').replace(/"/g, '&quot;')}" required>
+          </div>
+          <div class="topic-form-group">
+            <label class="topic-form-label">Respuesta Explicativa</label>
+            <textarea class="topic-form-textarea faq-input-respuesta" rows="3" placeholder="Escribí la respuesta detallada..." required>${item.respuesta || ''}</textarea>
+          </div>
+        </div>
+      `;
+    }).join("");
 
-    card.querySelector(".btn-del-faq").addEventListener("click", () => {
-      card.remove();
+    // Wire events
+    this.adminGuiaListWrap.querySelectorAll(".btn-order-faq-up").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.dataset.index, 10);
+        this.moveAdminFaq(i, -1);
+      });
     });
+    this.adminGuiaListWrap.querySelectorAll(".btn-order-faq-down").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.dataset.index, 10);
+        this.moveAdminFaq(i, 1);
+      });
+    });
+    this.adminGuiaListWrap.querySelectorAll(".btn-del-faq").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = parseInt(btn.dataset.index, 10);
+        this.removeAdminFaq(i);
+      });
+    });
+    this.adminGuiaListWrap.querySelectorAll(".faq-input-pregunta, .faq-input-respuesta").forEach(inp => {
+      inp.addEventListener("input", () => this.syncAdminFaqsFromDOM());
+    });
+  }
 
-    this.adminGuiaListWrap.appendChild(card);
+  addAdminFaq() {
+    this.syncAdminFaqsFromDOM();
+    this._adminFaqs.push({ pregunta: "", respuesta: "" });
+    this.renderAdminGuiaList();
+    const inputs = this.adminGuiaListWrap.querySelectorAll(".faq-input-pregunta");
+    const lastInput = inputs[inputs.length - 1];
+    if (lastInput) setTimeout(() => lastInput.focus(), 50);
+  }
+
+  moveAdminFaq(idx, direction) {
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= this._adminFaqs.length) return;
+    this.syncAdminFaqsFromDOM();
+    const temp = this._adminFaqs[idx];
+    this._adminFaqs[idx] = this._adminFaqs[targetIdx];
+    this._adminFaqs[targetIdx] = temp;
+    this.renderAdminGuiaList();
+  }
+
+  removeAdminFaq(idx) {
+    this.syncAdminFaqsFromDOM();
+    const target = this._adminFaqs[idx];
+    const previewName = target?.pregunta ? `"${target.pregunta.slice(0, 30)}..."` : `la Pregunta #${idx + 1}`;
+    if (!confirm(`¿Deseas quitar ${previewName}?`)) return;
+    this._adminFaqs.splice(idx, 1);
+    this.renderAdminGuiaList();
+    this.showToast("Pregunta eliminada de la lista.");
   }
 
   async saveAdminGuia() {
     if (!this.adminToken) return;
-    const cards = this.adminGuiaListWrap.querySelectorAll(".guia-faq-card");
-    const faq = [];
+    this.syncAdminFaqsFromDOM();
 
-    cards.forEach(c => {
-      const pregunta = c.querySelector(".faq-input-pregunta")?.value.trim() || "";
-      const respuesta = c.querySelector(".faq-input-respuesta")?.value.trim() || "";
-      if (pregunta && respuesta) {
-        faq.push({ pregunta, respuesta });
-      }
-    });
+    const faq = this._adminFaqs.filter(f => f.pregunta && f.pregunta.trim() && f.respuesta && f.respuesta.trim());
+    if (faq.length === 0) {
+      this.showToast("La guía debe tener al menos una pregunta completa.");
+      return;
+    }
 
     if (this.btnSaveAdminGuia) {
       this.btnSaveAdminGuia.disabled = true;
@@ -3282,8 +3655,10 @@ class ComunidadApp {
         if (!this.data) this.data = {};
         this.data.faq = faq;
         this.data.guia = faq;
+        this._adminFaqs = JSON.parse(JSON.stringify(faq));
         this.renderGuia();
-        this.showToast("💡 ¡Guía & FAQ guardadas con éxito!");
+        this.renderAdminGuiaList();
+        this.showToast("💡 ¡Guía & FAQ guardadas y actualizadas en vivo!");
       } else {
         this.showToast(data.message || "Error al guardar guías.");
       }

@@ -113,7 +113,26 @@ class ForoApp {
     this.btnCloseAuthModal = document.getElementById("btn-close-auth-modal");
     this.authSelectSchool = document.getElementById("auth-select-school");
     this.googleGisContainer = document.getElementById("google-gis-container");
-    this.btnQuickLogin = document.getElementById("btn-quick-login");
+
+    // Modal Onboarding / Registro Completo
+    this.modalOnboarding = document.getElementById("modal-onboarding-registro");
+    this.formOnboarding = document.getElementById("form-onboarding-registro");
+    this.onboardingUsername = document.getElementById("onboarding-username");
+    this.onboardingUsernameStatus = document.getElementById("onboarding-username-status");
+    this.onboardingName = document.getElementById("onboarding-name");
+    this.onboardingSchool = document.getElementById("onboarding-school");
+    this.onboardingRole = document.getElementById("onboarding-role");
+    this.onboardingGrade = document.getElementById("onboarding-grade");
+    this.onboardingPhotoPreview = document.getElementById("onboarding-photo-preview");
+    this.onboardingPhotoFile = document.getElementById("onboarding-photo-file");
+    this.btnOnboardingRestoreGoogle = document.getElementById("btn-onboarding-restore-google");
+    this.btnSubmitOnboarding = document.getElementById("btn-submit-onboarding");
+    this.btnCloseOnboarding = document.getElementById("btn-close-onboarding");
+    this.btnCancelOnboarding = document.getElementById("btn-cancel-onboarding");
+    this._pendingGoogleAuth = null;
+    this._pendingOnboardingPhoto = null;
+    this._pendingEditPhoto = null;
+    this._restoreGoogleAvatar = false;
 
     // Modal Admin
     this.modalAdminLogin = document.getElementById("modal-admin-login");
@@ -130,6 +149,7 @@ class ForoApp {
     this.threadModalDate = document.getElementById("thread-modal-date");
     this.threadOpAvatar = document.getElementById("thread-op-avatar");
     this.threadOpName = document.getElementById("thread-op-name");
+    this.threadOpHandle = document.getElementById("thread-op-handle");
     this.threadOpSchool = document.getElementById("thread-op-school");
     this.threadOpContent = document.getElementById("thread-op-content");
     this.threadModalVotes = document.getElementById("thread-modal-votes");
@@ -141,26 +161,214 @@ class ForoApp {
     this.formReply = document.getElementById("form-reply");
     this.replyInputContent = document.getElementById("reply-input-content");
     this.replyUserAvatar = document.getElementById("reply-user-avatar");
-    this.replySchoolHint = document.getElementById("reply-school-hint");
+    // Modal Sanción Usuario
+    this.modalSanctionUser = document.getElementById("modal-sanction-user");
+    this.btnCloseSanctionModal = document.getElementById("btn-close-sanction-modal");
+    this.btnCancelSanction = document.getElementById("btn-cancel-sanction");
+    this.formSanctionUser = document.getElementById("form-sanction-user");
+    this.sanctionTargetGoogleId = document.getElementById("sanction-target-google-id");
+    this.sanctionUserAvatar = document.getElementById("sanction-user-avatar");
+    this.sanctionUserName = document.getElementById("sanction-user-name");
+    this.sanctionUserSchool = document.getElementById("sanction-user-school");
+    this.sanctionUserStatus = document.getElementById("sanction-user-status");
+    this.sanctionDurationGroup = document.getElementById("sanction-duration-group");
+    this.sanctionDurationSelect = document.getElementById("sanction-duration-select");
+    this.sanctionReasonText = document.getElementById("sanction-reason-text");
+
+    // Modal Confirmación Admin
+    this.modalAdminConfirm = document.getElementById("modal-admin-confirm-foro");
+    this.confirmModalTitle = document.getElementById("confirm-modal-title");
+    this.confirmModalDesc = document.getElementById("confirm-modal-desc");
+    this.btnCloseConfirmModal = document.getElementById("btn-close-confirm-modal");
+    this.btnCancelConfirmAction = document.getElementById("btn-cancel-confirm-action");
+    this.btnProceedConfirmAction = document.getElementById("btn-proceed-confirm-action");
+    this._pendingConfirmCallback = null;
+
+    // Modal Perfil de Usuario Unificado
+    this.modalUserProfile = document.getElementById("modal-user-profile");
+    this.btnCloseProfileModal = document.getElementById("btn-close-profile-modal");
+    this.profileHeroBanner = document.getElementById("profile-hero-banner");
+    this.profileAvatarImg = document.getElementById("profile-avatar-img");
+    this.profileUserName = document.getElementById("profile-user-name");
+    this.profileUserHandle = document.getElementById("profile-user-handle");
+    this.profileUserBadge = document.getElementById("profile-user-badge");
+    this.profileSchoolPill = document.getElementById("profile-school-pill");
+    this.profileRolePill = document.getElementById("profile-role-pill");
+    this.profileGradePill = document.getElementById("profile-grade-pill");
+    this.profileUserBio = document.getElementById("profile-user-bio");
+    this.profileSocialRow = document.getElementById("profile-social-row");
+    this.profileInstagramLink = document.getElementById("profile-instagram-link");
+    this.profileInstagramText = document.getElementById("profile-instagram-text");
+    this.btnOpenEditProfile = document.getElementById("btn-open-edit-profile");
+    this.btnProfileShare = document.getElementById("btn-profile-share");
+    this.btnProfileModerate = document.getElementById("btn-profile-moderate");
+    this.profileStatKarma = document.getElementById("profile-stat-karma");
+    this.profileStatThreads = document.getElementById("profile-stat-threads");
+    this.profileStatReplies = document.getElementById("profile-stat-replies");
+    this.profileBadgesList = document.getElementById("profile-badges-list");
+
+    // Pestañas del perfil unificado
+    this.tabBtnProfileView = document.getElementById("tab-btn-profile-view");
+    this.tabBtnProfileEdit = document.getElementById("tab-btn-profile-edit");
+    this.tabBtnProfileThreads = document.getElementById("tab-btn-profile-threads");
+    this.tabBtnProfileReplies = document.getElementById("tab-btn-profile-replies");
+    this.tabLabelProfileView = document.getElementById("tab-label-profile-view");
+
+    this.profileTabView = document.getElementById("profile-tab-view");
+    this.profileTabEdit = document.getElementById("profile-tab-edit");
+    this.profileTabThreads = document.getElementById("profile-tab-threads");
+    this.profileTabReplies = document.getElementById("profile-tab-replies");
+
+    this.profileThreadsList = document.getElementById("profile-threads-list");
+    this.profileRepliesList = document.getElementById("profile-replies-list");
+    this.profileCountTabThreads = document.getElementById("profile-count-tab-threads");
+    this.profileCountTabReplies = document.getElementById("profile-count-tab-replies");
+
+    // Formulario Editar Perfil (integrado en pestaña)
+    this.btnCancelEditProfile = document.getElementById("btn-cancel-edit-profile");
+    this.formEditProfile = document.getElementById("form-edit-profile");
+    this.editProfileUsername = document.getElementById("edit-profile-username");
+    this.editProfileUsernameStatus = document.getElementById("edit-profile-username-status");
+    this.editProfileName = document.getElementById("edit-profile-name");
+    this.editProfileSchool = document.getElementById("edit-profile-school");
+    this.editProfileRole = document.getElementById("edit-profile-role");
+    this.editProfileGrade = document.getElementById("edit-profile-grade");
+    this.editProfileBio = document.getElementById("edit-profile-bio");
+    this.editBioCounter = document.getElementById("edit-bio-counter");
+    this.editProfileInstagram = document.getElementById("edit-profile-instagram");
+    this.editProfilePhotoPreview = document.getElementById("edit-profile-photo-preview");
+    this.editProfilePhotoFile = document.getElementById("edit-profile-photo-file");
+    this.btnEditRestoreGoogle = document.getElementById("btn-edit-restore-google");
 
     // Toast
     this.toastEl = document.getElementById("toast-notification");
     this.toastTimer = null;
   }
 
-  init() {
+  // ========== MODO OSCURO ==========
+  initDarkMode() {
+    this.themeToggleBtn = document.getElementById('theme-toggle');
+    this.themeIcon = document.getElementById('theme-icon');
+
+    // Cargar preferencia guardada universal o detectar preferencia del sistema
+    const savedTheme = localStorage.getItem('estudiantina_theme') || localStorage.getItem('foro_theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'light') {
+      this.enableLightMode();
+    } else if (savedTheme === 'dark') {
+      this.enableDarkMode();
+    } else if (prefersDark) {
+      this.enableDarkMode();
+    } else {
+      this.enableLightMode();
+    }
+
+    // Listener para el botón
+    if (this.themeToggleBtn) {
+      this.themeToggleBtn.addEventListener('click', () => this.toggleDarkMode());
+    }
+
+    // Listener para cambios en preferencia del sistema
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('estudiantina_theme') && !localStorage.getItem('foro_theme')) {
+          if (e.matches) {
+            this.enableDarkMode();
+          } else {
+            this.enableLightMode();
+          }
+        }
+      });
+    }
+  }
+
+  toggleDarkMode() {
+    if (document.body.classList.contains('dark-mode')) {
+      this.enableLightMode();
+      try {
+        localStorage.setItem('estudiantina_theme', 'light');
+        localStorage.setItem('foro_theme', 'light');
+      } catch(e){}
+    } else {
+      this.enableDarkMode();
+      try {
+        localStorage.setItem('estudiantina_theme', 'dark');
+        localStorage.setItem('foro_theme', 'dark');
+      } catch(e){}
+    }
+    window.dispatchEvent(new CustomEvent("estudiantina:themechange", {
+      detail: { theme: document.body.classList.contains('light-mode') ? 'light' : 'dark' }
+    }));
+    if (this.currentUser && this.currentUser.colegioId) {
+      this.applySchoolTheme(this.currentUser.colegioId);
+    }
+  }
+
+  enableDarkMode() {
+    document.body.classList.add('dark-mode');
+    document.body.classList.remove('light-mode');
+    document.documentElement.classList.remove('light-mode');
+    document.documentElement.classList.add('dark-mode');
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (this.themeIcon) {
+      this.themeIcon.textContent = '☀️';
+    }
+    if (this.themeToggleBtn) {
+      this.themeToggleBtn.setAttribute('title', 'Cambiar a modo claro');
+      this.themeToggleBtn.setAttribute('aria-label', 'Cambiar a modo claro');
+    }
+  }
+
+  enableLightMode() {
+    document.body.classList.remove('dark-mode');
+    document.body.classList.add('light-mode');
+    document.documentElement.classList.remove('dark-mode');
+    document.documentElement.classList.add('light-mode');
+    document.documentElement.setAttribute('data-theme', 'light');
+    if (this.themeIcon) {
+      this.themeIcon.textContent = '🌙';
+    }
+    if (this.themeToggleBtn) {
+      this.themeToggleBtn.setAttribute('title', 'Cambiar a modo oscuro');
+      this.themeToggleBtn.setAttribute('aria-label', 'Cambiar a modo oscuro');
+    }
+  }
+  // ========== FIN MODO OSCURO ==========
+
+  async init() {
+    // Inicializar modo oscuro
+    this.initDarkMode();
+
     this.populateSchools();
     this.initGoogleAuth();
+    if (this.currentUser && this.currentUser.colegioId) {
+      this.applySchoolTheme(this.currentUser.colegioId);
+    }
     this.updateUserBar();
-    this.updateAdminBar();
-    this.bindEvents();
 
-    // Comprobar parámetros de la URL (?canal=..., ?hilo=...)
+    // Comprobar parámetros de la URL (?canal=..., ?hilo=..., ?token=..., ?usuario=...)
     const params = new URLSearchParams(window.location.search);
     const canalParam = params.get("canal");
     if (canalParam) {
       this.activeCanal = canalParam;
     }
+
+    // Acceso oculto por Token en la URL
+    const urlToken = (params.get("token") || params.get("admin_token") || params.get("admin") || "").trim();
+    if (urlToken) {
+      this.adminToken = urlToken;
+      params.delete("token");
+      params.delete("admin_token");
+      params.delete("admin");
+      const newSearch = params.toString() ? `?${params.toString()}` : "";
+      window.history.replaceState({}, document.title, window.location.pathname + newSearch + window.location.hash);
+      await this.verifyAdminSession();
+    } else {
+      this.updateAdminBar();
+    }
+
+    this.bindEvents();
 
     // Cargar Canales y Debates Iniciales
     this.loadChannels();
@@ -171,20 +379,210 @@ class ForoApp {
     if (hiloParam) {
       this.openThread(hiloParam);
     }
+
+    // Deep link a perfil de usuario específico
+    const perfilParam = params.get("usuario") || params.get("perfil");
+    if (perfilParam) {
+      this.openUserProfile(perfilParam);
+    }
+  }
+
+  async verifyAdminSession() {
+    if (!this.adminToken) {
+      this.updateAdminBar();
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin?action=verificar", {
+        headers: { "Authorization": `Bearer ${this.adminToken}` }
+      });
+      const data = await res.json();
+      if (data.status === "ok") {
+        this.adminUser = data.admin?.usuario || this.adminUser || "admin";
+        localStorage.setItem("comunidad_admin_token", this.adminToken);
+        localStorage.setItem("comunidad_admin_user", this.adminUser);
+        this.updateAdminBar();
+        this.showToast(`¡Modo Administrador activado (${this.adminUser})! 🔐`);
+      } else {
+        this.adminToken = null;
+        localStorage.removeItem("comunidad_admin_token");
+        localStorage.removeItem("comunidad_admin_user");
+        this.updateAdminBar();
+      }
+    } catch (e) {
+      this.updateAdminBar();
+    }
   }
 
   getColegio(id) {
-    if (!id) return { nombre: "Colegio de Posadas", escudo: "🥁", color: "#38bdf8" };
-    return COLEGIOS.find(c => c.id === id) || { nombre: id, escudo: "🥁", color: "#38bdf8" };
+    if (!id) return { id: "", nombre: "Colegio de Posadas", escudo: "🥁", color: "#0284c7" };
+    const found = COLEGIOS.find(c => c.id === id);
+    if (!found) return { id, nombre: id, escudo: "🥁", color: "#0284c7" };
+    const primary = (found.colores && found.colores.primary) || "#0284c7";
+    return {
+      ...found,
+      color: primary
+    };
+  }
+
+  applySchoolTheme(colegioId, targetEl = document.documentElement) {
+    if (!colegioId) {
+      if (targetEl === document.documentElement) {
+        const schoolProps = [
+          "--school-primary", "--school-secondary", "--school-accent", "--school-glow",
+          "--school-collar", "--school-text-contrast", "--school-surface", "--school-border",
+          "--school-gradient", "--school-gradient-subtle"
+        ];
+        schoolProps.forEach(p => targetEl.style.removeProperty(p));
+        const themeMeta = document.querySelector('meta[name="theme-color"]');
+        if (themeMeta) themeMeta.setAttribute("content", "#090a0f");
+      }
+      return;
+    }
+
+    const col = this.getColegio(colegioId);
+    if (!col || !col.colores) return;
+    const colors = col.colores;
+    const primary = colors.primary || "#0284c7";
+    const secondary = colors.secondary || "#0ea5e9";
+    const accent = colors.accent || primary;
+    const glow = colors.glow || "rgba(2, 132, 199, 0.4)";
+    const collar = colors.collar || secondary;
+    const textContrast = colors.textContrast || "#ffffff";
+    const isLight = document.body && document.body.classList.contains("light-mode");
+    const surface = isLight ? this.hexToRgba(primary, 0.07) : (colors.surface || this.hexToRgba(primary, 0.12));
+    const border = isLight ? this.hexToRgba(primary, 0.3) : (colors.border || this.hexToRgba(primary, 0.35));
+    const gradient = colors.gradient || `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
+    const gradientSubtle = `linear-gradient(180deg, ${surface} 0%, transparent 100%)`;
+
+    targetEl.style.setProperty("--school-primary", primary);
+    targetEl.style.setProperty("--school-secondary", secondary);
+    targetEl.style.setProperty("--school-accent", accent);
+    targetEl.style.setProperty("--school-glow", glow);
+    targetEl.style.setProperty("--school-collar", collar);
+    targetEl.style.setProperty("--school-text-contrast", textContrast);
+    targetEl.style.setProperty("--school-surface", surface);
+    targetEl.style.setProperty("--school-border", border);
+    targetEl.style.setProperty("--school-gradient", gradient);
+    targetEl.style.setProperty("--school-gradient-subtle", gradientSubtle);
+
+    if (targetEl === document.documentElement) {
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute("content", primary);
+    }
+  }
+
+  hexToRgba(hex, alpha = 1) {
+    if (!hex || typeof hex !== "string" || !hex.startsWith("#")) {
+      return `rgba(56, 189, 248, ${alpha})`;
+    }
+    const clean = hex.replace("#", "");
+    const bigint = parseInt(clean.length === 3 ? clean.split("").map(c => c + c).join("") : clean, 16);
+    if (isNaN(bigint)) return `rgba(56, 189, 248, ${alpha})`;
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   populateSchools() {
-    const options = (COLEGIOS || []).map(c => 
+    const options = (COLEGIOS || []).map(c =>
       `<option value="${c.id}">${c.escudo || "🥁"} ${c.nombre}</option>`
     ).join("");
 
     if (this.topicSchool) this.topicSchool.innerHTML = options;
     if (this.authSelectSchool) this.authSelectSchool.innerHTML = options;
+    if (this.onboardingSchool) this.onboardingSchool.innerHTML = options;
+    if (this.editProfileSchool) this.editProfileSchool.innerHTML = options;
+  }
+
+  processImageFile(file) {
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith("image/")) {
+        return reject(new Error("El archivo seleccionado no es una imagen válida."));
+      }
+      if (file.size > 8 * 1024 * 1024) {
+        return reject(new Error("La imagen supera los 8MB. Seleccioná una foto más liviana."));
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 360;
+          let width = img.width;
+          let height = img.height;
+
+          // Crop centrado cuadrado 1:1
+          const minDim = Math.min(width, height);
+          const startX = (width - minDim) / 2;
+          const startY = (height - minDim) / 2;
+
+          canvas.width = maxDim;
+          canvas.height = maxDim;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, maxDim, maxDim);
+
+          let dataUrl = canvas.toDataURL("image/webp", 0.85);
+          if (!dataUrl.startsWith("data:image/webp")) {
+            dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          }
+          resolve(dataUrl);
+        };
+        img.onerror = () => reject(new Error("Error al procesar la imagen."));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error("Error al leer el archivo del dispositivo."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  setupUsernameValidator(inputEl, statusEl, getGoogleId) {
+    if (!inputEl || !statusEl) return;
+    let debounceTimer = null;
+
+    inputEl.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      // Limpiar caracteres: forzar minúsculas y solo a-z, 0-9, _
+      const clean = inputEl.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+      if (inputEl.value !== clean) {
+        inputEl.value = clean;
+      }
+
+      const username = clean.trim();
+      if (!username) {
+        statusEl.textContent = "";
+        statusEl.className = "username-status-badge";
+        return;
+      }
+
+      if (username.length < 3) {
+        statusEl.textContent = "Mín. 3 caracteres";
+        statusEl.className = "username-status-badge invalid";
+        return;
+      }
+
+      statusEl.textContent = "Comprobando...";
+      statusEl.className = "username-status-badge checking";
+
+      debounceTimer = setTimeout(async () => {
+        try {
+          const googleId = typeof getGoogleId === "function" ? getGoogleId() : (getGoogleId || "");
+          const res = await fetch(`/api/foro?action=check_username&username=${encodeURIComponent(username)}&googleId=${encodeURIComponent(googleId)}`);
+          const json = await res.json();
+          if (json.available) {
+            statusEl.textContent = "✓ Disponible";
+            statusEl.className = "username-status-badge available";
+          } else {
+            statusEl.textContent = json.message || "✗ No disponible";
+            statusEl.className = "username-status-badge taken";
+          }
+        } catch (e) {
+          statusEl.textContent = "";
+          statusEl.className = "username-status-badge";
+        }
+      }, 300);
+    });
   }
 
   initGoogleAuth() {
@@ -210,63 +608,146 @@ class ForoApp {
     }
   }
 
-  handleGoogleCredential(response) {
+  async handleGoogleCredential(response) {
     if (!response || !response.credential) return;
     try {
       const payloadBase64 = response.credential.split(".")[1];
       const decoded = JSON.parse(atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/")));
       const schoolId = (this.authSelectSchool && this.authSelectSchool.value) || "janssen";
+      const googleId = decoded.sub;
+      const nombre = decoded.name || "Hincha de Posadas";
+      const email = decoded.email || "";
+      const avatarUrl = decoded.picture || "";
 
-      const user = {
-        googleId: decoded.sub,
-        nombre: decoded.name || "Hincha de Posadas",
-        email: decoded.email || "",
-        avatarUrl: decoded.picture || `https://api.dicebear.com/7.x/bottts/svg?seed=${decoded.sub}`,
-        colegioId: schoolId
-      };
+      const res = await fetch("/api/foro?action=auth_google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          googleId,
+          nombre,
+          email,
+          avatarUrl,
+          colegioId: schoolId
+        })
+      });
 
-      this.saveUser(user);
+      const json = await res.json();
+      if (json.status === "ok") {
+        if (this.modalGoogleAuth) this.modalGoogleAuth.classList.remove("active");
+
+        if (json.needsOnboarding) {
+          this.openOnboardingModal({
+            googleId,
+            nombre,
+            email,
+            avatarOriginal: avatarUrl,
+            colegioId: schoolId
+          });
+        } else {
+          this.saveUser(json.usuario);
+        }
+      } else {
+        this.showToast(json.message || "Error al autenticar con Google");
+      }
     } catch (e) {
-      console.error("Error al decodificar credencial de Google:", e);
+      console.error("Error al autenticar con Google:", e);
+      this.showToast("Error de conexión al autenticar");
     }
   }
 
-  quickLogin() {
-    const schoolId = (this.authSelectSchool && this.authSelectSchool.value) || "janssen";
-    const demoNames = ["Pasista Costanera", "Redoblante de Oro", "Hincha de la Tribuna", "Bastonera Central", "Director de Banda"];
-    const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
-    const randomId = "google_user_" + Math.floor(Math.random() * 89999 + 10000);
+  openOnboardingModal(data) {
+    this._pendingGoogleAuth = data;
+    this._pendingOnboardingPhoto = null;
 
-    const user = {
-      googleId: randomId,
-      nombre: randomName,
-      email: `${randomId}@gmail.com`,
-      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${randomId}`,
-      colegioId: schoolId
-    };
+    if (this.onboardingName) this.onboardingName.value = data.nombre || "";
+    if (this.onboardingSchool) this.onboardingSchool.value = data.colegioId || "janssen";
+    if (this.onboardingPhotoPreview) {
+      this.onboardingPhotoPreview.src = data.avatarOriginal || "assets/avatar-default.webp";
+    }
 
-    this.saveUser(user);
+    // Sugerir usuario inicial limpio
+    const baseSource = (data.email ? data.email.split("@")[0] : data.nombre) || "hincha";
+    const suggested = baseSource.toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 18);
+    if (this.onboardingUsername) {
+      this.onboardingUsername.value = suggested;
+      // Disparar chequeo de disponibilidad en tiempo real
+      this.onboardingUsername.dispatchEvent(new Event("input"));
+    }
+
+    if (this.modalOnboarding) {
+      this.modalOnboarding.classList.add("active");
+      this.modalOnboarding.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  closeOnboardingModal() {
+    if (this.modalOnboarding) {
+      this.modalOnboarding.classList.remove("active");
+      this.modalOnboarding.setAttribute("aria-hidden", "true");
+    }
+    this._pendingGoogleAuth = null;
+    this._pendingOnboardingPhoto = null;
+  }
+
+  async handleOnboardingSubmit(e) {
+    e.preventDefault();
+    if (!this._pendingGoogleAuth) return;
+
+    const username = (this.onboardingUsername && this.onboardingUsername.value.trim().toLowerCase()) || "";
+    const nombre = (this.onboardingName && this.onboardingName.value.trim()) || this._pendingGoogleAuth.nombre;
+    const colegioId = (this.onboardingSchool && this.onboardingSchool.value) || this._pendingGoogleAuth.colegioId;
+    const rolEstudiantil = (this.onboardingRole && this.onboardingRole.value) || "Hincha de Tribuna";
+    const anoEscolar = (this.onboardingGrade && this.onboardingGrade.value) || "5° Año (Promo)";
+    const avatarUrl = this._pendingOnboardingPhoto || this._pendingGoogleAuth.avatarOriginal || "";
+
+    if (!username || username.length < 3) {
+      this.showToast("El nombre de usuario debe tener al menos 3 caracteres");
+      if (this.onboardingUsername) this.onboardingUsername.focus();
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/foro?action=completar_registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          googleId: this._pendingGoogleAuth.googleId,
+          username,
+          nombre,
+          colegioId,
+          rolEstudiantil,
+          anoEscolar,
+          avatarUrl
+        })
+      });
+
+      const json = await res.json();
+      if (json.status === "ok" && json.usuario) {
+        this.closeOnboardingModal();
+        this.saveUser(json.usuario);
+        this.showToast(`🎉 ¡Bienvenido a la comunidad, @${json.usuario.username}!`);
+      } else {
+        this.showToast(json.message || "Error al completar registro");
+      }
+    } catch (err) {
+      console.error("Error al completar registro:", err);
+      this.showToast("Error de conexión al registrarse");
+    }
   }
 
   async saveUser(user) {
     this.currentUser = user;
     localStorage.setItem("comunidad_google_user", JSON.stringify(user));
+    if (user.colegioId) {
+      this.applySchoolTheme(user.colegioId);
+    }
     this.updateUserBar();
 
     if (this.modalGoogleAuth) this.modalGoogleAuth.classList.remove("active");
 
     const col = this.getColegio(user.colegioId);
-    this.showToast(`¡Conectado como ${user.nombre} (${col.nombre})!`);
-
-    try {
-      await fetch("/api/foro?action=auth_google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
-      });
-    } catch (err) {
-      console.warn("Error sincronizando usuario:", err);
-    }
+    const handleText = user.username ? ` (@${user.username})` : "";
+    this.showToast(`¡Conectado como ${user.nombre}${handleText}!`);
 
     if (this.activeThreadId) {
       this.openThread(this.activeThreadId);
@@ -332,12 +813,26 @@ class ForoApp {
     if (this.adminToken && this.adminTopBar) {
       this.adminTopBar.style.display = "block";
       if (this.adminBarUser) this.adminBarUser.textContent = this.adminUser || "admin";
+      document.body.classList.add("has-admin-bar");
+      requestAnimationFrame(() => {
+        const h = this.adminTopBar.offsetHeight || 44;
+        document.documentElement.style.setProperty("--admin-bar-height", `${h}px`);
+      });
     } else if (this.adminTopBar) {
       this.adminTopBar.style.display = "none";
+      document.body.classList.remove("has-admin-bar");
+      document.documentElement.style.setProperty("--admin-bar-height", "0px");
     }
   }
 
   bindEvents() {
+    window.addEventListener("resize", () => {
+      if (this.adminToken && this.adminTopBar && this.adminTopBar.style.display !== "none") {
+        const h = this.adminTopBar.offsetHeight || 44;
+        document.documentElement.style.setProperty("--admin-bar-height", `${h}px`);
+      }
+    });
+
     // Auth Google Login
     if (this.btnGoogleLogin) {
       this.btnGoogleLogin.addEventListener("click", () => {
@@ -350,15 +845,70 @@ class ForoApp {
         this.modalGoogleAuth.classList.remove("active");
       });
     }
-    if (this.btnQuickLogin) {
-      this.btnQuickLogin.addEventListener("click", () => this.quickLogin());
+
+    // Modal Onboarding / Registro Completo
+    if (this.btnCloseOnboarding) {
+      this.btnCloseOnboarding.addEventListener("click", () => this.closeOnboardingModal());
     }
+    if (this.btnCancelOnboarding) {
+      this.btnCancelOnboarding.addEventListener("click", () => this.closeOnboardingModal());
+    }
+    if (this.formOnboarding) {
+      this.formOnboarding.addEventListener("submit", (e) => this.handleOnboardingSubmit(e));
+    }
+    if (this.onboardingUsername && this.onboardingUsernameStatus) {
+      this.setupUsernameValidator(
+        this.onboardingUsername,
+        this.onboardingUsernameStatus,
+        () => (this._pendingGoogleAuth ? this._pendingGoogleAuth.googleId : "")
+      );
+    }
+    if (this.onboardingPhotoFile) {
+      this.onboardingPhotoFile.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const dataUri = await this.processImageFile(file);
+          this._pendingOnboardingPhoto = dataUri;
+          if (this.onboardingPhotoPreview) this.onboardingPhotoPreview.src = dataUri;
+        } catch (err) {
+          this.showToast(err.message || "Error al procesar la imagen");
+        }
+      });
+    }
+    if (this.btnOnboardingRestoreGoogle) {
+      this.btnOnboardingRestoreGoogle.addEventListener("click", () => {
+        const gPic = this._pendingGoogleAuth && this._pendingGoogleAuth.avatarOriginal;
+        if (gPic) {
+          this._pendingOnboardingPhoto = gPic;
+          if (this.onboardingPhotoPreview) this.onboardingPhotoPreview.src = gPic;
+          this.showToast("Foto original de Google seleccionada");
+        }
+      });
+    }
+
     if (this.btnLogout) {
       this.btnLogout.addEventListener("click", () => {
         this.currentUser = null;
         localStorage.removeItem("comunidad_google_user");
+        this.applySchoolTheme(null);
         this.updateUserBar();
         this.showToast("Sesión cerrada");
+      });
+    }
+
+    // Previsualización dinámica de colores institucionales en selectores
+    if (this.onboardingSchool) {
+      this.onboardingSchool.addEventListener("change", (e) => {
+        this.applySchoolTheme(e.target.value);
+      });
+    }
+
+    if (this.editProfileSchool) {
+      this.editProfileSchool.addEventListener("change", (e) => {
+        if (this.modalUserProfile) {
+          this.applySchoolTheme(e.target.value, this.modalUserProfile);
+        }
       });
     }
 
@@ -510,12 +1060,60 @@ class ForoApp {
       });
     }
 
-    // Acceso Admin
+    // Acceso Admin (disparador en footer si existiera)
     if (this.btnFooterAdmin) {
       this.btnFooterAdmin.addEventListener("click", () => {
         if (this.modalAdminLogin) this.modalAdminLogin.classList.add("active");
       });
     }
+
+    // Atajo oculto de teclado: Ctrl + Shift + A o Alt + Shift + A
+    window.addEventListener("keydown", (e) => {
+      const isAKey = e.key === "A" || e.key === "a" || e.code === "KeyA";
+      const isShiftModifier = (e.ctrlKey || e.metaKey || e.altKey) && e.shiftKey;
+      const isAltOnly = e.altKey && !e.ctrlKey && !e.metaKey;
+      if (isAKey && (isShiftModifier || isAltOnly)) {
+        e.preventDefault();
+        if (this.modalAdminLogin) {
+          this.modalAdminLogin.classList.add("active");
+          const inp = document.getElementById("admin-login-token");
+          if (inp) setTimeout(() => inp.focus(), 100);
+        }
+      }
+    });
+
+    // Easter egg de 5 clics en el pie de página
+    const copyTextEl = document.getElementById("foro-footer-copy-text");
+    if (copyTextEl) {
+      let copyClicks = 0;
+      let copyClickTimer = null;
+      copyTextEl.addEventListener("click", () => {
+        copyClicks++;
+        clearTimeout(copyClickTimer);
+        copyClickTimer = setTimeout(() => { copyClicks = 0; }, 2200);
+        if (copyClicks >= 5) {
+          copyClicks = 0;
+          if (this.modalAdminLogin) {
+            this.modalAdminLogin.classList.add("active");
+            const inp = document.getElementById("admin-login-token");
+            if (inp) setTimeout(() => inp.focus(), 100);
+          }
+        }
+      });
+    }
+
+    // Toggle para ver/ocultar token secreto
+    const toggleBtn = document.getElementById("btn-toggle-admin-password");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", () => {
+        const inp = document.getElementById("admin-login-token");
+        if (!inp) return;
+        const isPwd = inp.type === "password";
+        inp.type = isPwd ? "text" : "password";
+        toggleBtn.textContent = isPwd ? "🙈" : "👁️";
+      });
+    }
+
     if (this.btnCloseAdminLogin) {
       this.btnCloseAdminLogin.addEventListener("click", () => {
         this.modalAdminLogin.classList.remove("active");
@@ -536,9 +1134,175 @@ class ForoApp {
       });
     }
 
+    // Modal Sanción Usuario: eventos
+    if (this.btnCloseSanctionModal) {
+      this.btnCloseSanctionModal.addEventListener("click", () => {
+        if (this.modalSanctionUser) this.modalSanctionUser.classList.remove("active");
+      });
+    }
+    if (this.btnCancelSanction) {
+      this.btnCancelSanction.addEventListener("click", () => {
+        if (this.modalSanctionUser) this.modalSanctionUser.classList.remove("active");
+      });
+    }
+    if (this.formSanctionUser) {
+      this.formSanctionUser.addEventListener("submit", (e) => this.handleSanctionSubmit(e));
+      // Cambiar visibilidad de select de duración según tipo
+      const radios = this.formSanctionUser.querySelectorAll('input[name="tipo-sancion"]');
+      radios.forEach(r => {
+        r.addEventListener("change", () => {
+          if (this.sanctionDurationGroup) {
+            this.sanctionDurationGroup.style.display = r.value === "suspender" ? "block" : "none";
+          }
+        });
+      });
+    }
+
+    // Modal Confirmación Admin: eventos
+    if (this.btnCloseConfirmModal) {
+      this.btnCloseConfirmModal.addEventListener("click", () => {
+        if (this.modalAdminConfirm) this.modalAdminConfirm.classList.remove("active");
+        this._pendingConfirmCallback = null;
+      });
+    }
+    if (this.btnCancelConfirmAction) {
+      this.btnCancelConfirmAction.addEventListener("click", () => {
+        if (this.modalAdminConfirm) this.modalAdminConfirm.classList.remove("active");
+        this._pendingConfirmCallback = null;
+      });
+    }
+    if (this.btnProceedConfirmAction) {
+      this.btnProceedConfirmAction.addEventListener("click", () => {
+        if (typeof this._pendingConfirmCallback === "function") {
+          const cb = this._pendingConfirmCallback;
+          this._pendingConfirmCallback = null;
+          cb();
+        }
+        if (this.modalAdminConfirm) this.modalAdminConfirm.classList.remove("active");
+      });
+    }
+
+    // Modal Perfil de Usuario: eventos de navegación y pestañas
+    if (this.btnCloseProfileModal) {
+      this.btnCloseProfileModal.addEventListener("click", () => this.closeUserProfileModal());
+    }
+    if (this.modalUserProfile) {
+      this.modalUserProfile.addEventListener("click", (e) => {
+        if (e.target === this.modalUserProfile) this.closeUserProfileModal();
+      });
+    }
+
+    if (this.tabBtnProfileView) {
+      this.tabBtnProfileView.addEventListener("click", () => this.switchProfileTab("view"));
+    }
+    if (this.tabBtnProfileEdit) {
+      this.tabBtnProfileEdit.addEventListener("click", () => this.switchProfileTab("edit"));
+    }
+    if (this.tabBtnProfileThreads) {
+      this.tabBtnProfileThreads.addEventListener("click", () => this.switchProfileTab("threads"));
+    }
+    if (this.tabBtnProfileReplies) {
+      this.tabBtnProfileReplies.addEventListener("click", () => this.switchProfileTab("replies"));
+    }
+
+    if (this.btnOpenEditProfile) {
+      this.btnOpenEditProfile.addEventListener("click", () => this.switchProfileTab("edit"));
+    }
+    if (this.btnCancelEditProfile) {
+      this.btnCancelEditProfile.addEventListener("click", () => this.switchProfileTab("view"));
+    }
+
+    if (this.btnProfileShare) {
+      this.btnProfileShare.addEventListener("click", () => {
+        const userId = this.btnProfileShare.dataset.userId;
+        if (!userId) return;
+        const shareUrl = `${window.location.origin}${window.location.pathname}?usuario=${encodeURIComponent(userId)}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          this.showToast("🔗 Enlace al perfil copiado al portapapeles");
+        }).catch(() => {
+          this.showToast(shareUrl);
+        });
+      });
+    }
+
+    if (this.btnProfileModerate) {
+      this.btnProfileModerate.addEventListener("click", () => {
+        const user = this._currentViewingProfileUser;
+        if (user) {
+          this.closeUserProfileModal();
+          this.openSanctionModal({
+            googleId: user.googleId,
+            nombre: user.nombre,
+            avatarUrl: user.avatarUrl,
+            colegioId: user.colegioId
+          });
+        }
+      });
+    }
+
+    if (this.editProfileUsername && this.editProfileUsernameStatus) {
+      this.setupUsernameValidator(
+        this.editProfileUsername,
+        this.editProfileUsernameStatus,
+        () => (this.currentUser ? this.currentUser.googleId : "")
+      );
+    }
+    if (this.editProfilePhotoFile) {
+      this.editProfilePhotoFile.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const dataUri = await this.processImageFile(file);
+          this._pendingEditPhoto = dataUri;
+          this._restoreGoogleAvatar = false;
+          if (this.editProfilePhotoPreview) this.editProfilePhotoPreview.src = dataUri;
+        } catch (err) {
+          this.showToast(err.message || "Error al procesar la imagen");
+        }
+      });
+    }
+    if (this.btnEditRestoreGoogle) {
+      this.btnEditRestoreGoogle.addEventListener("click", () => {
+        const orig = (this.currentUser && this.currentUser.avatarOriginal) || (this.currentUser && this.currentUser.avatarUrl);
+        this._restoreGoogleAvatar = true;
+        this._pendingEditPhoto = null;
+        if (this.editProfilePhotoPreview && orig) {
+          this.editProfilePhotoPreview.src = orig;
+        }
+        this.showToast("Foto original de Google seleccionada");
+      });
+    }
+
+    if (this.editProfileBio) {
+      this.editProfileBio.addEventListener("input", () => {
+        if (this.editBioCounter) {
+          this.editBioCounter.textContent = `(${this.editProfileBio.value.length}/160)`;
+        }
+      });
+    }
+    if (this.formEditProfile) {
+      this.formEditProfile.addEventListener("submit", (e) => this.handleEditProfileSubmit(e));
+    }
+
+    // Clic en avatar de perfil de usuario en header (abre perfil con pestaña de edición accesible)
+    if (this.userProfile) {
+      this.userProfile.addEventListener("click", (e) => {
+        if (e.target.closest("#btn-logout")) return;
+        if (this.currentUser && this.currentUser.googleId) {
+          this.openUserProfile(this.currentUser.googleId, "view");
+        }
+      });
+    }
+
     // Tecla ESC para cerrar modales
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
+        if (this.modalUserProfile && this.modalUserProfile.classList.contains("open")) {
+          this.closeUserProfileModal();
+        }
+        if (this.modalOnboarding && this.modalOnboarding.classList.contains("active")) {
+          this.closeOnboardingModal();
+        }
         if (this.modalThread && this.modalThread.classList.contains("active")) {
           this.closeThreadModal();
         }
@@ -550,6 +1314,12 @@ class ForoApp {
         }
         if (this.modalAdminLogin && this.modalAdminLogin.classList.contains("active")) {
           this.modalAdminLogin.classList.remove("active");
+        }
+        if (this.modalSanctionUser && this.modalSanctionUser.classList.contains("active")) {
+          this.modalSanctionUser.classList.remove("active");
+        }
+        if (this.modalAdminConfirm && this.modalAdminConfirm.classList.contains("active")) {
+          this.modalAdminConfirm.classList.remove("active");
         }
       }
     });
@@ -673,18 +1443,19 @@ class ForoApp {
     threads.forEach(t => {
       const col = this.getColegio(t.colegio_id);
       const isVoted = (t.user_voted === 1) || this.userVotes.has(t.id) || this.userVotes.has(String(t.id)) || this.userVotes.has(`hilo_${t.id}`);
+      const isPinned = t.fijado === 1 || t.fijado === true;
       const dateText = timeAgo(t.creado_en);
       const votosCount = (t.votos !== undefined && t.votos !== null) ? t.votos : 0;
       const respuestasCount = t.respuestas_count ?? t.comentarios_count ?? 0;
 
       const card = document.createElement("article");
-      card.className = "thread-card";
+      card.className = `thread-card ${isPinned ? "is-pinned" : ""}`;
       card.dataset.id = t.id;
 
       card.innerHTML = `
         <div class="thread-card-header">
-          <div class="thread-author-wrap">
-            <img class="thread-author-avatar" src="${escapeHtml(t.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${t.id}`)}" alt="Avatar" loading="lazy" />
+          <div class="thread-author-wrap" data-author-id="${escapeHtml(t.autor_google_id)}" style="cursor:pointer;" title="Ver perfil de ${escapeHtml(t.autor_nombre || "Hincha")}">
+            <img class="thread-author-avatar" src="${escapeHtml(t.autor_avatar || "assets/avatar-default.webp")}" alt="Avatar" loading="lazy" />
             <div class="thread-author-meta">
               <div class="thread-author-row">
                 <span class="thread-school-badge" style="border-left: 3px solid ${col.color || "#38bdf8"}">
@@ -692,8 +1463,10 @@ class ForoApp {
                 </span>
                 <span class="meta-dot">&bull;</span>
                 <span class="thread-author-name">${escapeHtml(t.autor_nombre || "Hincha")}</span>
+                ${t.autor_username ? `<span class="thread-author-handle">@${escapeHtml(t.autor_username)}</span>` : ""}
                 <span class="meta-dot">&bull;</span>
                 <span class="thread-time">${dateText}</span>
+                ${isPinned ? `<span class="pinned-badge">📌 Fijado</span>` : ""}
               </div>
               <div class="thread-sub-meta">
                 <span class="thread-channel-badge">${escapeHtml(t.canal_titulo || t.canal_id)}</span>
@@ -701,9 +1474,22 @@ class ForoApp {
             </div>
           </div>
           ${this.adminToken ? `
-            <button type="button" class="btn-admin-thread-mod" title="Moderar debate" data-thread-id="${t.id}">
-              ⚙️
-            </button>` : ""}
+            <div class="thread-admin-bar">
+              <button type="button" class="btn-mod-action btn-mod-pin ${isPinned ? "pinned-active" : ""}" data-thread-id="${t.id}" data-is-pinned="${isPinned ? "1" : "0"}" title="${isPinned ? "Desfijar de la parte superior" : "Fijar arriba"}">
+                ${isPinned ? "📌 Desfijar" : "📌 Fijar"}
+              </button>
+              <button type="button" class="btn-mod-action btn-mod-del" data-thread-id="${t.id}" data-thread-title="${escapeHtml(t.titulo)}" title="Eliminar debate">
+                🗑️ Borrar
+              </button>
+              <button type="button" class="btn-mod-action btn-mod-sanction" data-author-id="${escapeHtml(t.autor_google_id)}" data-author-name="${escapeHtml(t.autor_nombre)}" data-author-avatar="${escapeHtml(t.autor_avatar || "")}" data-author-school="${escapeHtml(t.colegio_id || "janssen")}" title="Sancionar autor">
+                🚫 Moderar
+              </button>
+            </div>
+          ` : `
+            <button type="button" class="btn-report-thread-sm" title="Reportar debate" data-thread-id="${t.id}">
+              🚩
+            </button>
+          `}
         </div>
         <h3 class="thread-title">${escapeHtml(t.titulo)}</h3>
         <p class="thread-excerpt">${escapeHtml(t.contenido)}</p>
@@ -725,7 +1511,13 @@ class ForoApp {
 
       // Eventos de la tarjeta
       card.addEventListener("click", (e) => {
-        if (e.target.closest(".reddit-vote-capsule") || e.target.closest(".btn-share-thread-card") || e.target.closest(".btn-admin-thread-mod")) {
+        const authorEl = e.target.closest(".thread-author-wrap");
+        if (authorEl && authorEl.dataset.authorId) {
+          e.stopPropagation();
+          this.openUserProfile(authorEl.dataset.authorId);
+          return;
+        }
+        if (e.target.closest(".reddit-vote-capsule") || e.target.closest(".btn-share-thread-card") || e.target.closest(".thread-admin-bar") || e.target.closest(".btn-report-thread-sm")) {
           return;
         }
         this.openThread(t.id);
@@ -747,9 +1539,39 @@ class ForoApp {
         });
       }
 
-      const modBtn = card.querySelector(".btn-admin-thread-mod");
-      if (modBtn) {
-        modBtn.addEventListener("click", (e) => {
+      // Moderación de hilo en tarjeta
+      const pinBtn = card.querySelector(".btn-mod-pin");
+      if (pinBtn) {
+        pinBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.adminTogglePinThread(t.id, isPinned);
+        });
+      }
+
+      const delBtn = card.querySelector(".btn-mod-del");
+      if (delBtn) {
+        delBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.adminDeleteThread(t.id, t.titulo);
+        });
+      }
+
+      const sanctionBtn = card.querySelector(".btn-mod-sanction");
+      if (sanctionBtn) {
+        sanctionBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.openSanctionModal({
+            googleId: t.autor_google_id,
+            nombre: t.autor_nombre,
+            avatarUrl: t.autor_avatar,
+            colegioId: t.colegio_id
+          });
+        });
+      }
+
+      const repBtn = card.querySelector(".btn-report-thread-sm");
+      if (repBtn) {
+        repBtn.addEventListener("click", (e) => {
           e.stopPropagation();
           this.reportContent("hilo", t.id);
         });
@@ -798,8 +1620,32 @@ class ForoApp {
       if (this.threadModalTitle) this.threadModalTitle.textContent = decodeEntities(h.titulo);
       if (this.threadModalChannel) this.threadModalChannel.textContent = h.canal_titulo || h.canal_id;
       if (this.threadModalDate) this.threadModalDate.textContent = timeAgo(h.creado_en);
-      if (this.threadOpAvatar) this.threadOpAvatar.src = h.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${h.id}`;
-      if (this.threadOpName) this.threadOpName.textContent = h.autor_nombre || "Hincha";
+      if (this.threadOpAvatar) {
+        this.threadOpAvatar.src = h.autor_avatar || "assets/avatar-default.webp";
+        this.threadOpAvatar.dataset.authorId = h.autor_google_id;
+        this.threadOpAvatar.style.cursor = "pointer";
+        this.threadOpAvatar.title = `Ver perfil de ${h.autor_nombre || "Hincha"}`;
+        this.threadOpAvatar.onclick = () => {
+          if (this.threadOpAvatar.dataset.authorId) {
+            this.openUserProfile(this.threadOpAvatar.dataset.authorId);
+          }
+        };
+      }
+      if (this.threadOpName) {
+        this.threadOpName.textContent = h.autor_nombre || "Hincha";
+        this.threadOpName.dataset.authorId = h.autor_google_id;
+        this.threadOpName.style.cursor = "pointer";
+        this.threadOpName.title = `Ver perfil de ${h.autor_nombre || "Hincha"}`;
+        this.threadOpName.onclick = () => {
+          if (this.threadOpName.dataset.authorId) {
+            this.openUserProfile(this.threadOpName.dataset.authorId);
+          }
+        };
+      }
+      if (this.threadOpHandle) {
+        this.threadOpHandle.textContent = h.autor_username ? `@${h.autor_username}` : "";
+        this.threadOpHandle.style.display = h.autor_username ? "inline-block" : "none";
+      }
       if (this.threadOpSchool) {
         this.threadOpSchool.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
       }
@@ -847,10 +1693,11 @@ class ForoApp {
 
       return `
         <div class="reply-card" data-comment-id="${r.id}">
-          <div class="reply-author-row">
-            <img class="reply-avatar" src="${escapeHtml(r.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${r.id}`)}" alt="Avatar" loading="lazy" />
+          <div class="reply-author-row" data-author-id="${escapeHtml(r.autor_google_id)}" style="cursor:pointer;" title="Ver perfil de ${escapeHtml(r.autor_nombre || "Hincha")}">
+            <img class="reply-avatar" src="${escapeHtml(r.autor_avatar || "assets/avatar-default.webp")}" alt="Avatar" loading="lazy" />
             <div class="reply-author-meta">
               <span class="reply-author-name">${escapeHtml(r.autor_nombre || "Hincha")}</span>
+              ${r.autor_username ? `<span class="reply-author-handle">@${escapeHtml(r.autor_username)}</span>` : ""}
               <span class="reply-author-school">${col.escudo || "🥁"} ${escapeHtml(col.nombre)}</span>
             </div>
             <span class="reply-time">${dateText}</span>
@@ -864,12 +1711,31 @@ class ForoApp {
             <button type="button" class="reply-report-btn" data-comment-id="${r.id}" title="Reportar">
               🚩
             </button>
+            ${this.adminToken ? `
+              <div class="reply-admin-bar">
+                <button type="button" class="btn-reply-mod-del" data-comment-id="${r.id}" title="Eliminar comentario">
+                  🗑️ Borrar
+                </button>
+                <button type="button" class="btn-reply-mod-sanction" data-author-id="${escapeHtml(r.autor_google_id)}" data-author-name="${escapeHtml(r.autor_nombre)}" data-author-avatar="${escapeHtml(r.autor_avatar || "")}" data-author-school="${escapeHtml(r.colegio_id || "janssen")}" title="Sancionar usuario">
+                  🚫 Sancionar
+                </button>
+              </div>
+            ` : ""}
           </div>
         </div>
       `;
     }).join("");
 
     this.threadRepliesList.innerHTML = html;
+
+    // Listeners para abrir perfil desde comentarios
+    this.threadRepliesList.querySelectorAll(".reply-author-row").forEach(row => {
+      row.addEventListener("click", () => {
+        if (row.dataset.authorId) {
+          this.openUserProfile(row.dataset.authorId);
+        }
+      });
+    });
 
     // Listeners de voto y reporte en comentarios
     this.threadRepliesList.querySelectorAll(".reply-vote-btn").forEach(btn => {
@@ -885,6 +1751,27 @@ class ForoApp {
         this.reportContent("comentario", commentId);
       });
     });
+
+    // Listeners de moderación en comentarios
+    if (this.adminToken) {
+      this.threadRepliesList.querySelectorAll(".btn-reply-mod-del").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const commentId = btn.dataset.commentId;
+          this.adminDeleteComment(commentId, this.activeThreadId);
+        });
+      });
+
+      this.threadRepliesList.querySelectorAll(".btn-reply-mod-sanction").forEach(btn => {
+        btn.addEventListener("click", () => {
+          this.openSanctionModal({
+            googleId: btn.dataset.authorId,
+            nombre: btn.dataset.authorName,
+            avatarUrl: btn.dataset.authorAvatar,
+            colegioId: btn.dataset.authorSchool
+          });
+        });
+      });
+    }
   }
 
   closeThreadModal() {
@@ -997,32 +1884,10 @@ class ForoApp {
     }
   }
 
-  quickLogin() {
-    const schoolSelect = this.authSelectSchool;
-    const schoolId = (schoolSelect && schoolSelect.value) || "janssen";
-    const col = this.getColegio(schoolId);
-
-    let hinchaId = localStorage.getItem("comunidad_hincha_id");
-    if (!hinchaId) {
-      hinchaId = "hincha_" + Math.random().toString(36).substring(2, 10);
-      localStorage.setItem("comunidad_hincha_id", hinchaId);
-    }
-
-    const user = {
-      googleId: hinchaId,
-      nombre: `Hincha de ${col.nombre}`,
-      email: "",
-      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${hinchaId}`,
-      colegioId: schoolId
-    };
-
-    this.saveUser(user);
-  }
-
   async toggleVote(id, isComment = false, commentId = null, btnEl = null) {
     if (!this.currentUser) {
       if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
-      this.showToast("Iniciá sesión o ingresá como hincha para votar");
+      this.showToast("Iniciá sesión con Google para votar");
       return;
     }
 
@@ -1144,30 +2009,45 @@ class ForoApp {
 
   async handleAdminLogin(e) {
     e.preventDefault();
-    const user = document.getElementById("admin-login-user").value.trim();
-    const pass = document.getElementById("admin-login-password").value;
+    const tokenEl = document.getElementById("admin-login-token");
+    const token = tokenEl ? tokenEl.value.trim() : "";
+    const user = (document.getElementById("admin-login-user")?.value || "").trim();
+    const pass = document.getElementById("admin-login-password")?.value || "";
     const errEl = document.getElementById("admin-login-error");
     if (errEl) errEl.style.display = "none";
 
+    if (!token && (!user || !pass)) return;
+
     try {
-      const res = await fetch("/api/admin?action=login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usuario: user, password: pass })
-      });
-      const json = await res.json();
-      if (json.status === "ok" && json.data && json.data.token) {
-        this.adminToken = json.data.token;
-        this.adminUser = user;
+      let res, json;
+      if (token) {
+        res = await fetch("/api/admin?action=login_token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token })
+        });
+        json = await res.json();
+      } else {
+        res = await fetch("/api/admin?action=login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario: user, password: pass })
+        });
+        json = await res.json();
+      }
+
+      if (json.status === "ok" && (json.token || json.data?.token)) {
+        this.adminToken = json.token || json.data.token;
+        this.adminUser = json.usuario || json.data?.usuario || "admin";
         localStorage.setItem("comunidad_admin_token", this.adminToken);
         localStorage.setItem("comunidad_admin_user", this.adminUser);
         if (this.modalAdminLogin) this.modalAdminLogin.classList.remove("active");
         this.updateAdminBar();
-        this.showToast("🔓 Sesión de moderador iniciada");
+        this.showToast(`🔓 Sesión de moderador iniciada (${this.adminUser})`);
         this.loadThreads(false);
       } else {
         if (errEl) {
-          errEl.textContent = json.message || "Usuario o contraseña inválidos";
+          errEl.textContent = json.message || "Token inválido o no reconocido";
           errEl.style.display = "block";
         }
       }
@@ -1176,6 +2056,557 @@ class ForoApp {
         errEl.textContent = "Error de conexión con el servidor";
         errEl.style.display = "block";
       }
+    }
+  }
+
+  // Moderación Admin: Diálogo de Confirmación
+  confirmAdminAction(title, desc, callback) {
+    if (this.confirmModalTitle) this.confirmModalTitle.textContent = title;
+    if (this.confirmModalDesc) this.confirmModalDesc.textContent = desc;
+    this._pendingConfirmCallback = callback;
+    if (this.modalAdminConfirm) {
+      this.modalAdminConfirm.classList.add("active");
+    } else {
+      if (confirm(`${title}\n${desc}`)) {
+        callback();
+      }
+    }
+  }
+
+  // Moderación Admin: Fijar / Desfijar Hilo
+  async adminTogglePinThread(id, isPinned) {
+    if (!this.adminToken) return;
+    try {
+      const res = await fetch("/api/admin?action=fijar_hilo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.adminToken}`
+        },
+        body: JSON.stringify({ hiloId: id, id: id, fijar: isPinned ? 0 : 1 })
+      });
+      const json = await res.json();
+      if (json.status === "ok") {
+        this.showToast(json.fijado === 1 ? "📌 Hilo fijado en la cima" : "📌 Hilo desfijado");
+        this.loadThreads(false);
+      } else {
+        this.showToast(json.message || "Error al fijar hilo");
+      }
+    } catch (e) {
+      this.showToast("Error de conexión al fijar hilo");
+    }
+  }
+
+  // Moderación Admin: Borrar Hilo
+  adminDeleteThread(id, title = "este debate") {
+    if (!this.adminToken) return;
+    this.confirmAdminAction(
+      "Eliminar Debate",
+      `¿Confirmás la eliminación permanente de "${title}" y todos sus comentarios asociados?`,
+      async () => {
+        try {
+          const res = await fetch("/api/admin?action=borrar_hilo", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${this.adminToken}`
+            },
+            body: JSON.stringify({ hiloId: id, id: id })
+          });
+          const json = await res.json();
+          if (json.status === "ok") {
+            this.showToast("🗑️ Debate eliminado con éxito");
+            if (this.activeThreadId == id) {
+              this.closeThreadModal();
+            }
+            this.loadThreads(false);
+          } else {
+            this.showToast(json.message || "Error al eliminar debate");
+          }
+        } catch (e) {
+          this.showToast("Error de conexión al eliminar debate");
+        }
+      }
+    );
+  }
+
+  // Moderación Admin: Borrar Comentario
+  adminDeleteComment(commentId, threadId) {
+    if (!this.adminToken) return;
+    this.confirmAdminAction(
+      "Eliminar Comentario",
+      "¿Confirmás la eliminación permanente de este comentario?",
+      async () => {
+        try {
+          const res = await fetch("/api/admin?action=borrar_comentario", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${this.adminToken}`
+            },
+            body: JSON.stringify({ comentarioId: commentId, id: commentId })
+          });
+          const json = await res.json();
+          if (json.status === "ok") {
+            this.showToast("🗑️ Comentario eliminado");
+            if (threadId) {
+              this.openThread(threadId); // refrescar comentarios en modal
+            }
+            this.loadThreads(false); // refrescar contador en feed
+          } else {
+            this.showToast(json.message || "Error al eliminar comentario");
+          }
+        } catch (e) {
+          this.showToast("Error de conexión al eliminar comentario");
+        }
+      }
+    );
+  }
+
+  // Moderación Admin: Abrir Modal de Sanción
+  openSanctionModal(user) {
+    if (!this.adminToken || !user) return;
+    const col = this.getColegio(user.colegioId);
+
+    if (this.sanctionTargetGoogleId) this.sanctionTargetGoogleId.value = user.googleId || "";
+    if (this.sanctionUserName) this.sanctionUserName.textContent = user.nombre || "Usuario";
+    if (this.sanctionUserSchool) this.sanctionUserSchool.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+    if (this.sanctionUserAvatar) {
+      this.sanctionUserAvatar.src = user.avatarUrl || "assets/avatar-default.webp";
+    }
+    if (this.sanctionUserStatus) {
+      const st = user.estado || "activo";
+      this.sanctionUserStatus.textContent = st.toUpperCase();
+      this.sanctionUserStatus.className = `user-status-pill status-${st}`;
+    }
+    if (this.sanctionReasonText) this.sanctionReasonText.value = "";
+    if (this.sanctionDurationGroup) this.sanctionDurationGroup.style.display = "block";
+
+    // Marcar "suspender" por defecto
+    if (this.formSanctionUser) {
+      const radioSusp = this.formSanctionUser.querySelector('input[name="tipo-sancion"][value="suspender"]');
+      if (radioSusp) radioSusp.checked = true;
+    }
+
+    if (this.modalSanctionUser) this.modalSanctionUser.classList.add("active");
+  }
+
+  // Moderación Admin: Aplicar Sanción
+  async handleSanctionSubmit(e) {
+    e.preventDefault();
+    if (!this.adminToken) return;
+
+    const googleId = (this.sanctionTargetGoogleId && this.sanctionTargetGoogleId.value.trim()) || "";
+    if (!googleId) {
+      this.showToast("Identificador de usuario inválido");
+      return;
+    }
+
+    const selectedRadio = this.formSanctionUser.querySelector('input[name="tipo-sancion"]:checked');
+    const tipoSancion = selectedRadio ? selectedRadio.value : "suspender";
+    const duracionHoras = parseInt((this.sanctionDurationSelect && this.sanctionDurationSelect.value) || "24", 10);
+    const motivo = (this.sanctionReasonText && this.sanctionReasonText.value.trim()) || "";
+
+    try {
+      const res = await fetch("/api/admin?action=sancionar_usuario", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.adminToken}`
+        },
+        body: JSON.stringify({
+          googleId,
+          tipoSancion,
+          duracionHoras,
+          motivo
+        })
+      });
+
+      const json = await res.json();
+      if (json.status === "ok") {
+        this.showToast(`🛡️ ${json.message}`);
+        if (this.modalSanctionUser) this.modalSanctionUser.classList.remove("active");
+      } else {
+        this.showToast(json.message || "Error al aplicar sanción");
+      }
+    } catch (err) {
+      console.error("Error al sancionar usuario:", err);
+      this.showToast("Error de conexión con el servidor");
+    }
+  }
+
+  closeUserProfileModal() {
+    if (this.modalUserProfile) {
+      this.modalUserProfile.classList.remove("open", "active");
+      this.modalUserProfile.setAttribute("aria-hidden", "true");
+      const schoolProps = [
+        "--school-primary", "--school-secondary", "--school-accent", "--school-glow",
+        "--school-collar", "--school-text-contrast", "--school-surface", "--school-border",
+        "--school-gradient", "--school-gradient-subtle"
+      ];
+      schoolProps.forEach(prop => this.modalUserProfile.style.removeProperty(prop));
+    }
+    // Limpiar parámetro usuario de la URL
+    const url = new URL(window.location);
+    if (url.searchParams.has("usuario") || url.searchParams.has("perfil")) {
+      url.searchParams.delete("usuario");
+      url.searchParams.delete("perfil");
+      window.history.replaceState({}, "", url);
+    }
+  }
+
+  switchProfileTab(tabName) {
+    const tabs = [
+      { name: "view", btn: this.tabBtnProfileView, panel: this.profileTabView },
+      { name: "edit", btn: this.tabBtnProfileEdit, panel: this.profileTabEdit },
+      { name: "threads", btn: this.tabBtnProfileThreads, panel: this.profileTabThreads },
+      { name: "replies", btn: this.tabBtnProfileReplies, panel: this.profileTabReplies }
+    ];
+
+    tabs.forEach(t => {
+      const isActive = t.name === tabName;
+      if (t.btn) {
+        t.btn.classList.toggle("active", isActive);
+        t.btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      }
+      if (t.panel) {
+        t.panel.style.display = isActive ? (t.name === "view" || t.name === "edit" ? "flex" : "block") : "none";
+      }
+    });
+
+    if (tabName === "edit" && this.editProfileName) {
+      setTimeout(() => this.editProfileName.focus(), 100);
+    }
+  }
+
+  async openUserProfile(googleId, initialTab = "view") {
+    if (!googleId) return;
+
+    // Actualizar URL sin recargar para soportar compartir
+    const url = new URL(window.location);
+    url.searchParams.set("usuario", googleId);
+    window.history.replaceState({}, "", url);
+
+    try {
+      const res = await fetch(`/api/foro?action=perfil&id=${encodeURIComponent(googleId)}`);
+      const json = await res.json();
+
+      if (json.status !== "ok" || !json.usuario) {
+        this.showToast("El usuario solicitado no fue encontrado.");
+        return;
+      }
+
+      const u = json.usuario;
+      const m = json.metricas || { totalHilos: 0, totalComentarios: 0, karmaTotal: 0 };
+      const insignias = json.insignias || [];
+      const hilos = json.hilosRecientes || [];
+      const comentarios = json.comentariosRecientes || [];
+
+      this._currentViewingProfileUser = u;
+
+      // Determinar si es el propio perfil del usuario autenticado
+      const isOwner = !!(this.currentUser && this.currentUser.googleId === u.googleId);
+
+      // Colores institucionales para banner y scoping temático del modal
+      const col = this.getColegio(u.colegioId);
+      if (this.modalUserProfile) {
+        this.applySchoolTheme(u.colegioId, this.modalUserProfile);
+      }
+      if (this.profileHeroBanner) {
+        const primary = (col && col.colores && col.colores.primary) || "#1d4ed8";
+        const secondary = (col && col.colores && col.colores.secondary) || primary;
+        this.profileHeroBanner.style.background = `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
+      }
+
+      // Avatar
+      if (this.profileAvatarImg) {
+        this.profileAvatarImg.src = u.avatarUrl || "assets/avatar-default.webp";
+      }
+
+      // Nombre y Rol/Badge
+      if (this.profileUserName) {
+        this.profileUserName.textContent = u.nombre || "Hincha";
+      }
+      if (this.profileUserHandle) {
+        this.profileUserHandle.textContent = u.username ? `@${u.username}` : "";
+        this.profileUserHandle.style.display = u.username ? "block" : "none";
+      }
+      if (this.profileUserBadge) {
+        if (u.rol === "admin" || u.rol === "superadmin") {
+          this.profileUserBadge.textContent = "⚡ Moderador Oficial";
+          this.profileUserBadge.style.display = "inline-flex";
+        } else if (u.estado === "suspendido") {
+          this.profileUserBadge.textContent = "⏳ Suspendido";
+          this.profileUserBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
+          this.profileUserBadge.style.display = "inline-flex";
+        } else if (u.estado === "baneado") {
+          this.profileUserBadge.textContent = "⛔ Baneado";
+          this.profileUserBadge.style.background = "linear-gradient(135deg, #ef4444, #dc2626)";
+          this.profileUserBadge.style.display = "inline-flex";
+        } else {
+          this.profileUserBadge.style.display = "none";
+        }
+      }
+
+      // Tags de Colegio, Rol Estudiantil y Año
+      if (this.profileSchoolPill) {
+        this.profileSchoolPill.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+      }
+      if (this.profileRolePill) {
+        this.profileRolePill.textContent = u.rolEstudiantil || "Hincha de Tribuna";
+      }
+      if (this.profileGradePill) {
+        this.profileGradePill.textContent = u.anoEscolar || "Secundaria";
+      }
+
+      // Biografía
+      if (this.profileUserBio) {
+        if (u.bio && u.bio.trim()) {
+          this.profileUserBio.textContent = u.bio;
+          this.profileUserBio.style.fontStyle = "normal";
+          this.profileUserBio.style.display = "block";
+          this.profileUserBio.style.removeProperty("color");
+        } else {
+          this.profileUserBio.textContent = isOwner
+            ? "Aún no escribiste tu biografía. ¡Hacé click en 'Editar Perfil' para agregarla!"
+            : "Este hincha aún no ha escrito una biografía.";
+          this.profileUserBio.style.fontStyle = "italic";
+          this.profileUserBio.style.display = "block";
+          this.profileUserBio.style.removeProperty("color");
+        }
+      }
+
+      // Instagram
+      if (this.profileSocialRow && this.profileInstagramLink && this.profileInstagramText) {
+        if (u.instagram && u.instagram.trim()) {
+          const cleanInsta = u.instagram.trim().replace(/^@/, "");
+          this.profileInstagramText.textContent = `@${cleanInsta}`;
+          this.profileInstagramLink.href = `https://instagram.com/${encodeURIComponent(cleanInsta)}`;
+          this.profileSocialRow.style.display = "block";
+        } else {
+          this.profileSocialRow.style.display = "none";
+        }
+      }
+
+      // Pestaña y Botón Editar (SOLO si es el dueño del perfil)
+      if (this.tabLabelProfileView) {
+        this.tabLabelProfileView.textContent = isOwner ? "Mi Perfil" : "Perfil";
+      }
+
+      if (this.tabBtnProfileEdit) {
+        this.tabBtnProfileEdit.style.display = isOwner ? "inline-flex" : "none";
+      }
+
+      if (this.btnOpenEditProfile) {
+        this.btnOpenEditProfile.style.display = isOwner ? "inline-flex" : "none";
+      }
+
+      // Botón Compartir
+      if (this.btnProfileShare) {
+        this.btnProfileShare.dataset.userId = u.googleId;
+      }
+
+      // Botón Moderar (visible solo para admin y no moderarse a sí mismo)
+      if (this.btnProfileModerate) {
+        this.btnProfileModerate.style.display = this.adminToken && !isOwner ? "inline-flex" : "none";
+      }
+
+      // Pre-cargar datos en el formulario de edición si es el dueño
+      if (isOwner) {
+        if (this.editProfileUsername) {
+          this.editProfileUsername.value = u.username || "";
+          if (this.editProfileUsernameStatus) {
+            this.editProfileUsernameStatus.textContent = "";
+            this.editProfileUsernameStatus.className = "username-status-badge";
+          }
+        }
+        if (this.editProfileName) this.editProfileName.value = u.nombre || "";
+        if (this.editProfileSchool) this.editProfileSchool.value = u.colegioId || "janssen";
+        if (this.editProfileRole) this.editProfileRole.value = u.rolEstudiantil || "Hincha de Tribuna";
+        if (this.editProfileGrade) this.editProfileGrade.value = u.anoEscolar || "5° Año (Promo)";
+        if (this.editProfileBio) {
+          this.editProfileBio.value = u.bio || "";
+          if (this.editBioCounter) {
+            this.editBioCounter.textContent = `(${(u.bio || "").length}/160)`;
+          }
+        }
+        if (this.editProfileInstagram) {
+          this.editProfileInstagram.value = (u.instagram || "").replace(/^@/, "");
+        }
+
+        this._pendingEditPhoto = null;
+        this._restoreGoogleAvatar = false;
+        if (this.editProfilePhotoPreview) {
+          this.editProfilePhotoPreview.src = u.avatarUrl || "assets/avatar-default.webp";
+        }
+      }
+
+      // Métricas
+      if (this.profileStatKarma) this.profileStatKarma.textContent = m.karmaTotal || 0;
+      if (this.profileStatThreads) this.profileStatThreads.textContent = m.totalHilos || 0;
+      if (this.profileStatReplies) this.profileStatReplies.textContent = m.totalComentarios || 0;
+
+      if (this.profileCountTabThreads) this.profileCountTabThreads.textContent = m.totalHilos || 0;
+      if (this.profileCountTabReplies) this.profileCountTabReplies.textContent = m.totalComentarios || 0;
+
+      // Insignias
+      if (this.profileBadgesList) {
+        if (insignias.length === 0) {
+          this.profileBadgesList.innerHTML = `<span style="font-size:0.8rem;color:var(--foro-text-muted);">Sin insignias por el momento.</span>`;
+        } else {
+          this.profileBadgesList.innerHTML = insignias.map(b => `
+            <div class="badge-item-pill" title="${escapeHtml(b.desc)}" style="border-color: ${b.color || "rgba(255,255,255,0.1)"}">
+              <span class="badge-icon">${b.icono || "⭐"}</span>
+              <span class="badge-title">${escapeHtml(b.titulo)}</span>
+            </div>
+          `).join("");
+        }
+      }
+
+      // Pestaña Debates Creados
+      if (this.profileThreadsList) {
+        if (hilos.length === 0) {
+          this.profileThreadsList.innerHTML = `<div style="font-size:0.82rem;color:var(--foro-text-muted);padding:10px 0;">No ha publicado debates todavía.</div>`;
+        } else {
+          this.profileThreadsList.innerHTML = hilos.map(h => `
+            <div class="profile-activity-item" data-thread-id="${h.id}">
+              <span class="activity-item-title">${escapeHtml(h.titulo)}</span>
+              <div class="activity-item-meta">
+                <span class="activity-meta-metric">▲ ${h.votos || 0}</span>
+                <span class="activity-meta-metric">💬 ${h.respuestas_count || 0}</span>
+                <span>${timeAgo(h.creado_en)}</span>
+              </div>
+            </div>
+          `).join("");
+
+          this.profileThreadsList.querySelectorAll(".profile-activity-item").forEach(item => {
+            item.addEventListener("click", () => {
+              const threadId = item.dataset.threadId;
+              this.closeUserProfileModal();
+              this.openThread(threadId);
+            });
+          });
+        }
+      }
+
+      // Pestaña Comentarios / Respuestas
+      if (this.profileRepliesList) {
+        if (comentarios.length === 0) {
+          this.profileRepliesList.innerHTML = `<div style="font-size:0.82rem;color:var(--foro-text-muted);padding:10px 0;">No ha participado en comentarios todavía.</div>`;
+        } else {
+          this.profileRepliesList.innerHTML = comentarios.map(c => `
+            <div class="profile-activity-item" data-thread-id="${c.hilo_id}">
+              <span style="font-size:0.75rem;color:var(--foro-cyan);font-weight:700;">En: ${escapeHtml(c.hilo_titulo || "Debate #" + c.hilo_id)}</span>
+              <span class="activity-item-title" style="font-weight:400;">${escapeHtml(c.contenido)}</span>
+              <div class="activity-item-meta">
+                <span class="activity-meta-metric">▲ ${c.votos || 0}</span>
+                <span>${timeAgo(c.creado_en)}</span>
+              </div>
+            </div>
+          `).join("");
+
+          this.profileRepliesList.querySelectorAll(".profile-activity-item").forEach(item => {
+            item.addEventListener("click", () => {
+              const threadId = item.dataset.threadId;
+              this.closeUserProfileModal();
+              this.openThread(threadId);
+            });
+          });
+        }
+      }
+
+      // Activar pestaña solicitada
+      const targetTab = (!isOwner && initialTab === "edit") ? "view" : initialTab;
+      this.switchProfileTab(targetTab);
+
+      // Abrir modal
+      if (this.modalUserProfile) {
+        this.modalUserProfile.classList.add("open", "active");
+        this.modalUserProfile.setAttribute("aria-hidden", "false");
+      }
+    } catch (err) {
+      console.error("Error al cargar perfil de usuario:", err);
+      this.showToast("Error de conexión al cargar el perfil");
+    }
+  }
+
+  async handleEditProfileSubmit(e) {
+    e.preventDefault();
+    if (!this.currentUser) return;
+
+    const username = (this.editProfileUsername && this.editProfileUsername.value.trim().toLowerCase()) || "";
+    const nombre = (this.editProfileName && this.editProfileName.value.trim()) || this.currentUser.nombre;
+    const colegioId = (this.editProfileSchool && this.editProfileSchool.value) || this.currentUser.colegioId;
+    const rolEstudiantil = (this.editProfileRole && this.editProfileRole.value) || "Hincha de Tribuna";
+    const anoEscolar = (this.editProfileGrade && this.editProfileGrade.value) || "5° Año (Promo)";
+    const bio = (this.editProfileBio && this.editProfileBio.value.trim()) || "";
+    const instagram = (this.editProfileInstagram && this.editProfileInstagram.value.trim().replace(/^@/, "")) || "";
+
+    if (username && username.length < 3) {
+      this.showToast("El usuario debe tener al menos 3 caracteres");
+      if (this.editProfileUsername) this.editProfileUsername.focus();
+      return;
+    }
+
+    const payload = {
+      googleId: this.currentUser.googleId,
+      username,
+      nombre,
+      colegioId,
+      rolEstudiantil,
+      anoEscolar,
+      bio,
+      instagram
+    };
+
+    if (this._restoreGoogleAvatar) {
+      payload.restoreGoogleAvatar = true;
+    } else if (this._pendingEditPhoto) {
+      payload.avatarUrl = this._pendingEditPhoto;
+    }
+
+    try {
+      const res = await fetch("/api/foro?action=editar_perfil", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const json = await res.json();
+      if (json.status === "ok" && json.usuario) {
+        // Actualizar currentUser
+        this.currentUser.username = json.usuario.username || "";
+        this.currentUser.nombre = json.usuario.nombre;
+        this.currentUser.colegioId = json.usuario.colegioId;
+        this.currentUser.bio = json.usuario.bio;
+        this.currentUser.rolEstudiantil = json.usuario.rolEstudiantil;
+        this.currentUser.anoEscolar = json.usuario.anoEscolar;
+        this.currentUser.instagram = json.usuario.instagram;
+        this.currentUser.avatarUrl = json.usuario.avatarUrl;
+
+        localStorage.setItem("comunidad_google_user", JSON.stringify(this.currentUser));
+
+        this._pendingEditPhoto = null;
+        this._restoreGoogleAvatar = false;
+
+        if (this.currentUser.colegioId) {
+          this.applySchoolTheme(this.currentUser.colegioId);
+        }
+
+        this.updateUserBar();
+        this.showToast("✨ ¡Perfil actualizado con éxito!");
+
+        // Refrescar modal de perfil directamente en la pestaña "view"
+        this.openUserProfile(this.currentUser.googleId, "view");
+
+        // Recargar hilos para reflejar cambios de nombre/avatar/username en feed
+        this.loadThreads(false);
+      } else {
+        this.showToast(json.message || "Error al actualizar perfil");
+      }
+    } catch (err) {
+      console.error("Error al editar perfil:", err);
+      this.showToast("Error de conexión al guardar cambios");
     }
   }
 

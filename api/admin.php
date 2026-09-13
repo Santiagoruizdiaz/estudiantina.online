@@ -36,8 +36,9 @@ try {
     exit;
 }
 
-// Clave secreta para tokens HMAC
+// Clave secreta para tokens HMAC y Token Maestro de Administración
 $ADMIN_SECRET = getenv("ADMIN_SECRET") ?: "estudiantina_admin_secret_posadas_2026_key";
+$ADMIN_TOKEN = getenv("ADMIN_TOKEN") ?: (getenv("ADMIN_SECRET") ?: "posadas_admin_2026_x9k2m");
 
 // Tablas de Administración y Noticias
 $pdo->exec("
@@ -101,9 +102,17 @@ function generateAdminToken($admin, $secret) {
     return $payloadB64 . "." . $sig;
 }
 
-function verifyAdminToken($token, $secret) {
-    if (!$token || strpos($token, ".") === false) return null;
-    $parts = explode(".", $token);
+function verifyAdminToken($token, $secret, $masterToken = null) {
+    if (!$token) return null;
+    $clean = trim($token);
+    if ($masterToken && hash_equals($masterToken, $clean)) {
+        return ["id" => 1, "usuario" => "admin", "rol" => "superadmin"];
+    }
+    if ($secret && hash_equals($secret, $clean)) {
+        return ["id" => 1, "usuario" => "admin", "rol" => "superadmin"];
+    }
+    if (strpos($clean, ".") === false) return null;
+    $parts = explode(".", $clean);
     if (count($parts) !== 2) return null;
     list($payloadB64, $sig) = $parts;
 
@@ -117,12 +126,15 @@ function verifyAdminToken($token, $secret) {
     return $payload;
 }
 
-function getAdminFromRequest($secret) {
+function getAdminFromRequest($secret, $masterToken = null) {
+    if ($masterToken === null && isset($GLOBALS["ADMIN_TOKEN"])) {
+        $masterToken = $GLOBALS["ADMIN_TOKEN"];
+    }
     $headers = getallheaders();
     $auth = isset($headers["Authorization"]) ? $headers["Authorization"] : (isset($headers["authorization"]) ? $headers["authorization"] : "");
     if (strpos($auth, "Bearer ") === 0) {
         $token = trim(substr($auth, 7));
-        return verifyAdminToken($token, $secret);
+        return verifyAdminToken($token, $secret, $masterToken);
     }
     return null;
 }
@@ -217,6 +229,25 @@ if ($method === "GET") {
         exit;
     }
 
+    if ($action === "usuarios") {
+        $admin = getAdminFromRequest($ADMIN_SECRET);
+        if (!$admin) {
+            http_response_code(401);
+            echo json_encode(["status" => "error", "message" => "No autorizado"]);
+            exit;
+        }
+        $stmt = $pdo->query("
+            SELECT u.*,
+              (SELECT COUNT(*) FROM hilos h WHERE h.autor_google_id = u.google_id) as total_hilos,
+              (SELECT COUNT(*) FROM comentarios c WHERE c.autor_google_id = u.google_id) as total_comentarios
+            FROM usuarios u
+            ORDER BY u.creado_en DESC
+        ");
+        $usuarios = $stmt->fetchAll();
+        echo json_encode(["status" => "ok", "usuarios" => $usuarios]);
+        exit;
+    }
+
     http_response_code(400);
     echo json_encode(["status" => "error", "message" => "Acción GET no reconocida"]);
     exit;
@@ -263,6 +294,30 @@ if ($method === "POST") {
             "token" => $token,
             "usuario" => $row["usuario"],
             "rol" => $row["rol"]
+        ]);
+        exit;
+    }
+
+    // Login directo mediante Token de Administración Maestro
+    if ($action === "login_token") {
+        $rawToken = trim((string)($body["token"] ?? ""));
+        if (!$rawToken) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Token de administración requerido"]);
+            exit;
+        }
+        $verified = verifyAdminToken($rawToken, $ADMIN_SECRET, $ADMIN_TOKEN);
+        if (!$verified) {
+            http_response_code(401);
+            echo json_encode(["status" => "error", "message" => "Token de administración inválido o no reconocido"]);
+            exit;
+        }
+        echo json_encode([
+            "status" => "ok",
+            "token" => $rawToken,
+            "usuario" => $verified["usuario"] ?? "admin",
+            "rol" => $verified["rol"] ?? "superadmin",
+            "admin" => $verified
         ]);
         exit;
     }
@@ -354,10 +409,11 @@ if ($method === "POST") {
         $id = "noticia-" . time();
         $fecha = date("d/m/Y");
         $imagenUrl = trim($body["imagen"] ?? $body["imagenUrl"] ?? "");
+        $fijada = !empty($body["fijada"]) ? 1 : 0;
 
         $stmt = $pdo->prepare("
             INSERT INTO noticias (id, titulo, categoria, categoria_slug, fecha, autor, tiempo_lectura, badge, resumen, contenido, bloques, tags, imagen_url, fijada)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             $id,
@@ -372,7 +428,8 @@ if ($method === "POST") {
             json_encode($contenido, JSON_UNESCAPED_UNICODE),
             json_encode($bloques, JSON_UNESCAPED_UNICODE),
             json_encode(array_values($tags), JSON_UNESCAPED_UNICODE),
-            $imagenUrl
+            $imagenUrl,
+            $fijada
         ]);
 
         syncComunidadJson($pdo);
@@ -394,7 +451,8 @@ if ($method === "POST") {
                 "bloques" => $bloques,
                 "tags" => array_values($tags),
                 "imagen" => $imagenUrl,
-                "imagenUrl" => $imagenUrl
+                "imagenUrl" => $imagenUrl,
+                "fijada" => $fijada === 1
             ]
         ]);
         exit;
@@ -410,6 +468,7 @@ if ($method === "POST") {
         $autor = trim($body["autor"] ?? "Redacción Oficial");
         $tiempoLectura = trim($body["tiempoLectura"] ?? "3 min de lectura");
         $imagenUrl = trim($body["imagen"] ?? $body["imagenUrl"] ?? "");
+        $fijada = !empty($body["fijada"]) ? 1 : 0;
         
         $tags = $body["tags"] ?? [];
         if (is_string($tags)) {
@@ -444,7 +503,7 @@ if ($method === "POST") {
 
         $stmt = $pdo->prepare("
             UPDATE noticias 
-            SET titulo = ?, categoria = ?, categoria_slug = ?, badge = ?, autor = ?, tiempo_lectura = ?, resumen = ?, contenido = ?, bloques = ?, tags = ?, imagen_url = ?
+            SET titulo = ?, categoria = ?, categoria_slug = ?, badge = ?, autor = ?, tiempo_lectura = ?, resumen = ?, contenido = ?, bloques = ?, tags = ?, imagen_url = ?, fijada = ?
             WHERE id = ?
         ");
         $stmt->execute([
@@ -459,6 +518,7 @@ if ($method === "POST") {
             json_encode($bloques, JSON_UNESCAPED_UNICODE),
             json_encode(array_values($tags), JSON_UNESCAPED_UNICODE),
             $imagenUrl,
+            $fijada,
             $id
         ]);
 
@@ -629,6 +689,58 @@ if ($method === "POST") {
             echo json_encode(["status" => "ok", "message" => "Contenido eliminado"]);
             exit;
         }
+    }
+
+    // Moderación: Sancionar / Desbanear Usuario
+    if ($action === "sancionar_usuario") {
+        $googleId = trim($body["googleId"] ?? "");
+        $tipoSancion = strtolower(trim($body["tipoSancion"] ?? "suspender"));
+        $motivo = htmlspecialchars(trim(mb_substr($body["motivo"] ?? "", 0, 500)), ENT_QUOTES, "UTF-8");
+        $duracionHoras = (int)($body["duracionHoras"] ?? 24);
+
+        if (empty($googleId)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "ID de usuario requerido"]);
+            exit;
+        }
+
+        // Asegurar que el usuario exista
+        $stmtChk = $pdo->prepare("SELECT * FROM usuarios WHERE google_id = ?");
+        $stmtChk->execute([$googleId]);
+        $user = $stmtChk->fetch();
+        if (!$user) {
+            $stmtInfo = $pdo->prepare("SELECT autor_nombre, autor_avatar, colegio_id FROM hilos WHERE autor_google_id = ? UNION SELECT autor_nombre, autor_avatar, colegio_id FROM comentarios WHERE autor_google_id = ? LIMIT 1");
+            $stmtInfo->execute([$googleId, $googleId]);
+            $autorInfo = $stmtInfo->fetch();
+            $nombre = $autorInfo ? $autorInfo["autor_nombre"] : "Usuario " . substr($googleId, -4);
+            $avatar = $autorInfo ? $autorInfo["autor_avatar"] : "";
+            $col = $autorInfo ? $autorInfo["colegio_id"] : "janssen";
+            $pdo->prepare("INSERT INTO usuarios (google_id, nombre, avatar_url, colegio_id) VALUES (?, ?, ?, ?)")->execute([$googleId, $nombre, $avatar, $col]);
+        }
+
+        if ($tipoSancion === "desbanear" || $tipoSancion === "levantar") {
+            $pdo->prepare("UPDATE usuarios SET estado = 'activo', motivo_sancion = NULL, sancionado_hasta = NULL, sancionado_por = NULL, sancionado_en = NULL WHERE google_id = ?")->execute([$googleId]);
+            echo json_encode(["status" => "ok", "message" => "Sanción levantada. El usuario ahora está activo."]);
+            exit;
+        }
+
+        if ($tipoSancion === "banear") {
+            $pdo->prepare("UPDATE usuarios SET estado = 'baneado', motivo_sancion = ?, sancionado_hasta = NULL, sancionado_por = ?, sancionado_en = CURRENT_TIMESTAMP WHERE google_id = ?")->execute([$motivo ?: "Violación grave de las normas de convivencia", $admin["usuario"] ?? "admin", $googleId]);
+            echo json_encode(["status" => "ok", "message" => "Usuario baneado permanentemente."]);
+            exit;
+        }
+
+        if ($tipoSancion === "suspender") {
+            $horas = $duracionHoras > 0 ? $duracionHoras : 24;
+            $hasta = date("Y-m-d H:i:s", time() + ($horas * 3600));
+            $pdo->prepare("UPDATE usuarios SET estado = 'suspendido', motivo_sancion = ?, sancionado_hasta = ?, sancionado_por = ?, sancionado_en = CURRENT_TIMESTAMP WHERE google_id = ?")->execute([$motivo ?: "Suspensión temporal por {$horas}h", $hasta, $admin["usuario"] ?? "admin", $googleId]);
+            echo json_encode(["status" => "ok", "message" => "Usuario suspendido hasta " . date("d/m/Y H:i", strtotime($hasta)) . ".", "hasta" => $hasta]);
+            exit;
+        }
+
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Tipo de sanción no válido"]);
+        exit;
     }
 
     http_response_code(400);

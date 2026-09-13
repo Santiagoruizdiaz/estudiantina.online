@@ -28,8 +28,21 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Hojas de Estilos -->
-  <link rel="stylesheet" href="css/comunidad.css?v=20260912_3">
-  <link rel="stylesheet" href="css/foro.css?v=20260912_5">
+  <link rel="stylesheet" href="css/comunidad.css?v=20260912_10">
+  <link rel="stylesheet" href="css/foro.css?v=20260912_10">
+  <script>
+    (function(){
+      try {
+        var t = localStorage.getItem('estudiantina_theme') || localStorage.getItem('foro_theme');
+        var p = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var theme = t ? t : (p ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+        if (theme === 'light') {
+          document.documentElement.classList.add('light-mode');
+        }
+      } catch(e){}
+    })();
+  </script>
 </head>
 <body class="page-foro">
 
@@ -41,6 +54,7 @@
         <span class="admin-user-label">Sesión: <strong id="admin-bar-user">admin</strong></span>
       </div>
       <div class="admin-bar-actions">
+        <a href="comunidad.html" class="btn-admin-bar-portal" title="Ir al Administrador de Noticias y Comunidad">📰 Portal Admin</a>
         <button type="button" id="btn-admin-logout" class="btn-admin-bar-logout" title="Cerrar sesión de administrador">
           <span>Salir</span>
           <span>✕</span>
@@ -52,7 +66,7 @@
   <!-- HEADER DEDICADO DEL FORO (ESTILO APP / REDDIT) -->
   <header class="foro-app-header">
     <div class="foro-app-header-inner">
-      
+
       <!-- Lado Izquierdo: Volver a Noticias + Logo Foro -->
       <div class="foro-header-brand-group">
         <a href="comunidad.html" class="foro-back-link" title="Volver al Portal de Noticias">
@@ -74,6 +88,11 @@
 
       <!-- Lado Derecho: Simulador + Login / Avatar + Botón Publicar -->
       <div class="foro-header-user-actions">
+        <!-- Toggle Modo Oscuro -->
+        <button type="button" id="theme-toggle" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar entre modo claro y oscuro">
+          <span id="theme-icon">🌙</span>
+        </button>
+
         <a href="index.html" class="foro-game-btn" title="Ir al Simulador de Carrera">
           <span>🎮</span><span class="game-btn-text">Simulador</span>
         </a>
@@ -89,7 +108,7 @@
             </svg>
             <span>Ingresar</span>
           </button>
-          
+
           <div id="forum-user-profile" class="forum-user-profile" style="display:none;">
             <img id="user-avatar-img" class="user-avatar-img" src="" alt="Avatar" />
             <div class="user-profile-info">
@@ -99,10 +118,6 @@
             <button type="button" id="btn-logout" class="btn-logout" title="Cerrar sesión">✕</button>
           </div>
         </div>
-
-        <button id="btn-propose-topic" class="btn-new-topic-header" type="button">
-          <span>✍️</span><span>Nuevo Debate</span>
-        </button>
       </div>
 
     </div>
@@ -128,7 +143,7 @@
   <!-- CONTENEDOR PRINCIPAL DEL FEED (REDDIT STYLE) -->
   <main class="foro-main-layout">
     <div class="foro-layout-container">
-      
+
       <!-- FEED DE DEBATES -->
       <section class="foro-feed-section" aria-label="Feed de debates">
 
@@ -163,7 +178,7 @@
 
       <!-- SIDEBAR LATERAL DESKTOP: REGLAS Y ACERCA DE -->
       <aside class="foro-desktop-sidebar" aria-label="Información de la comunidad">
-        
+
         <!-- Tarjeta Acerca de la Comunidad -->
         <div class="sidebar-reddit-card">
           <div class="reddit-card-header">
@@ -220,7 +235,7 @@
           <button type="button" id="btn-close-thread-x" class="btn-modal-close-x" aria-label="Cerrar debate" title="Cerrar">✕</button>
         </div>
       </div>
-      
+
       <div class="thread-modal-body">
         <!-- Post Principal -->
         <div class="thread-original-post">
@@ -231,12 +246,13 @@
                 <span id="thread-op-school" class="thread-author-school">Colegio</span>
                 <span class="meta-dot">&bull;</span>
                 <span id="thread-op-name" class="thread-author-name">Autor</span>
+                <span id="thread-op-handle" class="thread-author-handle"></span>
               </div>
             </div>
           </div>
           <h2 id="thread-modal-title" class="thread-op-title">Título del Debate</h2>
           <div id="thread-op-content" class="thread-op-text"></div>
-          
+
           <div class="thread-op-actions-bar">
             <button type="button" id="btn-vote-thread" class="reddit-vote-capsule modal-vote-btn" aria-label="Votar debate">
               <span class="vote-icon">▲</span>
@@ -252,7 +268,7 @@
         <!-- Sección de Respuestas -->
         <div class="thread-replies-section">
           <h3 class="thread-replies-heading">Comentarios</h3>
-          
+
           <!-- Formulario de Respuesta -->
           <form id="form-reply" class="thread-reply-form">
             <div class="reply-input-wrap">
@@ -313,13 +329,13 @@
     </div>
   </div>
 
-  <!-- MODAL LOGIN GOOGLE & SELECCIÓN DE COLEGIO -->
+  <!-- MODAL LOGIN GOOGLE & ACCESO OFICIAL -->
   <div id="modal-google-auth" class="auth-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="auth-modal-title">
     <div class="auth-modal-card">
       <div class="auth-modal-header">
         <span class="auth-modal-icon">🥁</span>
         <h3 id="auth-modal-title" class="auth-modal-title">Identificate para Participar</h3>
-        <p class="auth-modal-desc">Iniciá sesión con tu cuenta de Google y elegí tu colegio para debatir y votar.</p>
+        <p class="auth-modal-desc">Iniciá sesión con tu cuenta de Google. Si es tu primera vez, podrás elegir tu nombre de usuario único (@usuario) y configurar tu perfil de la Estudiantina.</p>
         <button id="btn-close-auth-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
       </div>
       <div class="auth-modal-body">
@@ -330,43 +346,443 @@
           </select>
         </div>
 
-        <div class="google-login-action-wrap">
+        <div class="google-login-action-wrap" style="padding-top:0.5rem;">
           <div id="google-gis-container" class="google-gis-container"></div>
-          
-          <div class="auth-divider"><span>O ingreso rápido</span></div>
-          
-          <button type="button" id="btn-quick-login" class="btn-quick-login">
-            <span>⚡</span><span>Ingresar como Hincha (Perfil Rápido)</span>
-          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL LOGIN ADMIN -->
+  <!-- MODAL REGISTRO / ONBOARDING EN EL FORO (@username único y foto) -->
+  <div id="modal-onboarding-registro" class="auth-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="onboarding-modal-title">
+    <div class="auth-modal-card onboarding-modal-card">
+      <button id="btn-close-onboarding" class="btn-close-modal" aria-label="Cerrar">✕</button>
+      <div class="auth-modal-header">
+        <span class="auth-modal-icon">🎉</span>
+        <h3 id="onboarding-modal-title" class="auth-modal-title">Completá tu Registro</h3>
+        <p class="auth-modal-desc">Elegí tu nombre de usuario único y personalizá tu ficha estudiantil para debatir en la comunidad.</p>
+      </div>
+      <form id="form-onboarding-registro" class="onboarding-form">
+        <!-- Foto de Perfil Preview & Upload -->
+        <div class="onboarding-photo-section">
+          <div class="photo-preview-wrap">
+            <img id="onboarding-photo-preview" class="photo-preview-img" src="" alt="Foto de perfil">
+            <label for="onboarding-photo-file" class="photo-upload-badge" title="Cambiar foto">
+              📷
+            </label>
+            <input type="file" id="onboarding-photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          </div>
+          <div class="photo-actions-wrap">
+            <label for="onboarding-photo-file" class="btn-photo-action">Subir Foto</label>
+            <button type="button" id="btn-onboarding-restore-google" class="btn-photo-action-outline">Usar Foto Google</button>
+          </div>
+        </div>
+
+        <!-- Nombre de Usuario Único (@username) -->
+        <div class="topic-form-group">
+          <label for="onboarding-username" class="topic-form-label">
+            Nombre de Usuario Único <span class="required-star">*</span>
+          </label>
+          <div class="username-input-wrap">
+            <span class="username-at">@</span>
+            <input type="text" id="onboarding-username" class="topic-form-input username-field" placeholder="tu_usuario" required minlength="3" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="none">
+            <span id="onboarding-username-status" class="username-status-badge"></span>
+          </div>
+          <small class="form-hint">Entre 3 y 20 caracteres (letras, números y guión bajo _). Será tu identificador en el foro.</small>
+        </div>
+
+        <!-- Nombre visible -->
+        <div class="topic-form-group">
+          <label for="onboarding-name" class="topic-form-label">Nombre Visible / Apodo <span class="required-star">*</span></label>
+          <input type="text" id="onboarding-name" class="topic-form-input" required minlength="2" maxlength="50" placeholder="Ej: Lucas Percusión">
+        </div>
+
+        <!-- Colegio Oficial -->
+        <div class="topic-form-group">
+          <label for="onboarding-school" class="topic-form-label">🏟️ Tu Colegio de la Estudiantina <span class="required-star">*</span></label>
+          <select id="onboarding-school" class="topic-form-select" required>
+            <!-- Poblado con los 33 colegios -->
+          </select>
+        </div>
+
+        <div class="profile-form-grid-2">
+          <div class="topic-form-group">
+            <label for="onboarding-role" class="topic-form-label">🥁 Rol Estudiantil</label>
+            <select id="onboarding-role" class="topic-form-select">
+              <optgroup label="Banda de Música">
+                <option value="Chancha (Surdo)">🥁 Chancha (Surdo)</option>
+                <option value="Redoblante">🥁 Redoblante</option>
+                <option value="Cajita">🥁 Cajita</option>
+                <option value="Ton">🥁 Ton</option>
+                <option value="Pilar de Banda">⭐ Pilar de Banda</option>
+                <option value="Director/a de Banda">👑 Director/a de Banda</option>
+              </optgroup>
+              <optgroup label="Cuerpo de Baile">
+                <option value="Pasista de Escuadra">💃 Pasista de Escuadra</option>
+                <option value="Bastonera / Coreógrafa">✨ Bastonera / Coreógrafa</option>
+                <option value="Portaestandarte">🚩 Portaestandarte</option>
+                <option value="Reina / Rey">👑 Reina / Rey</option>
+              </optgroup>
+              <optgroup label="Comunidad &amp; Hinchada">
+                <option value="Carrocero">🛠️ Carrocero</option>
+                <option value="Hincha de Tribuna" selected>📢 Hincha de Tribuna</option>
+                <option value="Egresado">🎓 Egresado / Exalumno</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="topic-form-group">
+            <label for="onboarding-grade" class="topic-form-label">📚 Año Escolar</label>
+            <select id="onboarding-grade" class="topic-form-select">
+              <option value="1° Año">1° Año</option>
+              <option value="2° Año">2° Año</option>
+              <option value="3° Año">3° Año</option>
+              <option value="4° Año">4° Año</option>
+              <option value="5° Año (Promo)" selected>5° Año (Promo)</option>
+              <option value="6° Año Técnico">6° Año Técnico</option>
+              <option value="Egresado">Egresado</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-submit-onboarding" class="btn-propose-topic" style="width:100%;justify-content:center;padding:0.95rem;font-size:0.95rem;margin-top:0.75rem;">
+          ¡Completar Registro y Entrar! 🚀
+        </button>
+        <button type="button" id="btn-cancel-onboarding" class="btn-secondary-modal" style="width:100%;margin-top:0.5rem;padding:0.65rem;font-size:0.88rem;">
+          Cancelar y Salir
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LOGIN ADMIN (ACCESO PRIVADO POR TOKEN) -->
   <div id="modal-admin-login" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-login-title">
     <div class="admin-modal-card">
       <div class="admin-modal-header">
         <span class="admin-modal-icon">🔐</span>
-        <h3 id="admin-login-title" class="admin-modal-title">Acceso de Administración</h3>
-        <p class="admin-modal-desc">Panel exclusivo para moderadores de estudiantina.online</p>
+        <h3 id="admin-login-title" class="admin-modal-title">Acceso Privado</h3>
+        <p class="admin-modal-desc">Ingresá tu Token de Administración Maestro para acceder al panel de moderación.</p>
         <button id="btn-close-admin-login" class="btn-close-modal" aria-label="Cerrar">✕</button>
       </div>
       <form id="form-admin-login" class="admin-form">
-        <div class="admin-login-hint">
-          <span>💡 Acceso local: <strong>admin</strong> &bull; Clave: <strong>Estudiantina2026!</strong></span>
-        </div>
         <div class="topic-form-group">
-          <label for="admin-login-user" class="topic-form-label">Usuario Administrador</label>
-          <input type="text" id="admin-login-user" class="topic-form-input" placeholder="admin" required autocomplete="username">
-        </div>
-        <div class="topic-form-group">
-          <label for="admin-login-password" class="topic-form-label">Contraseña</label>
-          <input type="password" id="admin-login-password" class="topic-form-input" placeholder="••••••••" required autocomplete="current-password">
+          <label for="admin-login-token" class="topic-form-label">Token de Acceso Maestro</label>
+          <div class="password-input-wrap">
+            <input type="password" id="admin-login-token" class="topic-form-input" placeholder="Pegá tu token secreto..." required autocomplete="off">
+            <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar">👁️</button>
+          </div>
         </div>
         <div id="admin-login-error" class="admin-login-error" style="display:none;"></div>
-        <button type="submit" id="btn-submit-admin-login" class="btn-submit-admin-login">Iniciar Sesión 🔓</button>
+        <button type="submit" id="btn-submit-admin-login" class="btn-submit-admin-login">Validar Token y Entrar 🔓</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL SANCIONAR USUARIO (MODERACIÓN ADMIN) -->
+  <div id="modal-sanction-user" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="sanction-modal-title">
+    <div class="admin-modal-card sanction-modal-card">
+      <div class="admin-modal-header">
+        <span class="admin-modal-icon">🚫</span>
+        <h3 id="sanction-modal-title" class="admin-modal-title">Moderar Usuario</h3>
+        <p class="admin-modal-desc">Aplicá una suspensión temporal o baneo permanente por infracciones a las normas del foro.</p>
+        <button id="btn-close-sanction-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <form id="form-sanction-user" class="admin-form">
+        <input type="hidden" id="sanction-target-google-id" value="">
+
+        <!-- Tarjeta de Usuario Destino -->
+        <div class="sanction-user-preview">
+          <img id="sanction-user-avatar" class="sanction-user-avatar" src="assets/avatar-default.webp" alt="Avatar">
+          <div class="sanction-user-info">
+            <span id="sanction-user-name" class="sanction-user-name">Usuario</span>
+            <span id="sanction-user-school" class="sanction-user-school">Colegio</span>
+            <span id="sanction-user-status" class="user-status-pill status-activo">Activo</span>
+          </div>
+        </div>
+
+        <div class="topic-form-group">
+          <label class="topic-form-label">Acción Disciplinaria</label>
+          <div class="sanction-options-grid">
+            <label class="sanction-radio-card">
+              <input type="radio" name="tipo-sancion" value="suspender" checked>
+              <div class="sanction-card-content">
+                <span class="sanction-type-title">⏳ Suspender Temporalmente</span>
+                <span class="sanction-type-desc">Bloquea debates y comentarios durante un lapso fijado.</span>
+              </div>
+            </label>
+            <label class="sanction-radio-card">
+              <input type="radio" name="tipo-sancion" value="banear">
+              <div class="sanction-card-content">
+                <span class="sanction-type-title">⛔ Banear Permanentemente</span>
+                <span class="sanction-type-desc">Expulsión definitiva del foro de debates de la Estudiantina.</span>
+              </div>
+            </label>
+            <label class="sanction-radio-card">
+              <input type="radio" name="tipo-sancion" value="desbanear">
+              <div class="sanction-card-content">
+                <span class="sanction-type-title">✅ Levantar Sanción / Rehabilitar</span>
+                <span class="sanction-type-desc">Restaura los permisos plenos del usuario en la plataforma.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div id="sanction-duration-group" class="topic-form-group">
+          <label for="sanction-duration-select" class="topic-form-label">Duración de la Suspensión</label>
+          <select id="sanction-duration-select" class="topic-form-select">
+            <option value="24">24 horas (1 día)</option>
+            <option value="72">72 horas (3 días)</option>
+            <option value="168">7 días (1 semana)</option>
+            <option value="720">30 días (1 mes)</option>
+          </select>
+        </div>
+
+        <div id="sanction-reason-group" class="topic-form-group">
+          <label for="sanction-reason-text" class="topic-form-label">Motivo de la Sanción <small>(visible para el usuario al intentar participar)</small></label>
+          <textarea id="sanction-reason-text" class="topic-form-textarea" rows="3" placeholder="Ej: Agresión reiterada contra hinchada rival en la costanera..." maxlength="400"></textarea>
+        </div>
+
+        <div class="modal-actions-dual">
+          <button type="button" id="btn-cancel-sanction" class="btn-secondary-modal">Cancelar</button>
+          <button type="submit" id="btn-confirm-sanction" class="btn-confirm-danger">Aplicar Sanción</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN ADMIN -->
+  <div id="modal-admin-confirm-foro" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="confirm-modal-title">
+    <div class="admin-modal-card confirm-modal-card" style="max-width: 440px;">
+      <div class="admin-modal-header">
+        <span class="admin-modal-icon">⚠️</span>
+        <h3 id="confirm-modal-title" class="admin-modal-title">Confirmar Acción</h3>
+        <p id="confirm-modal-desc" class="admin-modal-desc">¿Estás seguro de continuar con esta acción?</p>
+        <button id="btn-close-confirm-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-actions-dual" style="margin-top:1.25rem;">
+        <button type="button" id="btn-cancel-confirm-action" class="btn-secondary-modal">Cancelar</button>
+        <button type="button" id="btn-proceed-confirm-action" class="btn-confirm-danger">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL UNIFICADO: PERFIL DE USUARIO Y EDICIÓN -->
+  <div id="modal-user-profile" class="profile-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="profile-user-name">
+    <div class="profile-modal-card">
+      <div id="profile-hero-banner" class="profile-hero-banner">
+        <button id="btn-close-profile-modal" class="profile-close-btn" aria-label="Cerrar" title="Cerrar perfil">✕</button>
+        <div class="profile-hero-content">
+          <div class="profile-avatar-outer">
+            <img id="profile-avatar-img" class="profile-avatar-img" src="" alt="Avatar del usuario">
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-body">
+        <!-- Pestañas Principales Unificadas -->
+        <div class="profile-main-tabs-nav" role="tablist" aria-label="Secciones del perfil">
+          <button type="button" id="tab-btn-profile-view" class="profile-main-tab-btn active" role="tab" aria-selected="true">
+            <span class="tab-icon">👤</span><span id="tab-label-profile-view">Mi Perfil</span>
+          </button>
+          <button type="button" id="tab-btn-profile-edit" class="profile-main-tab-btn" role="tab" aria-selected="false" style="display:none;">
+            <span class="tab-icon">✏️</span><span>Editar Perfil</span>
+          </button>
+          <button type="button" id="tab-btn-profile-threads" class="profile-main-tab-btn" role="tab" aria-selected="false">
+            <span class="tab-icon">📢</span><span>Debates (<span id="profile-count-tab-threads">0</span>)</span>
+          </button>
+          <button type="button" id="tab-btn-profile-replies" class="profile-main-tab-btn" role="tab" aria-selected="false">
+            <span class="tab-icon">💬</span><span>Respuestas (<span id="profile-count-tab-replies">0</span>)</span>
+          </button>
+        </div>
+
+        <!-- PANEL 1: VER PERFIL -->
+        <div id="profile-tab-view" class="profile-view-tab-panel">
+          <div class="profile-header-meta">
+            <div class="profile-name-row">
+              <h3 id="profile-user-name" class="profile-user-name">Nombre de Usuario</h3>
+              <span id="profile-user-badge" class="profile-role-pill" style="display:none;">⚡ Moderador</span>
+            </div>
+            <div id="profile-user-handle" class="profile-user-handle">@usuario</div>
+
+            <div class="profile-tags-row">
+              <span id="profile-school-pill" class="profile-tag-pill school-tag">⚙️ El Janssen</span>
+              <span id="profile-role-pill" class="profile-tag-pill role-tag">🥁 Redoblante</span>
+              <span id="profile-grade-pill" class="profile-tag-pill grade-tag">5° Año (Promo)</span>
+            </div>
+
+            <p id="profile-user-bio" class="profile-user-bio"></p>
+
+            <div id="profile-social-row" class="profile-social-row" style="display:none;">
+              <a id="profile-instagram-link" href="#" target="_blank" rel="noopener noreferrer" class="profile-instagram-link">
+                <span class="insta-icon">📷</span>
+                <span id="profile-instagram-text">@instagram</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Acciones del perfil -->
+          <div class="profile-actions-bar">
+            <button type="button" id="btn-open-edit-profile" class="btn-profile-action btn-profile-edit" style="display:none;">
+              <span>✏️</span><span>Editar Mi Perfil</span>
+            </button>
+            <button type="button" id="btn-profile-share" class="btn-profile-action btn-profile-share" title="Copiar enlace directo a este perfil">
+              <span>🔗</span><span>Compartir Perfil</span>
+            </button>
+            <button type="button" id="btn-profile-moderate" class="btn-profile-action btn-profile-mod" style="display:none;">
+              <span>🚫</span><span>Moderar Usuario</span>
+            </button>
+          </div>
+
+          <!-- Estadísticas de Reputación / Karma -->
+          <div class="profile-stats-grid">
+            <div class="stat-card karma-card">
+              <span class="stat-icon">⚡</span>
+              <span id="profile-stat-karma" class="stat-value">0</span>
+              <span class="stat-label">Karma Posadeño</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">📢</span>
+              <span id="profile-stat-threads" class="stat-value">0</span>
+              <span class="stat-label">Debates</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-icon">💬</span>
+              <span id="profile-stat-replies" class="stat-value">0</span>
+              <span class="stat-label">Respuestas</span>
+            </div>
+          </div>
+
+          <!-- Insignias Culturales -->
+          <div class="profile-badges-section">
+            <h4 class="profile-section-title">Insignias de la Estudiantina</h4>
+            <div id="profile-badges-list" class="profile-badges-list">
+              <!-- Insignias renderizadas dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL 2: EDITAR PERFIL (INTEGRADO EN EL MISMO MODAL) -->
+        <div id="profile-tab-edit" class="profile-view-tab-panel" style="display:none;">
+          <div class="profile-edit-header-strip">
+            <h4 class="profile-section-title">✏️ Personalizar Mi Perfil</h4>
+            <p class="profile-edit-subtitle">Modificá tu usuario único, tus datos de hincha, colegio, rol y foto de perfil.</p>
+          </div>
+
+          <form id="form-edit-profile" class="topic-form profile-inline-edit-form">
+            <!-- Foto de Perfil Custom Upload -->
+            <div class="topic-form-group">
+              <label class="topic-form-label">📸 Foto de Perfil</label>
+              <div class="profile-photo-edit-card">
+                <div class="photo-preview-wrap">
+                  <img id="edit-profile-photo-preview" class="photo-preview-img" src="" alt="Foto de perfil">
+                  <label for="edit-profile-photo-file" class="photo-upload-badge" title="Cambiar foto">
+                    📷
+                  </label>
+                  <input type="file" id="edit-profile-photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                </div>
+                <div class="photo-actions-wrap">
+                  <label for="edit-profile-photo-file" class="btn-photo-action">Subir Nueva Foto</label>
+                  <button type="button" id="btn-edit-restore-google" class="btn-photo-action-outline">Restaurar Foto Google</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nombre de Usuario Único (@username) -->
+            <div class="topic-form-group">
+              <label for="edit-profile-username" class="topic-form-label">
+                Nombre de Usuario Único <span class="required-star">*</span>
+              </label>
+              <div class="username-input-wrap">
+                <span class="username-at">@</span>
+                <input type="text" id="edit-profile-username" class="topic-form-input username-field" placeholder="tu_usuario" required minlength="3" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="none">
+                <span id="edit-profile-username-status" class="username-status-badge"></span>
+              </div>
+              <small class="form-hint">Letras, números y guión bajo (_). Tu identificador único en el foro.</small>
+            </div>
+
+            <div class="topic-form-group">
+              <label for="edit-profile-name" class="topic-form-label">Tu Nombre Visible o Apodo</label>
+              <input type="text" id="edit-profile-name" class="topic-form-input" required minlength="2" maxlength="50" placeholder="Ej: Lucas Percusión">
+            </div>
+
+            <div class="topic-form-group">
+              <label for="edit-profile-school" class="topic-form-label">🏟️ Colegio Oficial</label>
+              <select id="edit-profile-school" class="topic-form-select" required>
+                <!-- 33 colegios poblados -->
+              </select>
+            </div>
+
+            <div class="profile-form-grid-2">
+              <div class="topic-form-group">
+                <label for="edit-profile-role" class="topic-form-label">🥁 Rol Estudiantil</label>
+                <select id="edit-profile-role" class="topic-form-select">
+                  <optgroup label="Banda de Música">
+                    <option value="Chancha (Surdo)">🥁 Chancha (Surdo)</option>
+                    <option value="Redoblante">🥁 Redoblante</option>
+                    <option value="Cajita">🥁 Cajita</option>
+                    <option value="Ton">🥁 Ton</option>
+                    <option value="Pilar de Banda">⭐ Pilar de Banda</option>
+                    <option value="Director/a de Banda">👑 Director/a de Banda</option>
+                  </optgroup>
+                  <optgroup label="Cuerpo de Baile">
+                    <option value="Pasista de Escuadra">💃 Pasista de Escuadra</option>
+                    <option value="Bastonera / Coreógrafa">✨ Bastonera / Coreógrafa</option>
+                    <option value="Portaestandarte">🚩 Portaestandarte</option>
+                    <option value="Reina / Rey">👑 Reina / Rey</option>
+                  </optgroup>
+                  <optgroup label="Comunidad &amp; Hinchada">
+                    <option value="Carrocero">🛠️ Carrocero</option>
+                    <option value="Hincha de Tribuna" selected>📢 Hincha de Tribuna</option>
+                    <option value="Egresado">🎓 Egresado / Exalumno</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <div class="topic-form-group">
+                <label for="edit-profile-grade" class="topic-form-label">📚 Año Escolar</label>
+                <select id="edit-profile-grade" class="topic-form-select">
+                  <option value="1° Año">1° Año</option>
+                  <option value="2° Año">2° Año</option>
+                  <option value="3° Año">3° Año</option>
+                  <option value="4° Año">4° Año</option>
+                  <option value="5° Año (Promo)" selected>5° Año (Promo)</option>
+                  <option value="6° Año Técnico">6° Año Técnico</option>
+                  <option value="Egresado">Egresado</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="topic-form-group">
+              <label for="edit-profile-bio" class="topic-form-label">
+                Biografía <small id="edit-bio-counter" class="char-counter">(0/160)</small>
+              </label>
+              <textarea id="edit-profile-bio" class="topic-form-textarea" rows="3" maxlength="160" placeholder="Contá tu puesto en la banda, escuadra o pasión por tu colegio..."></textarea>
+            </div>
+
+            <div class="topic-form-group">
+              <label for="edit-profile-instagram" class="topic-form-label">📷 Instagram <small>(opcional)</small></label>
+              <div class="instagram-input-wrap">
+                <span class="at-prefix">@</span>
+                <input type="text" id="edit-profile-instagram" class="topic-form-input" maxlength="30" placeholder="usuario_posadas">
+              </div>
+            </div>
+
+            <div class="modal-actions-dual">
+              <button type="button" id="btn-cancel-edit-profile" class="btn-secondary-modal">Volver a Mi Perfil</button>
+              <button type="submit" id="btn-save-edit-profile" class="btn-propose-topic">Guardar Cambios ✨</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- PANEL 3: DEBATES CREADOS -->
+        <div id="profile-tab-threads" class="profile-view-tab-panel" style="display:none;">
+          <div id="profile-threads-list" class="profile-activity-list"></div>
+        </div>
+
+        <!-- PANEL 4: RESPUESTAS PUBLICADAS -->
+        <div id="profile-tab-replies" class="profile-view-tab-panel" style="display:none;">
+          <div id="profile-replies-list" class="profile-activity-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -375,14 +791,13 @@
     <div class="foro-footer-inner">
       <div class="foro-footer-brand">
         <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
-        <p>Comunidad y foro de debate independiente de la Estudiantina de Posadas.</p>
+        <p id="foro-footer-copy-text">Comunidad y foro de debate independiente de la Estudiantina de Posadas.</p>
       </div>
       <div class="foro-footer-links">
         <a href="comunidad.html" class="foro-footer-link">📰 Noticias &amp; Comunidad</a>
         <a href="index.html" class="foro-footer-link">🎮 Ir al Simulador</a>
         <a href="index.html#ranking" class="foro-footer-link">🏆 Salón de la Fama</a>
         <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="foro-footer-link">📷 Instagram</a>
-        <button type="button" id="btn-footer-admin-trigger" class="foro-footer-admin-btn">🔐 Acceso Admin</button>
       </div>
     </div>
   </footer>

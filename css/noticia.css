@@ -894,3 +894,391 @@ body.page-noticia {
   cursor: pointer;
   padding: 5px;
 }
+
+/* ──────────────── MÓDULO DE COMENTARIOS & FORO INTEGRADO ──────────────── */
+.noticia-comments-section {
+  margin-top: 2.5rem;
+  padding: 1.75rem;
+  background: rgba(17, 19, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg, 16px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.noticia-comments-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  margin-bottom: 1.5rem;
+}
+
+.noticia-comments-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.noticia-comments-icon {
+  font-size: 1.8rem;
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.noticia-comments-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.noticia-comments-subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.noticia-comments-forum-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.noticia-comments-forum-link:hover {
+  background: #0ea5e9;
+  color: #fff;
+  border-color: #0ea5e9;
+  transform: translateY(-1px);
+}
+
+/* Caja de login / no registrado */
+.noticia-comment-login-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.2rem 1.4rem;
+  background: linear-gradient(135deg, rgba(26, 30, 46, 0.9), rgba(15, 17, 26, 0.95));
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-radius: 14px;
+  margin-bottom: 1.75rem;
+}
+
+.noticia-login-info {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.noticia-login-icon {
+  font-size: 2rem;
+}
+
+.noticia-login-text h4 {
+  margin: 0 0 0.2rem;
+  font-size: 0.98rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.noticia-login-text p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.btn-noticia-google-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-noticia-google-login:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Formulario de comentario */
+.noticia-comment-form-wrap {
+  padding: 1.25rem;
+  background: rgba(14, 16, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  margin-bottom: 2rem;
+}
+
+.noticia-comment-user-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.noticia-comment-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.noticia-comment-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  object-fit: cover;
+}
+
+.noticia-comment-user-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.noticia-comment-school-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: rgba(14, 165, 233, 0.15);
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  color: #38bdf8;
+}
+
+.noticia-school-selector-wrap select {
+  background: #111420;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.noticia-comment-textarea {
+  width: 100%;
+  min-height: 85px;
+  background: #090a10;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.85rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.noticia-comment-textarea:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.noticia-comment-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+
+.noticia-comment-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-noticia-submit-comment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 7px 18px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
+}
+
+.btn-noticia-submit-comment:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(2, 132, 199, 0.5);
+}
+
+.btn-noticia-submit-comment:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Lista de comentarios */
+.noticia-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.noticia-comment-card {
+  background: rgba(14, 16, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  transition: border-color 0.2s;
+}
+
+.noticia-comment-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.noticia-comment-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.noticia-comment-author-box {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.noticia-comment-author-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  object-fit: cover;
+}
+
+.noticia-comment-author-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.noticia-comment-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.noticia-comment-body {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+  margin: 0 0 0.75rem;
+  word-break: break-word;
+}
+
+.noticia-comment-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 0.5rem;
+}
+
+.noticia-vote-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.noticia-vote-pill:hover {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+}
+
+.noticia-vote-pill.has-voted {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: #0ea5e9;
+  color: #38bdf8;
+}
+
+.noticia-report-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.noticia-report-btn:hover {
+  color: #ef4444;
+}
+
+.noticia-comments-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--text-muted);
+}
+
+.noticia-comments-empty-icon {
+  font-size: 2.4rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .noticia-comments-section {
+    padding: 1.15rem 0.95rem;
+  }
+  .noticia-comment-login-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-noticia-google-login {
+    width: 100%;
+    justify-content: center;
+  }
+}

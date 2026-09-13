@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <link rel="stylesheet" href="css/comunidad.css?v=20260912_6">
+  <link rel="stylesheet" href="css/comunidad.css?v=20260912_9">
 </head>
 <body>
 
@@ -229,22 +229,8 @@
               <span class="sidebar-block-icon">&#x1F4C5;</span>
               <h3 class="sidebar-block-title">Proximas Fechas</h3>
             </div>
-            <div class="schedule-compact-list">
-              <div class="schedule-compact-item">
-                <div class="schedule-compact-icon">&#x23F1;</div>
-                <div><strong>Pruebas Piloto</strong><span>Septiembre 2026 &mdash; Costanera</span></div>
-                <span class="schedule-compact-badge live">En curso</span>
-              </div>
-              <div class="schedule-compact-item">
-                <div class="schedule-compact-icon">&#x1F941;</div>
-                <div><strong>Noches de Calle</strong><span>Sep&ndash;Oct 2026 &mdash; 4 Tramos</span></div>
-                <span class="schedule-compact-badge upcoming">Proximo</span>
-              </div>
-              <div class="schedule-compact-item">
-                <div class="schedule-compact-icon">&#x1F451;</div>
-                <div><strong>Cierre en Anfiteatro</strong><span>Octubre 2026 &mdash; Ramirez</span></div>
-                <span class="schedule-compact-badge">Cierre</span>
-              </div>
+            <div id="schedule-compact-list" class="schedule-compact-list" aria-live="polite">
+              <!-- Renderizado dinámicamente desde el Cronograma Oficial -->
             </div>
           </div>
 
@@ -436,9 +422,8 @@
 
       <!-- Barra inferior / Copyright -->
       <div class="footer-bottom-bar">
-        <p class="footer-copy">
+        <p class="footer-copy" id="footer-copy-text">
           &copy; 2026 <strong>estudiantina.online</strong> &mdash; Obra cultural independiente sin fines de lucro. Desarrollado con pasi&oacute;n posade&ntilde;a.
-          <button type="button" id="btn-footer-admin-trigger" class="footer-admin-trigger" title="Acceso de Administración">&#x1F510; Acceso Admin</button>
         </p>
         <button type="button" id="btn-footer-back-to-top" class="footer-back-to-top" aria-label="Volver arriba">
           <span>Subir</span>
@@ -534,33 +519,26 @@
 
 
 
-  <!-- MODAL LOGIN ADMIN -->
+  <!-- MODAL LOGIN ADMIN (ACCESO PRIVADO POR TOKEN) -->
   <div id="modal-admin-login" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-login-title">
     <div class="admin-modal-card">
       <div class="admin-modal-header">
         <span class="admin-modal-icon">&#x1F510;</span>
-        <h3 id="admin-login-title" class="admin-modal-title">Acceso de Administración</h3>
-        <p class="admin-modal-desc">Panel exclusivo para redactores y moderadores de estudiantina.online</p>
+        <h3 id="admin-login-title" class="admin-modal-title">Acceso Privado</h3>
+        <p class="admin-modal-desc">Ingresá tu Token de Administración Maestro para acceder al panel de gestión.</p>
         <button id="btn-close-admin-login" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
       </div>
       <form id="form-admin-login" class="admin-form">
-        <div class="admin-login-hint">
-          <span>💡 Acceso local: <strong>admin</strong> &bull; Clave: <strong>Estudiantina2026!</strong> o <strong>admin123</strong></span>
-        </div>
         <div class="topic-form-group">
-          <label for="admin-login-user" class="topic-form-label">Usuario Administrador</label>
-          <input type="text" id="admin-login-user" class="topic-form-input" placeholder="admin" required autocomplete="username">
-        </div>
-        <div class="topic-form-group">
-          <label for="admin-login-password" class="topic-form-label">Contraseña</label>
+          <label for="admin-login-token" class="topic-form-label">Token de Acceso Maestro</label>
           <div class="password-input-wrap">
-            <input type="password" id="admin-login-password" class="topic-form-input" placeholder="Ingresá tu contraseña" required autocomplete="current-password">
+            <input type="password" id="admin-login-token" class="topic-form-input" placeholder="Pegá tu token secreto..." required autocomplete="off">
             <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar">&#x1F441;&#xFE0F;</button>
           </div>
         </div>
         <div id="admin-login-error" class="admin-login-error" style="display:none;"></div>
         <button type="submit" id="btn-submit-admin-login" class="btn-admin-primary">
-          <span>Ingresar al Modo Administrador</span> <span>&#x27A4;</span>
+          <span>Validar Token y Entrar</span> <span>&#x27A4;</span>
         </button>
       </form>
     </div>
@@ -707,6 +685,19 @@
                 <label for="news-input-tags" class="topic-form-label">🏷️ Tags (separados por coma)</label>
                 <input type="text" id="news-input-tags" class="topic-form-input" placeholder="Ej: Costanera, Palco 1, Posadas" value="Costanera, Posadas">
               </div>
+            </div>
+            <div class="topic-form-group" style="margin-top:0.75rem; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:var(--r-sm); border:1px solid var(--border-dim);">
+              <label class="topic-form-label" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0; cursor:pointer;">
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:1.1rem;">📌</span>
+                  <span style="font-weight:700; color:#fff;">Noticia Principal / Fijada en Portada</span>
+                </span>
+                <label class="admin-toggle-switch">
+                  <input type="checkbox" id="news-input-fijada">
+                  <span class="toggle-slider"></span>
+                </label>
+              </label>
+              <p class="admin-field-hint" style="margin-top:4px; margin-bottom:0;">Si está activa, se mostrará como artículo de portada destacado en la parte superior del portal.</p>
             </div>
           </div>
         </div>
@@ -876,9 +867,29 @@
         </form>
       </div>
 
-      <!-- Tab 3: Cambiar Contraseña -->
+      <!-- Tab: Seguridad & Token Maestro -->
       <div id="admin-tab-password" class="admin-tab-content" style="display:none;">
-        <form id="form-admin-change-pwd" class="admin-form" style="max-width:440px;margin:1rem auto;">
+        <div class="admin-token-card">
+          <div class="admin-token-header">
+            <span class="admin-token-icon">🔑</span>
+            <div>
+              <h4 class="admin-token-title">Token Maestro de Acceso Rápido</h4>
+              <p class="admin-token-subtitle">Utilizá este token secreto para acceder al modo administrador sin ingresar usuario ni contraseña.</p>
+            </div>
+          </div>
+          <div class="admin-token-input-row">
+            <input type="password" id="admin-active-token-display" class="topic-form-input admin-token-input" readonly value="" placeholder="Cargando token maestro...">
+            <button type="button" id="btn-toggle-view-active-token" class="btn-admin-table-action" title="Mostrar/Ocultar Token">👁️ Ver</button>
+            <button type="button" id="btn-copy-active-token" class="btn-admin-table-action" title="Copiar Token al portapapeles">📋 Copiar Token</button>
+            <button type="button" id="btn-copy-direct-admin-link" class="btn-admin-primary btn-direct-link-copy" title="Copiar enlace con login automático">🔗 Copiar Enlace Directo</button>
+          </div>
+          <p class="admin-field-hint" style="margin-top:8px;">💡 Guardá tu enlace directo en marcadores de tu navegador para ingresar automáticamente con un solo clic.</p>
+        </div>
+
+        <div class="admin-tab-divider"></div>
+
+        <h4 class="admin-subheading"><span>🔒</span> Actualizar Contraseña de Administrador</h4>
+        <form id="form-admin-change-pwd" class="admin-form" style="max-width:460px;margin:0 auto;">
           <div class="topic-form-group">
             <label for="pwd-actual" class="topic-form-label">Contraseña Actual</label>
             <input type="password" id="pwd-actual" class="topic-form-input" required autocomplete="current-password">
@@ -891,8 +902,8 @@
             <label for="pwd-confirmar" class="topic-form-label">Confirmar Nueva Contraseña</label>
             <input type="password" id="pwd-confirmar" class="topic-form-input" required minlength="6" autocomplete="new-password">
           </div>
-          <button type="submit" id="btn-submit-change-pwd" class="btn-admin-primary" style="margin-top:10px;">
-            <span>Actualizar Contraseña</span>
+          <button type="submit" id="btn-submit-change-pwd" class="btn-admin-primary" style="margin-top:10px; width:100%;">
+            <span>💾 Actualizar Contraseña</span>
           </button>
         </form>
       </div>
@@ -918,7 +929,7 @@
 
   <div id="toast-notification" class="toast-notification">Copiado</div>
 
-  <script type="module" src="js/comunidad.js?v=20260912_6"></script>
+  <script type="module" src="js/comunidad.js?v=20260912_9"></script>
   <script>
     (function(){
       var d = new Date();

@@ -18,6 +18,7 @@ const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data", "ranking.json");
 const FORO_DB_FILE = path.join(__dirname, "data", "foro.db");
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "estudiantina_admin_secret_posadas_2026_key";
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
 
 let foroDb = null;
 function getForoDb() {
@@ -27,6 +28,7 @@ function getForoDb() {
     foroDb = new DatabaseSync(FORO_DB_FILE);
     foroDb.exec(`
       PRAGMA journal_mode = WAL;
+      PRAGMA busy_timeout = 5000;
       CREATE TABLE IF NOT EXISTS usuarios (
           google_id TEXT PRIMARY KEY,
           nombre TEXT NOT NULL,
@@ -107,6 +109,20 @@ function getForoDb() {
       );
     `);
 
+    try { foroDb.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE hilos ADD COLUMN noticia_id TEXT"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN estado TEXT DEFAULT 'activo'"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN motivo_sancion TEXT"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN sancionado_hasta DATETIME"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN sancionado_por TEXT"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN sancionado_en DATETIME"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN bio TEXT DEFAULT ''"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN rol_estudiantil TEXT DEFAULT 'Hincha de Tribuna'"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN ano_escolar TEXT DEFAULT 'Secundaria'"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN instagram TEXT DEFAULT ''"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN avatar_personalizado TEXT DEFAULT ''"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN username TEXT DEFAULT ''"); } catch (e) {}
+
     // Índices secundarios para acelerar consultas del foro con alta concurrencia
     foroDb.exec(`
       CREATE INDEX IF NOT EXISTS idx_hilos_canal ON hilos(canal_id);
@@ -115,8 +131,8 @@ function getForoDb() {
       CREATE INDEX IF NOT EXISTS idx_comentarios_hilo ON comentarios(hilo_id);
       CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
     `);
-
-    try { foroDb.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch (e) {}
+    try { foroDb.exec("CREATE INDEX IF NOT EXISTS idx_hilos_noticia ON hilos(noticia_id)"); } catch (e) {}
+    try { foroDb.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(LOWER(username)) WHERE username != '' AND username IS NOT NULL;"); } catch (e) {}
 
     // Sembrar administrador inicial si no existe
     const rowAdmins = foroDb.prepare("SELECT COUNT(*) as count FROM administradores").get();
@@ -238,21 +254,37 @@ function getForoDb() {
       ins.run("baile", "Cuerpo de Baile", "Coreografías, temáticas, trajes, tocados y evolución en calle.", "💃", "#ec4899");
       ins.run("hinchadas", "Tribunas & Hinchadas", "Cantos, banderas, color y aliento de cada colegio.", "📢", "#22c55e");
       ins.run("simulador", "Sugerencias del Juego", "Ideas, reportes de eventos y mejoras para el Simulador.", "🎮", "#a855f7");
+      ins.run("noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8");
+    } else {
+      try {
+        const hasNoticiasCanal = foroDb.prepare("SELECT 1 FROM canales WHERE id = 'noticias'").get();
+        if (!hasNoticiasCanal) {
+          foroDb.prepare("INSERT INTO canales (id, titulo, descripcion, icono, color) VALUES (?, ?, ?, ?, ?)").run(
+            "noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8"
+          );
+        }
+      } catch (e) {}
     }
+
+    // Sembrar usuarios demo si no existen
+    const insU = foroDb.prepare("INSERT OR IGNORE INTO usuarios (google_id, email, nombre, username, avatar_url, colegio_id, rol_estudiantil, ano_escolar, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    insU.run("demo-user-1", "lucas@example.com", "Lucas Percusión", "lucas_percusion", "assets/avatar-default.webp", "janssen", "Redoblante", "5° Año (Promo)", "Apasionado del ritmo y los cortes de batería del Janssen.");
+    insU.run("demo-user-2", "valentina@example.com", "Valentina Pasista", "valen_pasista", "assets/avatar-default.webp", "santa_maria", "Pasista de Escuadra", "4° Año", "Bailando en la costanera con el corazón azul y blanco.");
+    insU.run("demo-user-3", "agustin@example.com", "Agustín Gamer", "agustin_gamer", "assets/avatar-default.webp", "industrial", "Director/a de Banda", "6° Año Técnico", "Simulador y tambores en la previa de la fiesta.");
 
     // Sembrar hilos si está vacía
     const rowHilos = foroDb.prepare("SELECT COUNT(*) as count FROM hilos").get();
     if (rowHilos && rowHilos.count === 0) {
       const insH = foroDb.prepare("INSERT INTO hilos (canal_id, titulo, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id, votos, respuestas_count, fijado, creado_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-      insH.run("banda", "¡Ritmos y sincronización de las chanchas pesadas en la Costanera!", "¿Qué opinan de los cortes que prepararon los colegios técnicos este año? En las pruebas piloto se notó una potencia tremenda en los palcos.", "demo-user-1", "Lucas Percusión", "https://api.dicebear.com/7.x/bottts/svg?seed=Lucas", "janssen", 28, 2, 1, new Date(Date.now() - 3600000 * 3).toISOString());
-      insH.run("baile", "¿Cómo influye el peso de los espaldares en las pasadas largas?", "Bailar 800 metros seguidos con plumas y tocados de pedrería demanda un físico tremendo. ¿Qué técnicas de respiración usan sus escuadras?", "demo-user-2", "Valentina Pasista", "https://api.dicebear.com/7.x/bottts/svg?seed=Valentina", "santa_maria", 34, 1, 0, new Date(Date.now() - 3600000 * 5).toISOString());
-      insH.run("simulador", "Propuesta: Que se puedan personalizar los cortes de redoble en el juego", "Estaría genial que en las noches de calle del simulador puedas elegir ritmos acelerados o hacer solos de batería antes de entrar al palco.", "demo-user-3", "Agustín Gamer", "https://api.dicebear.com/7.x/bottts/svg?seed=Agustin", "industrial", 19, 1, 0, new Date(Date.now() - 3600000 * 8).toISOString());
+      insH.run("banda", "¡Ritmos y sincronización de las chanchas pesadas en la Costanera!", "¿Qué opinan de los cortes que prepararon los colegios técnicos este año? En las pruebas piloto se notó una potencia tremenda en los palcos.", "demo-user-1", "Lucas Percusión", "assets/avatar-default.webp", "janssen", 28, 2, 1, new Date(Date.now() - 3600000 * 3).toISOString());
+      insH.run("baile", "¿Cómo influye el peso de los espaldares en las pasadas largas?", "Bailar 800 metros seguidos con plumas y tocados de pedrería demanda un físico tremendo. ¿Qué técnicas de respiración usan sus escuadras?", "demo-user-2", "Valentina Pasista", "assets/avatar-default.webp", "santa_maria", 34, 1, 0, new Date(Date.now() - 3600000 * 5).toISOString());
+      insH.run("simulador", "Propuesta: Que se puedan personalizar los cortes de redoble en el juego", "Estaría genial que en las noches de calle del simulador puedas elegir ritmos acelerados o hacer solos de batería antes de entrar al palco.", "demo-user-3", "Agustín Gamer", "assets/avatar-default.webp", "industrial", 19, 1, 0, new Date(Date.now() - 3600000 * 8).toISOString());
 
       const insC = foroDb.prepare("INSERT INTO comentarios (hilo_id, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id, votos, creado_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-      insC.run(1, "Totalmente de acuerdo, los cortes cruzados de chancha este año van a definir el primer puesto.", "demo-user-2", "Valentina Pasista", "https://api.dicebear.com/7.x/bottts/svg?seed=Valentina", "santa_maria", 5, new Date(Date.now() - 3600000 * 2).toISOString());
-      insC.run(1, "El secreto está en los redoblantes bien tensados, si no suenan secos se pierde en el viento del río.", "demo-user-3", "Agustín Gamer", "https://api.dicebear.com/7.x/bottts/svg?seed=Agustin", "industrial", 3, new Date(Date.now() - 3600000 * 1).toISOString());
-      insC.run(2, "Nosotras ensayamos con chalecos livianos para acostumbrarnos al peso de las plumas antes de las noches oficiales.", "demo-user-1", "Lucas Percusión", "https://api.dicebear.com/7.x/bottts/svg?seed=Lucas", "janssen", 6, new Date(Date.now() - 3600000 * 3).toISOString());
-      insC.run(3, "¡Apoyo total! Poder elegir la velocidad del redoble en los palcos sumaría muchísima adrenalina al simulador.", "demo-user-1", "Lucas Percusión", "https://api.dicebear.com/7.x/bottts/svg?seed=Lucas", "janssen", 4, new Date(Date.now() - 3600000 * 4).toISOString());
+      insC.run(1, "Totalmente de acuerdo, los cortes cruzados de chancha este año van a definir el primer puesto.", "demo-user-2", "Valentina Pasista", "assets/avatar-default.webp", "santa_maria", 5, new Date(Date.now() - 3600000 * 2).toISOString());
+      insC.run(1, "El secreto está en los redoblantes bien tensados, si no suenan secos se pierde en el viento del río.", "demo-user-3", "Agustín Gamer", "assets/avatar-default.webp", "industrial", 3, new Date(Date.now() - 3600000 * 1).toISOString());
+      insC.run(2, "Nosotras ensayamos con chalecos livianos para acostumbrarnos al peso de las plumas antes de las noches oficiales.", "demo-user-1", "Lucas Percusión", "assets/avatar-default.webp", "janssen", 6, new Date(Date.now() - 3600000 * 3).toISOString());
+      insC.run(3, "¡Apoyo total! Poder elegir la velocidad del redoble en los palcos sumaría muchísima adrenalina al simulador.", "demo-user-1", "Lucas Percusión", "assets/avatar-default.webp", "janssen", 4, new Date(Date.now() - 3600000 * 4).toISOString());
     }
   }
   return foroDb;
@@ -293,8 +325,13 @@ function generateAdminToken(admin) {
 }
 
 function verifyAdminToken(token) {
-  if (!token || typeof token !== "string" || !token.includes(".")) return null;
-  const parts = token.split(".");
+  if (!token || typeof token !== "string") return null;
+  const clean = token.trim();
+  if (clean === ADMIN_TOKEN || clean === ADMIN_SECRET) {
+    return { id: 1, usuario: "admin", rol: "superadmin" };
+  }
+  if (!clean.includes(".")) return null;
+  const parts = clean.split(".");
   if (parts.length !== 2) return null;
   const [payloadB64, sig] = parts;
   const expectedSig = crypto.createHmac("sha256", ADMIN_SECRET).update(payloadB64).digest("base64url");
@@ -319,6 +356,132 @@ function getAdminFromRequest(req) {
     return verifyAdminToken(authHeader.substring(7).trim());
   }
   return null;
+}
+
+const RESERVED_USERNAMES = new Set([
+  "admin", "administrador", "moderador", "mod", "sistema",
+  "estudiantina", "staff", "soporte", "oficial", "posadas", "redaccion"
+]);
+
+function validateUsername(rawUsername) {
+  const username = String(rawUsername || "").trim().toLowerCase();
+  if (!username) {
+    return { valid: false, message: "El nombre de usuario es obligatorio" };
+  }
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    return { valid: false, message: "El usuario debe tener entre 3 y 20 caracteres y solo letras, números o guión bajo (_)." };
+  }
+  if (RESERVED_USERNAMES.has(username)) {
+    return { valid: false, message: "Ese nombre de usuario está reservado." };
+  }
+  return { valid: true, username };
+}
+
+function checkUserSanction(db, googleId) {
+  if (!googleId) return null;
+  try {
+    const user = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(googleId);
+    if (!user) return null;
+
+    if (user.estado === "baneado") {
+      return {
+        bloqueado: true,
+        tipo: "baneo",
+        mensaje: `Tu cuenta ha sido baneada permanentemente del foro. Motivo: ${user.motivo_sancion || "Infracción a las normas de convivencia."}`
+      };
+    }
+
+    if (user.estado === "suspendido") {
+      if (user.sancionado_hasta) {
+        const hasta = new Date(user.sancionado_hasta);
+        const now = new Date();
+        if (hasta > now) {
+          return {
+            bloqueado: true,
+            tipo: "suspension",
+            hasta: user.sancionado_hasta,
+            mensaje: `Tu cuenta se encuentra suspendida hasta el ${hasta.toLocaleString("es-AR")}. Motivo: ${user.motivo_sancion || "Infracción temporal."}`
+          };
+        } else {
+          // Suspensión expirada: restablecer automáticamente a activo
+          db.prepare("UPDATE usuarios SET estado = 'activo', motivo_sancion = NULL, sancionado_hasta = NULL WHERE google_id = ?").run(googleId);
+          return null;
+        }
+      } else {
+        return {
+          bloqueado: true,
+          tipo: "suspension",
+          mensaje: `Tu cuenta se encuentra suspendida temporalmente. Motivo: ${user.motivo_sancion || "Infracción temporal."}`
+        };
+      }
+    }
+  } catch (e) {
+    console.warn("Error verificando sanción de usuario:", e);
+  }
+  return null;
+}
+
+function calculateUserBadges(user, totalHilos, totalComentarios, karmaTotal, maxThreadVotes) {
+  const badges = [];
+  badges.push({
+    id: "pionero_2026",
+    titulo: "Pionero 2026",
+    icono: "🌟",
+    color: "#f59e0b",
+    desc: "Miembro activo de la temporada Estudiantina 2026."
+  });
+
+  if (totalHilos >= 3) {
+    badges.push({
+      id: "voz_tribuna",
+      titulo: "Voz de la Tribuna",
+      icono: "📢",
+      color: "#38bdf8",
+      desc: "Inició 3 o más debates en la comunidad."
+    });
+  }
+
+  if (totalComentarios >= 5) {
+    badges.push({
+      id: "comentarista_fiel",
+      titulo: "Comentarista Fiel",
+      icono: "💬",
+      color: "#a855f7",
+      desc: "Aportó 5 o más respuestas constructivas."
+    });
+  }
+
+  if (karmaTotal >= 20 || maxThreadVotes >= 10) {
+    badges.push({
+      id: "costanera_trending",
+      titulo: "Trending Costanera",
+      icono: "🔥",
+      color: "#ef4444",
+      desc: "Sus aportes cosecharon amplio reconocimiento popular."
+    });
+  }
+
+  if (user && user.estado === "activo") {
+    badges.push({
+      id: "convivencia_ejemplar",
+      titulo: "Convivencia Ejemplar",
+      icono: "🛡️",
+      color: "#22c55e",
+      desc: "Cuenta en regla con respeto a las hinchadas posadeñas."
+    });
+  }
+
+  if (user && (user.rol === "admin" || user.rol === "superadmin")) {
+    badges.push({
+      id: "moderador_oficial",
+      titulo: "Moderador Oficial",
+      icono: "⚡",
+      color: "#fbbf24",
+      desc: "Miembro del equipo de fiscalización y moderación."
+    });
+  }
+
+  return badges;
 }
 
 function syncComunidadJson(db) {
@@ -656,6 +819,28 @@ const server = http.createServer((req, res) => {
     const action = reqUrl.searchParams.get("action") || "";
 
     if (req.method === "GET") {
+      if (action === "check_username") {
+        const rawUsername = (reqUrl.searchParams.get("username") || "").trim();
+        const excludeGoogleId = (reqUrl.searchParams.get("googleId") || "").trim();
+        const check = validateUsername(rawUsername);
+        if (!check.valid) {
+          res.writeHead(200);
+          res.end(JSON.stringify({ status: "ok", available: false, message: check.message }));
+          return;
+        }
+
+        const existing = db.prepare("SELECT google_id FROM usuarios WHERE LOWER(username) = LOWER(?) AND google_id != ?").get(check.username, excludeGoogleId);
+        if (existing) {
+          res.writeHead(200);
+          res.end(JSON.stringify({ status: "ok", available: false, message: "El nombre de usuario ya está registrado por otro hincha." }));
+          return;
+        }
+
+        res.writeHead(200);
+        res.end(JSON.stringify({ status: "ok", available: true, message: "¡Usuario disponible!", username: check.username }));
+        return;
+      }
+
       if (action === "canales") {
         const canales = db.prepare(`
           SELECT c.*, COUNT(h.id) as hilos_count 
@@ -676,25 +861,25 @@ const server = http.createServer((req, res) => {
         const q = (reqUrl.searchParams.get("q") || "").trim();
         const viewerGoogleId = reqUrl.searchParams.get("googleId") || "";
 
-        let sql = "SELECT * FROM hilos WHERE oculto = 0";
+        let sql = "SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0";
         const params = [];
 
         if (canal !== "todos" && canal !== "") {
-          sql += " AND canal_id = ?";
+          sql += " AND h.canal_id = ?";
           params.push(canal);
         }
 
         // Búsqueda full-text sobre título, contenido y nombre de autor
         if (q) {
-          sql += " AND (titulo LIKE ? OR contenido LIKE ? OR autor_nombre LIKE ?)";
+          sql += " AND (h.titulo LIKE ? OR h.contenido LIKE ? OR h.autor_nombre LIKE ? OR u.username LIKE ?)";
           const like = `%${q}%`;
-          params.push(like, like, like);
+          params.push(like, like, like, like);
         }
 
         if (sort === "recientes") {
-          sql += ` ORDER BY fijado DESC, creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
+          sql += ` ORDER BY h.fijado DESC, h.creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
         } else {
-          sql += ` ORDER BY fijado DESC, votos DESC, creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
+          sql += ` ORDER BY h.fijado DESC, h.votos DESC, h.creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
         }
 
         const hilosRaw = db.prepare(sql).all(...params);
@@ -716,7 +901,7 @@ const server = http.createServer((req, res) => {
       if (action === "hilo") {
         const id = parseInt(reqUrl.searchParams.get("id") || "0", 10);
         const viewerGoogleId = reqUrl.searchParams.get("googleId") || "";
-        const hilo = db.prepare("SELECT * FROM hilos WHERE id = ? AND oculto = 0").get(id);
+        const hilo = db.prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.id = ? AND h.oculto = 0").get(id);
 
         if (!hilo) {
           res.writeHead(404);
@@ -732,7 +917,7 @@ const server = http.createServer((req, res) => {
           hilo.user_voted = 0;
         }
 
-        const comentariosRaw = db.prepare("SELECT * FROM comentarios WHERE hilo_id = ? AND oculto = 0 ORDER BY creado_en ASC").all(id);
+        const comentariosRaw = db.prepare("SELECT c.*, u.username as autor_username FROM comentarios c LEFT JOIN usuarios u ON c.autor_google_id = u.google_id WHERE c.hilo_id = ? AND c.oculto = 0 ORDER BY c.creado_en ASC").all(id);
 
         // Enriquecer cada comentario con user_voted
         const comentarios = comentariosRaw.map(c => {
@@ -747,6 +932,163 @@ const server = http.createServer((req, res) => {
 
         res.writeHead(200);
         res.end(JSON.stringify({ status: "ok", hilo, comentarios }));
+        return;
+      }
+
+      if (action === "noticia_hilo") {
+        const noticiaId = (reqUrl.searchParams.get("noticiaId") || "").trim();
+        const viewerGoogleId = (reqUrl.searchParams.get("googleId") || "").trim();
+
+        if (!noticiaId) {
+          res.writeHead(400);
+          res.end(JSON.stringify({ status: "error", message: "Parámetro noticiaId requerido" }));
+          return;
+        }
+
+        // Buscar hilo asociado a la noticia
+        let hilo = db.prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.noticia_id = ? AND h.oculto = 0").get(noticiaId);
+
+        // Si no existe, crearlo on-demand buscando los datos de la noticia
+        if (!hilo) {
+          const notic = db.prepare("SELECT * FROM noticias WHERE id = ?").get(noticiaId);
+          const titulo = notic ? notic.titulo : `Debate: Noticia ${noticiaId}`;
+          const contenido = notic ? (notic.resumen || notic.titulo) : "Espacio oficial de debate y comentarios sobre esta cobertura periodística.";
+
+          const ins = db.prepare(`
+            INSERT INTO hilos (canal_id, titulo, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id, noticia_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          `).run("noticias", titulo, contenido, "admin-redaccion", "Redacción Oficial", "assets/avatar-redaccion.webp", "posadas", noticiaId);
+
+          hilo = db.prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.id = ?").get(ins.lastInsertRowid);
+        }
+
+        if (viewerGoogleId) {
+          const hiloVoted = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?").get(hilo.id, viewerGoogleId);
+          hilo.user_voted = hiloVoted ? 1 : 0;
+        } else {
+          hilo.user_voted = 0;
+        }
+
+        const comentariosRaw = db.prepare("SELECT c.*, u.username as autor_username FROM comentarios c LEFT JOIN usuarios u ON c.autor_google_id = u.google_id WHERE c.hilo_id = ? AND c.oculto = 0 ORDER BY c.creado_en ASC").all(hilo.id);
+
+        const comentarios = comentariosRaw.map(c => {
+          if (viewerGoogleId) {
+            const cv = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?").get(c.id, viewerGoogleId);
+            c.user_voted = cv ? 1 : 0;
+          } else {
+            c.user_voted = 0;
+          }
+          return c;
+        });
+
+        res.writeHead(200);
+        res.end(JSON.stringify({ status: "ok", hilo, comentarios }));
+        return;
+      }
+
+      if (action === "perfil") {
+        const targetId = (reqUrl.searchParams.get("id") || reqUrl.searchParams.get("googleId") || "").trim();
+        if (!targetId) {
+          res.writeHead(400);
+          res.end(JSON.stringify({ status: "error", message: "ID de usuario requerido" }));
+          return;
+        }
+
+        let user = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(targetId);
+
+        // Si no está registrado en la tabla pero tiene hilos o comentarios creados
+        if (!user) {
+          const autorInfo = db.prepare(`
+            SELECT autor_nombre, autor_avatar, colegio_id
+            FROM hilos WHERE autor_google_id = ?
+            UNION
+            SELECT autor_nombre, autor_avatar, colegio_id
+            FROM comentarios WHERE autor_google_id = ?
+            LIMIT 1
+          `).get(targetId, targetId);
+
+          if (autorInfo) {
+            user = {
+              google_id: targetId,
+              nombre: autorInfo.autor_nombre || ("Hincha " + targetId.slice(-4)),
+              email: "",
+              avatar_url: autorInfo.autor_avatar || "",
+              colegio_id: autorInfo.colegio_id || "janssen",
+              rol: "usuario",
+              estado: "activo",
+              bio: "",
+              rol_estudiantil: "Hincha de Tribuna",
+              ano_escolar: "Secundaria",
+              instagram: "",
+              creado_en: new Date().toISOString()
+            };
+          } else {
+            res.writeHead(404);
+            res.end(JSON.stringify({ status: "error", message: "Perfil de usuario no encontrado" }));
+            return;
+          }
+        }
+
+        // Métricas en tiempo real
+        const countHilosRow = db.prepare("SELECT COUNT(*) as count FROM hilos WHERE autor_google_id = ? AND oculto = 0").get(targetId);
+        const countComentariosRow = db.prepare("SELECT COUNT(*) as count FROM comentarios WHERE autor_google_id = ? AND oculto = 0").get(targetId);
+        const karmaHilosRow = db.prepare("SELECT COALESCE(SUM(votos), 0) as karma, COALESCE(MAX(votos), 0) as max_votos FROM hilos WHERE autor_google_id = ? AND oculto = 0").get(targetId);
+        const karmaComentariosRow = db.prepare("SELECT COALESCE(SUM(votos), 0) as karma FROM comentarios WHERE autor_google_id = ? AND oculto = 0").get(targetId);
+
+        const totalHilos = countHilosRow ? countHilosRow.count : 0;
+        const totalComentarios = countComentariosRow ? countComentariosRow.count : 0;
+        const karmaTotal = (karmaHilosRow ? karmaHilosRow.karma : 0) + (karmaComentariosRow ? karmaComentariosRow.karma : 0);
+        const maxVotes = karmaHilosRow ? karmaHilosRow.max_votos : 0;
+
+        // Insignias
+        const insignias = calculateUserBadges(user, totalHilos, totalComentarios, karmaTotal, maxVotes);
+
+        // Hilos recientes creados por este usuario
+        const hilosRecientes = db.prepare(`
+          SELECT id, canal_id, titulo, votos, respuestas_count, creado_en
+          FROM hilos
+          WHERE autor_google_id = ? AND oculto = 0
+          ORDER BY creado_en DESC
+          LIMIT 10
+        `).all(targetId);
+
+        // Comentarios recientes creados por este usuario con título del hilo
+        const comentariosRecientes = db.prepare(`
+          SELECT c.id, c.hilo_id, c.contenido, c.votos, c.creado_en, h.titulo as hilo_titulo
+          FROM comentarios c
+          LEFT JOIN hilos h ON h.id = c.hilo_id
+          WHERE c.autor_google_id = ? AND c.oculto = 0
+          ORDER BY c.creado_en DESC
+          LIMIT 10
+        `).all(targetId);
+
+        res.writeHead(200);
+        res.end(JSON.stringify({
+          status: "ok",
+          usuario: {
+            googleId: user.google_id,
+            nombre: user.nombre,
+            username: user.username || "",
+            avatarUrl: user.avatar_personalizado || user.avatar_url,
+            avatarOriginal: user.avatar_url,
+            colegioId: user.colegio_id,
+            rol: user.rol,
+            estado: user.estado || "activo",
+            bio: user.bio || "",
+            rolEstudiantil: user.rol_estudiantil || "Hincha de Tribuna",
+            anoEscolar: user.ano_escolar || "Secundaria",
+            instagram: user.instagram || "",
+            creadoEn: user.creado_en
+          },
+          metricas: {
+            totalHilos,
+            totalComentarios,
+            karmaTotal
+          },
+          insignias,
+          hilosRecientes,
+          comentariosRecientes
+        }));
         return;
       }
 
@@ -779,14 +1121,215 @@ const server = http.createServer((req, res) => {
               INSERT INTO usuarios (google_id, nombre, email, avatar_url, colegio_id)
               VALUES (?, ?, ?, ?, ?)
               ON CONFLICT(google_id) DO UPDATE SET
-                nombre = excluded.nombre,
-                email = excluded.email,
-                avatar_url = excluded.avatar_url,
-                colegio_id = excluded.colegio_id
+                email = CASE WHEN excluded.email != '' THEN excluded.email ELSE usuarios.email END,
+                avatar_url = CASE WHEN usuarios.avatar_url IS NULL OR usuarios.avatar_url = '' THEN excluded.avatar_url ELSE usuarios.avatar_url END,
+                nombre = CASE WHEN usuarios.nombre IS NULL OR usuarios.nombre = '' THEN excluded.nombre ELSE usuarios.nombre END,
+                colegio_id = CASE WHEN usuarios.colegio_id IS NULL THEN excluded.colegio_id ELSE usuarios.colegio_id END
             `).run(googleId, nombre, email, avatarUrl, colegioId);
 
+            const rowUser = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(googleId);
+            const needsOnboarding = !rowUser || !rowUser.username || rowUser.username.trim() === "";
+
             res.writeHead(200);
-            res.end(JSON.stringify({ status: "ok", usuario: { googleId, nombre, avatarUrl, colegioId } }));
+            res.end(JSON.stringify({
+              status: "ok",
+              needsOnboarding,
+              usuario: {
+                googleId,
+                nombre: rowUser ? rowUser.nombre : nombre,
+                username: rowUser ? (rowUser.username || "") : "",
+                avatarUrl: rowUser ? (rowUser.avatar_personalizado || rowUser.avatar_url) : avatarUrl,
+                avatarOriginal: rowUser ? rowUser.avatar_url : avatarUrl,
+                colegioId: rowUser ? rowUser.colegio_id : colegioId,
+                bio: rowUser ? (rowUser.bio || "") : "",
+                rolEstudiantil: rowUser ? (rowUser.rol_estudiantil || "Hincha de Tribuna") : "Hincha de Tribuna",
+                anoEscolar: rowUser ? (rowUser.ano_escolar || "Secundaria") : "Secundaria",
+                instagram: rowUser ? (rowUser.instagram || "") : ""
+              }
+            }));
+            return;
+          }
+
+          if (action === "completar_registro") {
+            const googleId = String(body.googleId || "").trim();
+            const rawUsername = String(body.username || "").trim();
+            const nombre = escapeHtml(String(body.nombre || "").trim().slice(0, 50));
+            const colegioId = String(body.colegioId || "janssen").trim();
+            const rolEstudiantil = escapeHtml(String(body.rolEstudiantil || "Hincha de Tribuna").trim().slice(0, 50));
+            const anoEscolar = escapeHtml(String(body.anoEscolar || "5° Año (Promo)").trim().slice(0, 40));
+            const bio = escapeHtml(String(body.bio || "").trim().slice(0, 160));
+            const rawInsta = String(body.instagram || "").trim().replace(/^@/, "").slice(0, 30);
+            const instagram = escapeHtml(rawInsta);
+            const avatarUrl = String(body.avatarUrl || "").trim();
+
+            if (!googleId) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "ID de usuario requerido" }));
+              return;
+            }
+
+            const checkUser = validateUsername(rawUsername);
+            if (!checkUser.valid) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: checkUser.message }));
+              return;
+            }
+
+            // Validar unicidad en SQLite
+            const taken = db.prepare("SELECT google_id FROM usuarios WHERE LOWER(username) = LOWER(?) AND google_id != ?").get(checkUser.username, googleId);
+            if (taken) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "El nombre de usuario ya está registrado por otro hincha." }));
+              return;
+            }
+
+            if (!nombre || nombre.length < 2) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "El nombre debe tener al menos 2 caracteres." }));
+              return;
+            }
+
+            const exist = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(googleId);
+            const isCustomPhoto = avatarUrl.startsWith("data:image/");
+            const customAvatarToSave = isCustomPhoto ? avatarUrl : (exist ? (exist.avatar_personalizado || "") : "");
+
+            if (!exist) {
+              db.prepare(`
+                INSERT INTO usuarios (google_id, username, nombre, colegio_id, bio, rol_estudiantil, ano_escolar, instagram, avatar_personalizado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+              `).run(googleId, checkUser.username, nombre, colegioId, bio, rolEstudiantil, anoEscolar, instagram, customAvatarToSave);
+            } else {
+              db.prepare(`
+                UPDATE usuarios
+                SET username = ?, nombre = ?, colegio_id = ?, bio = ?, rol_estudiantil = ?, ano_escolar = ?, instagram = ?, avatar_personalizado = ?
+                WHERE google_id = ?
+              `).run(checkUser.username, nombre, colegioId, bio, rolEstudiantil, anoEscolar, instagram, customAvatarToSave, googleId);
+            }
+
+            const finalAvatar = customAvatarToSave || (exist ? exist.avatar_url : avatarUrl);
+            try {
+              db.prepare("UPDATE hilos SET autor_nombre = ?, autor_avatar = ?, colegio_id = ? WHERE autor_google_id = ?").run(nombre, finalAvatar, colegioId, googleId);
+              db.prepare("UPDATE comentarios SET autor_nombre = ?, autor_avatar = ?, colegio_id = ? WHERE autor_google_id = ?").run(nombre, finalAvatar, colegioId, googleId);
+            } catch (e) {}
+
+            res.writeHead(200);
+            res.end(JSON.stringify({
+              status: "ok",
+              message: "¡Registro completado con éxito!",
+              usuario: {
+                googleId,
+                username: checkUser.username,
+                nombre,
+                colegioId,
+                bio,
+                rolEstudiantil,
+                anoEscolar,
+                instagram,
+                avatarUrl: finalAvatar,
+                avatarOriginal: exist ? exist.avatar_url : ""
+              }
+            }));
+            return;
+          }
+
+          if (action === "editar_perfil") {
+            const googleId = String(body.googleId || "").trim();
+            const rawUsername = String(body.username || "").trim();
+            const nombre = escapeHtml(String(body.nombre || "").trim().slice(0, 50));
+            const colegioId = String(body.colegioId || "janssen").trim();
+            const bio = escapeHtml(String(body.bio || "").trim().slice(0, 160));
+            const rolEstudiantil = escapeHtml(String(body.rolEstudiantil || "Hincha de Tribuna").trim().slice(0, 50));
+            const anoEscolar = escapeHtml(String(body.anoEscolar || "Secundaria").trim().slice(0, 40));
+            const rawInsta = String(body.instagram || "").trim().replace(/^@/, "").slice(0, 30);
+            const instagram = escapeHtml(rawInsta);
+            const avatarUrl = String(body.avatarUrl || body.avatarPersonalizado || "").trim();
+            const restoreGoogleAvatar = body.restoreGoogleAvatar === true;
+
+            if (!googleId) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "ID de usuario requerido" }));
+              return;
+            }
+            if (!nombre || nombre.length < 2) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "El nombre debe tener al menos 2 caracteres" }));
+              return;
+            }
+
+            // Validar username si se proporcionó
+            let validatedUsername = null;
+            if (rawUsername) {
+              const checkUser = validateUsername(rawUsername);
+              if (!checkUser.valid) {
+                res.writeHead(400);
+                res.end(JSON.stringify({ status: "error", message: checkUser.message }));
+                return;
+              }
+              const taken = db.prepare("SELECT google_id FROM usuarios WHERE LOWER(username) = LOWER(?) AND google_id != ?").get(checkUser.username, googleId);
+              if (taken) {
+                res.writeHead(400);
+                res.end(JSON.stringify({ status: "error", message: "El nombre de usuario ya está registrado por otro hincha." }));
+                return;
+              }
+              validatedUsername = checkUser.username;
+            }
+
+            // Verificar si el usuario está sancionado
+            const sanction = checkUserSanction(db, googleId);
+            if (sanction && sanction.bloqueado) {
+              res.writeHead(403);
+              res.end(JSON.stringify({ status: "error", message: sanction.mensaje, sanction }));
+              return;
+            }
+
+            const exist = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(googleId);
+            let customAvatar = exist ? (exist.avatar_personalizado || "") : "";
+            if (restoreGoogleAvatar) {
+              customAvatar = "";
+            } else if (avatarUrl.startsWith("data:image/")) {
+              customAvatar = avatarUrl;
+            }
+
+            const finalUsername = validatedUsername !== null ? validatedUsername : (exist ? (exist.username || "") : "");
+
+            if (!exist) {
+              db.prepare(`
+                INSERT INTO usuarios (google_id, username, nombre, colegio_id, bio, rol_estudiantil, ano_escolar, instagram, avatar_personalizado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+              `).run(googleId, finalUsername, nombre, colegioId, bio, rolEstudiantil, anoEscolar, instagram, customAvatar);
+            } else {
+              db.prepare(`
+                UPDATE usuarios
+                SET username = ?, nombre = ?, colegio_id = ?, bio = ?, rol_estudiantil = ?, ano_escolar = ?, instagram = ?, avatar_personalizado = ?
+                WHERE google_id = ?
+              `).run(finalUsername, nombre, colegioId, bio, rolEstudiantil, anoEscolar, instagram, customAvatar, googleId);
+            }
+
+            const finalAvatarUrl = customAvatar || (exist ? exist.avatar_url : avatarUrl);
+
+            // Sincronizar en hilos y comentarios del usuario
+            try {
+              db.prepare("UPDATE hilos SET autor_nombre = ?, autor_avatar = ?, colegio_id = ? WHERE autor_google_id = ?").run(nombre, finalAvatarUrl, colegioId, googleId);
+              db.prepare("UPDATE comentarios SET autor_nombre = ?, autor_avatar = ?, colegio_id = ? WHERE autor_google_id = ?").run(nombre, finalAvatarUrl, colegioId, googleId);
+            } catch (e) {}
+
+            res.writeHead(200);
+            res.end(JSON.stringify({
+              status: "ok",
+              message: "Perfil actualizado con éxito",
+              usuario: {
+                googleId,
+                username: finalUsername,
+                nombre,
+                colegioId,
+                bio,
+                rolEstudiantil,
+                anoEscolar,
+                instagram,
+                avatarUrl: finalAvatarUrl,
+                avatarOriginal: exist ? exist.avatar_url : ""
+              }
+            }));
             return;
           }
 
@@ -812,6 +1355,14 @@ const server = http.createServer((req, res) => {
             if (!googleId || !autorNombre) {
               res.writeHead(401);
               res.end(JSON.stringify({ status: "error", message: "Iniciá sesión con Google para publicar" }));
+              return;
+            }
+
+            // Verificar si el usuario está suspendido o baneado
+            const sanctionHilo = checkUserSanction(db, googleId);
+            if (sanctionHilo && sanctionHilo.bloqueado) {
+              res.writeHead(403);
+              res.end(JSON.stringify({ status: "error", message: sanctionHilo.mensaje, sanction: sanctionHilo }));
               return;
             }
 
@@ -848,6 +1399,14 @@ const server = http.createServer((req, res) => {
             if (!googleId || !autorNombre) {
               res.writeHead(401);
               res.end(JSON.stringify({ status: "error", message: "Iniciá sesión con Google para comentar" }));
+              return;
+            }
+
+            // Verificar si el usuario está suspendido o baneado
+            const sanctionComentario = checkUserSanction(db, googleId);
+            if (sanctionComentario && sanctionComentario.bloqueado) {
+              res.writeHead(403);
+              res.end(JSON.stringify({ status: "error", message: sanctionComentario.mensaje, sanction: sanctionComentario }));
               return;
             }
 
@@ -985,6 +1544,25 @@ const server = http.createServer((req, res) => {
         return;
       }
 
+      if (action === "usuarios") {
+        const admin = getAdminFromRequest(req);
+        if (!admin) {
+          res.writeHead(401);
+          res.end(JSON.stringify({ status: "error", message: "No autorizado" }));
+          return;
+        }
+        const usuarios = db.prepare(`
+          SELECT u.*,
+            (SELECT COUNT(*) FROM hilos h WHERE h.autor_google_id = u.google_id) as total_hilos,
+            (SELECT COUNT(*) FROM comentarios c WHERE c.autor_google_id = u.google_id) as total_comentarios
+          FROM usuarios u
+          ORDER BY u.creado_en DESC
+        `).all();
+        res.writeHead(200);
+        res.end(JSON.stringify({ status: "ok", usuarios }));
+        return;
+      }
+
       res.writeHead(400);
       res.end(JSON.stringify({ status: "error", message: "Acción GET no reconocida" }));
       return;
@@ -1035,6 +1613,31 @@ const server = http.createServer((req, res) => {
               token,
               usuario: row.usuario,
               rol: row.rol
+            }));
+            return;
+          }
+
+          // Login directo mediante Token de Administración Maestro
+          if (action === "login_token") {
+            const rawToken = String(body.token || "").trim();
+            if (!rawToken) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "Token de administración requerido" }));
+              return;
+            }
+            const verified = verifyAdminToken(rawToken);
+            if (!verified) {
+              res.writeHead(401);
+              res.end(JSON.stringify({ status: "error", message: "Token de administración inválido o no reconocido" }));
+              return;
+            }
+            res.writeHead(200);
+            res.end(JSON.stringify({
+              status: "ok",
+              token: rawToken,
+              usuario: verified.usuario || "admin",
+              rol: verified.rol || "superadmin",
+              admin: verified
             }));
             return;
           }
@@ -1120,13 +1723,14 @@ const server = http.createServer((req, res) => {
             const fecha = new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
             const imagenUrl = String(body.imagen || body.imagenUrl || "").trim();
+            const fijada = body.fijada ? 1 : 0;
 
             // Ensure bloques column exists
             try { db.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch(e) {}
 
             db.prepare(`
               INSERT INTO noticias (id, titulo, categoria, categoria_slug, fecha, autor, tiempo_lectura, badge, resumen, contenido, bloques, tags, imagen_url, fijada)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
               id,
               titulo,
@@ -1140,7 +1744,8 @@ const server = http.createServer((req, res) => {
               JSON.stringify(contenido),
               JSON.stringify(bloques),
               JSON.stringify(tags),
-              imagenUrl
+              imagenUrl,
+              fijada
             );
 
             syncComunidadJson(db);
@@ -1152,7 +1757,7 @@ const server = http.createServer((req, res) => {
               noticia: {
                 id, titulo, categoria, categoriaSlug, fecha, autor,
                 tiempoLectura, badge, resumen, contenido, bloques, tags,
-                imagen: imagenUrl, imagenUrl
+                imagen: imagenUrl, imagenUrl, fijada: fijada === 1
               }
             }));
             return;
@@ -1169,6 +1774,7 @@ const server = http.createServer((req, res) => {
             const autor = String(body.autor || "Redacción Oficial").trim();
             const tiempoLectura = String(body.tiempoLectura || "3 min de lectura").trim();
             const imagenUrl = String(body.imagen || body.imagenUrl || "").trim();
+            const fijada = body.fijada ? 1 : 0;
             const tags = Array.isArray(body.tags) ? body.tags : (typeof body.tags === "string" ? body.tags.split(",").map(t=>t.trim()).filter(Boolean) : []);
             // Support bloques
             let bloques = Array.isArray(body.bloques) ? body.bloques : null;
@@ -1193,11 +1799,11 @@ const server = http.createServer((req, res) => {
 
             db.prepare(`
               UPDATE noticias 
-              SET titulo = ?, categoria = ?, categoria_slug = ?, badge = ?, autor = ?, tiempo_lectura = ?, resumen = ?, contenido = ?, bloques = ?, tags = ?, imagen_url = ?
+              SET titulo = ?, categoria = ?, categoria_slug = ?, badge = ?, autor = ?, tiempo_lectura = ?, resumen = ?, contenido = ?, bloques = ?, tags = ?, imagen_url = ?, fijada = ?
               WHERE id = ?
             `).run(
               titulo, categoria, categoriaSlug, badge, autor, tiempoLectura, resumen,
-              JSON.stringify(contenido), JSON.stringify(bloques), JSON.stringify(tags), imagenUrl, id
+              JSON.stringify(contenido), JSON.stringify(bloques), JSON.stringify(tags), imagenUrl, fijada, id
             );
 
             syncComunidadJson(db);
@@ -1372,6 +1978,69 @@ const server = http.createServer((req, res) => {
 
             res.writeHead(200);
             res.end(JSON.stringify({ status: "ok", message: "Ajustes del sitio actualizados", ajustes: cur.ajustes }));
+            return;
+          }
+
+          // Moderación: Sancionar / Desbanear Usuario
+          if (action === "sancionar_usuario") {
+            const googleId = String(body.googleId || "").trim();
+            const tipoSancion = String(body.tipoSancion || "suspender").toLowerCase(); // "suspender", "banear", "desbanear"
+            const motivo = escapeHtml(String(body.motivo || "").trim().slice(0, 500));
+            const duracionHoras = parseInt(body.duracionHoras || "24", 10);
+
+            if (!googleId) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "ID de usuario requerido" }));
+              return;
+            }
+
+            // Asegurar que el usuario exista en la tabla usuarios
+            const userCheck = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(googleId);
+            if (!userCheck) {
+              const autorInfo = db.prepare("SELECT autor_nombre, autor_avatar, colegio_id FROM hilos WHERE autor_google_id = ? UNION SELECT autor_nombre, autor_avatar, colegio_id FROM comentarios WHERE autor_google_id = ? LIMIT 1").get(googleId, googleId);
+              const nombre = autorInfo ? autorInfo.autor_nombre : "Usuario " + googleId.slice(-4);
+              const avatar = autorInfo ? autorInfo.autor_avatar : "";
+              const col = autorInfo ? autorInfo.colegio_id : "janssen";
+              db.prepare("INSERT INTO usuarios (google_id, nombre, avatar_url, colegio_id) VALUES (?, ?, ?, ?)").run(googleId, nombre, avatar, col);
+            }
+
+            if (tipoSancion === "desbanear" || tipoSancion === "levantar") {
+              db.prepare(`
+                UPDATE usuarios
+                SET estado = 'activo', motivo_sancion = NULL, sancionado_hasta = NULL, sancionado_por = NULL, sancionado_en = NULL
+                WHERE google_id = ?
+              `).run(googleId);
+              res.writeHead(200);
+              res.end(JSON.stringify({ status: "ok", message: "Sanción levantada. El usuario ahora está activo." }));
+              return;
+            }
+
+            if (tipoSancion === "banear") {
+              db.prepare(`
+                UPDATE usuarios
+                SET estado = 'baneado', motivo_sancion = ?, sancionado_hasta = NULL, sancionado_por = ?, sancionado_en = CURRENT_TIMESTAMP
+                WHERE google_id = ?
+              `).run(motivo || "Violación grave de las normas de convivencia", admin.usuario || "admin", googleId);
+              res.writeHead(200);
+              res.end(JSON.stringify({ status: "ok", message: "Usuario baneado permanentemente." }));
+              return;
+            }
+
+            if (tipoSancion === "suspender") {
+              const horas = isNaN(duracionHoras) || duracionHoras <= 0 ? 24 : duracionHoras;
+              const hasta = new Date(Date.now() + horas * 3600 * 1000).toISOString();
+              db.prepare(`
+                UPDATE usuarios
+                SET estado = 'suspendido', motivo_sancion = ?, sancionado_hasta = ?, sancionado_por = ?, sancionado_en = CURRENT_TIMESTAMP
+                WHERE google_id = ?
+              `).run(motivo || `Suspensión temporal por ${horas}h`, hasta, admin.usuario || "admin", googleId);
+              res.writeHead(200);
+              res.end(JSON.stringify({ status: "ok", message: `Usuario suspendido hasta ${new Date(hasta).toLocaleString("es-AR")}.`, hasta }));
+              return;
+            }
+
+            res.writeHead(400);
+            res.end(JSON.stringify({ status: "error", message: "Tipo de sanción no válido" }));
             return;
           }
 
