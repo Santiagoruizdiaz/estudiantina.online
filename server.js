@@ -8,17 +8,49 @@ import http from "http";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
+import zlib from "node:zlib";
 import { fileURLToPath } from "url";
 import { DatabaseSync } from "node:sqlite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Carga nativa de variables desde .env si existe (sin dependencias externas)
+const envFilePath = path.join(__dirname, ".env");
+if (fs.existsSync(envFilePath)) {
+  try {
+    const lines = fs.readFileSync(envFilePath, "utf-8").split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eqIdx = trimmed.indexOf("=");
+      if (eqIdx > 0) {
+        const k = trimmed.slice(0, eqIdx).trim();
+        const v = trimmed.slice(eqIdx + 1).trim().replace(/^['"]|['"]$/g, "");
+        if (typeof process.env[k] === "undefined") {
+          process.env[k] = v;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso al procesar archivo .env local:", err.message);
+  }
+}
+
+const NODE_ENV = process.env.NODE_ENV || "development";
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data", "ranking.json");
-const FORO_DB_FILE = path.join(__dirname, "data", "foro.db");
+const FORO_DB_FILE = process.env.DATABASE_PATH ? path.resolve(__dirname, process.env.DATABASE_PATH) : path.join(__dirname, "data", "foro.db");
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "estudiantina_admin_secret_posadas_2026_key";
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
+
+// Fail-fast de seguridad en producción: bloquear secretos por defecto conocidos
+if (NODE_ENV === "production") {
+  if (ADMIN_SECRET === "estudiantina_admin_secret_posadas_2026_key" || ADMIN_TOKEN === "posadas_admin_2026_x9k2m") {
+    console.error("FATAL [Seguridad]: En producción (NODE_ENV=production) es obligatorio definir ADMIN_SECRET y ADMIN_TOKEN seguros.");
+    process.exit(1);
+  }
+}
 
 let foroDb = null;
 function getForoDb() {
@@ -27,8 +59,13 @@ function getForoDb() {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     foroDb = new DatabaseSync(FORO_DB_FILE);
     foroDb.exec(`
-      PRAGMA journal_mode = WAL;
       PRAGMA busy_timeout = 5000;
+      PRAGMA journal_mode = WAL;
+      PRAGMA synchronous = NORMAL;
+      PRAGMA cache_size = -64000;
+      PRAGMA foreign_keys = ON;
+      PRAGMA temp_store = MEMORY;
+      PRAGMA mmap_size = 268435456;
       CREATE TABLE IF NOT EXISTS usuarios (
           google_id TEXT PRIMARY KEY,
           nombre TEXT NOT NULL,
@@ -133,7 +170,7 @@ function getForoDb() {
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN avatar_personalizado TEXT DEFAULT ''"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN username TEXT DEFAULT ''"); } catch (e) {}
 
-    // Índices secundarios para acelerar consultas del foro con alta concurrencia
+    // Índices secundarios y compuestos para acelerar consultas del foro con alta concurrencia
     foroDb.exec(`
       CREATE INDEX IF NOT EXISTS idx_hilos_canal ON hilos(canal_id);
       CREATE INDEX IF NOT EXISTS idx_hilos_creado ON hilos(creado_en);
@@ -142,6 +179,9 @@ function getForoDb() {
       CREATE INDEX IF NOT EXISTS idx_comentarios_parent ON comentarios(parent_id);
       CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
       CREATE INDEX IF NOT EXISTS idx_reportes_item ON reportes(item_tipo, item_id);
+      CREATE INDEX IF NOT EXISTS idx_hilos_canal_compuesto ON hilos(canal_id, oculto, fijado, creado_en);
+      CREATE INDEX IF NOT EXISTS idx_comentarios_hilo_compuesto ON comentarios(hilo_id, oculto, creado_en);
+      CREATE INDEX IF NOT EXISTS idx_hilos_colegio_compuesto ON hilos(colegio_id, oculto);
     `);
     try { foroDb.exec("CREATE INDEX IF NOT EXISTS idx_hilos_noticia ON hilos(noticia_id)"); } catch (e) {}
     try { foroDb.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(LOWER(username)) WHERE username != '' AND username IS NOT NULL;"); } catch (e) {}
@@ -384,39 +424,95 @@ function escapeHtml(str) {
     .replace(/'/g, "&#x27;");
 }
 
-// Rate-limiting en memoria: previene spam con TTL y poda de memoria
+// Pool de Sentencias Preparadas SQLite (elimina costo de compilación repetida)
+const _stmtCache = new Map();
+function getStmt(db, sql) {
+  let stmt = _stmtCache.get(sql);
+  if (!stmt) {
+    stmt = db.prepare(sql);
+    _stmtCache.set(sql, stmt);
+  }
+  return stmt;
+}
+
+// Rate-limiting en memoria con poda periódica O(1)
 const _rateLimitMap = new Map();
 const _rateLimitComentarioMap = new Map();
 
-function pruneRateLimitMap(map, windowMs) {
-  if (map.size > 500) {
-    const now = Date.now();
-    for (const [key, timestamp] of map.entries()) {
-      if (now - timestamp > windowMs) {
-        map.delete(key);
-      }
-    }
+const _rateLimitCleanup = setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of _rateLimitMap.entries()) {
+    if (now - timestamp > 60000) _rateLimitMap.delete(key);
   }
-}
+  for (const [key, timestamp] of _rateLimitComentarioMap.entries()) {
+    if (now - timestamp > 30000) _rateLimitComentarioMap.delete(key);
+  }
+}, 60000);
+_rateLimitCleanup.unref();
 
 function checkRateLimit(googleId, windowMs = 30000) {
   if (!googleId) return false;
-  pruneRateLimitMap(_rateLimitMap, windowMs);
   const now = Date.now();
   const last = _rateLimitMap.get(googleId) || 0;
-  if (now - last < windowMs) return false; // bloqueado
+  if (now - last < windowMs) return false;
   _rateLimitMap.set(googleId, now);
-  return true; // permitido
+  return true;
 }
 
 function checkCommentRateLimit(googleId, windowMs = 5000) {
   if (!googleId) return false;
-  pruneRateLimitMap(_rateLimitComentarioMap, windowMs);
   const now = Date.now();
   const last = _rateLimitComentarioMap.get(googleId) || 0;
-  if (now - last < windowMs) return false; // bloqueado
+  if (now - last < windowMs) return false;
   _rateLimitComentarioMap.set(googleId, now);
-  return true; // permitido
+  return true;
+}
+
+// Helper de alto throughput para respuestas JSON con compresión nativa (Gzip) y ETag condicional
+function sendOptimizedJson(req, res, statusCode, payload, { cacheable = false, maxAge = 15 } = {}) {
+  const jsonStr = typeof payload === "string" ? payload : JSON.stringify(payload);
+  const jsonBuffer = Buffer.from(jsonStr, "utf-8");
+
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  };
+
+  if (cacheable && statusCode === 200) {
+    const etag = `"${crypto.createHash("md5").update(jsonBuffer).digest("hex")}"`;
+    headers["ETag"] = etag;
+    headers["Cache-Control"] = `public, max-age=${maxAge}, stale-while-revalidate=60`;
+
+    if (req.headers["if-none-match"] === etag) {
+      res.writeHead(304, headers);
+      res.end();
+      return;
+    }
+  } else {
+    headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+  }
+
+  const acceptEncoding = req.headers["accept-encoding"] || "";
+  if (acceptEncoding.includes("gzip") && jsonBuffer.length > 1024) {
+    zlib.gzip(jsonBuffer, (err, gzipped) => {
+      if (err) {
+        headers["Content-Length"] = jsonBuffer.length;
+        res.writeHead(statusCode, headers);
+        res.end(jsonBuffer);
+        return;
+      }
+      headers["Content-Encoding"] = "gzip";
+      headers["Content-Length"] = gzipped.length;
+      res.writeHead(statusCode, headers);
+      res.end(gzipped);
+    });
+  } else {
+    headers["Content-Length"] = jsonBuffer.length;
+    res.writeHead(statusCode, headers);
+    res.end(jsonBuffer);
+  }
 }
 
 // Helpers de Seguridad de Administración
@@ -771,15 +867,14 @@ const server = http.createServer((req, res) => {
         };
       });
 
-      res.writeHead(200);
-      res.end(JSON.stringify({
+      sendOptimizedJson(req, res, 200, {
         status: "ok",
         noticias,
         cronograma: baseData.cronograma,
         guia: baseData.guia,
         faq: baseData.faq,
         ajustes: baseData.ajustes
-      }));
+      }, { cacheable: true, maxAge: 30 });
       return;
     } catch (e) {
       console.error("Error leyendo noticias de SQLite:", e);
@@ -791,23 +886,33 @@ const server = http.createServer((req, res) => {
 
   // Endpoint API Global Ranking
   if (pathname === "/api/ranking" || pathname === "/api/ranking.php") {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-
     if (req.method === "GET") {
       const data = leerRanking();
-      res.writeHead(200);
-      res.end(JSON.stringify({ status: "ok", top10: data.top10, colegios: data.colegios }));
+      sendOptimizedJson(req, res, 200, { status: "ok", top10: data.top10, colegios: data.colegios }, { cacheable: true, maxAge: 15 });
       return;
     }
 
     if (req.method === "POST") {
       let bodyStr = "";
+      let totalBytes = 0;
+      let payloadTooLarge = false;
+      const MAX_PAYLOAD = 2 * 1024 * 1024;
+
       req.on("data", chunk => {
+        if (payloadTooLarge) return;
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_PAYLOAD) {
+          payloadTooLarge = true;
+          res.writeHead(413, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
+          req.destroy();
+          return;
+        }
         bodyStr += chunk;
       });
 
       req.on("end", () => {
+        if (payloadTooLarge) return;
         try {
           const body = JSON.parse(bodyStr || "{}");
           const action = body.action;
@@ -950,14 +1055,14 @@ const server = http.createServer((req, res) => {
       }
 
       if (action === "canales") {
-        const canales = db.prepare(`
+        const canales = getStmt(db, `
           SELECT c.*, COUNT(h.id) as hilos_count
           FROM canales c
           LEFT JOIN hilos h ON c.id = h.canal_id AND h.oculto = 0
           GROUP BY c.id
         `).all();
 
-        const colegiosCountsRaw = db.prepare(`
+        const colegiosCountsRaw = getStmt(db, `
           SELECT colegio_id, COUNT(id) as count
           FROM hilos
           WHERE oculto = 0
@@ -968,8 +1073,7 @@ const server = http.createServer((req, res) => {
           if (r.colegio_id) colegiosCounts[r.colegio_id] = r.count;
         });
 
-        res.writeHead(200);
-        res.end(JSON.stringify({ status: "ok", canales, colegiosCounts }));
+        sendOptimizedJson(req, res, 200, { status: "ok", canales, colegiosCounts }, { cacheable: true, maxAge: 20 });
         return;
       }
 
@@ -1022,13 +1126,15 @@ const server = http.createServer((req, res) => {
         }
 
         const hilosRaw = db.prepare(sql).all(...params);
+        let votedHilosSet = new Set();
+        if (viewerGoogleId && hilosRaw.length > 0) {
+          const ids = hilosRaw.map(h => h.id);
+          const placeholders = ids.map(() => "?").join(",");
+          const vRows = db.prepare(`SELECT item_id FROM votos WHERE item_tipo = 'hilo' AND google_id = ? AND item_id IN (${placeholders})`).all(viewerGoogleId, ...ids);
+          for (const r of vRows) votedHilosSet.add(r.item_id);
+        }
         const hilos = hilosRaw.map(h => {
-          if (viewerGoogleId) {
-            const v = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?").get(h.id, viewerGoogleId);
-            h.user_voted = v ? 1 : 0;
-          } else {
-            h.user_voted = 0;
-          }
+          h.user_voted = votedHilosSet.has(h.id) ? 1 : 0;
           return h;
         });
 
@@ -1051,8 +1157,7 @@ const server = http.createServer((req, res) => {
         const countRow = db.prepare(countSql).get(...countParams);
         const totalCount = countRow ? countRow.total : hilosRaw.length;
 
-        res.writeHead(200);
-        res.end(JSON.stringify({ status: "ok", total_count: totalCount, hilos }));
+        sendOptimizedJson(req, res, 200, { status: "ok", total_count: totalCount, hilos }, { cacheable: !viewerGoogleId && !q, maxAge: 15 });
         return;
       }
 
@@ -1080,7 +1185,7 @@ const server = http.createServer((req, res) => {
 
         // Incluir si el visitante ya votó el hilo principal
         if (viewerGoogleId) {
-          const hiloVoted = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?").get(id, viewerGoogleId);
+          const hiloVoted = getStmt(db, "SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?").get(id, viewerGoogleId);
           hilo.user_voted = hiloVoted ? 1 : 0;
         } else {
           hilo.user_voted = 0;
@@ -1100,19 +1205,21 @@ const server = http.createServer((req, res) => {
           ORDER BY c.creado_en ASC
         `).all(id);
 
+        let votedComentariosSet = new Set();
+        if (viewerGoogleId && comentariosRaw.length > 0) {
+          const cIds = comentariosRaw.map(c => c.id);
+          const placeholders = cIds.map(() => "?").join(",");
+          const vRows = db.prepare(`SELECT item_id FROM votos WHERE item_tipo = 'comentario' AND google_id = ? AND item_id IN (${placeholders})`).all(viewerGoogleId, ...cIds);
+          for (const r of vRows) votedComentariosSet.add(r.item_id);
+        }
+
         // Enriquecer cada comentario con user_voted
         const comentarios = comentariosRaw.map(c => {
-          if (viewerGoogleId) {
-            const cv = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?").get(c.id, viewerGoogleId);
-            c.user_voted = cv ? 1 : 0;
-          } else {
-            c.user_voted = 0;
-          }
+          c.user_voted = votedComentariosSet.has(c.id) ? 1 : 0;
           return c;
         });
 
-        res.writeHead(200);
-        res.end(JSON.stringify({ status: "ok", hilo, comentarios }));
+        sendOptimizedJson(req, res, 200, { status: "ok", hilo, comentarios });
         return;
       }
 
@@ -1186,18 +1293,20 @@ const server = http.createServer((req, res) => {
           ORDER BY c.creado_en ASC
         `).all(hilo.id);
 
+        let votedNoticiaComentariosSet = new Set();
+        if (viewerGoogleId && comentariosRaw.length > 0) {
+          const cIds = comentariosRaw.map(c => c.id);
+          const placeholders = cIds.map(() => "?").join(",");
+          const vRows = db.prepare(`SELECT item_id FROM votos WHERE item_tipo = 'comentario' AND google_id = ? AND item_id IN (${placeholders})`).all(viewerGoogleId, ...cIds);
+          for (const r of vRows) votedNoticiaComentariosSet.add(r.item_id);
+        }
+
         const comentarios = comentariosRaw.map(c => {
-          if (viewerGoogleId) {
-            const cv = db.prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?").get(c.id, viewerGoogleId);
-            c.user_voted = cv ? 1 : 0;
-          } else {
-            c.user_voted = 0;
-          }
+          c.user_voted = votedNoticiaComentariosSet.has(c.id) ? 1 : 0;
           return c;
         });
 
-        res.writeHead(200);
-        res.end(JSON.stringify({ status: "ok", hilo, comentarios }));
+        sendOptimizedJson(req, res, 200, { status: "ok", hilo, comentarios });
         return;
       }
 
@@ -1318,8 +1427,25 @@ const server = http.createServer((req, res) => {
 
     if (req.method === "POST") {
       let bodyStr = "";
-      req.on("data", chunk => { bodyStr += chunk; });
+      let totalBytes = 0;
+      let payloadTooLarge = false;
+      const MAX_PAYLOAD = 2 * 1024 * 1024;
+
+      req.on("data", chunk => {
+        if (payloadTooLarge) return;
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_PAYLOAD) {
+          payloadTooLarge = true;
+          res.writeHead(413, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
+          req.destroy();
+          return;
+        }
+        bodyStr += chunk;
+      });
+
       req.on("end", () => {
+        if (payloadTooLarge) return;
         try {
           const body = JSON.parse(bodyStr || "{}");
 
@@ -1847,8 +1973,25 @@ const server = http.createServer((req, res) => {
 
     if (req.method === "POST") {
       let bodyStr = "";
-      req.on("data", chunk => { bodyStr += chunk; });
+      let totalBytes = 0;
+      let payloadTooLarge = false;
+      const MAX_PAYLOAD = 2 * 1024 * 1024;
+
+      req.on("data", chunk => {
+        if (payloadTooLarge) return;
+        totalBytes += chunk.length;
+        if (totalBytes > MAX_PAYLOAD) {
+          payloadTooLarge = true;
+          res.writeHead(413, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
+          req.destroy();
+          return;
+        }
+        bodyStr += chunk;
+      });
+
       req.on("end", () => {
+        if (payloadTooLarge) return;
         try {
           const body = JSON.parse(bodyStr || "{}");
 
@@ -2372,18 +2515,62 @@ const server = http.createServer((req, res) => {
   }
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    const stats = fs.statSync(filePath);
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || "application/octet-stream";
-    res.writeHead(200, { "Content-Type": contentType });
-    fs.createReadStream(filePath).pipe(res);
+
+    const etag = `W/"${stats.size.toString(16)}-${Math.floor(stats.mtimeMs).toString(16)}"`;
+    if (req.headers["if-none-match"] === etag) {
+      res.writeHead(304, {
+        "ETag": etag,
+        "Cache-Control": "public, max-age=3600"
+      });
+      res.end();
+      return;
+    }
+
+    const headers = {
+      "Content-Type": contentType,
+      "ETag": etag,
+      "Cache-Control": "public, max-age=3600"
+    };
+
+    const isCompressible = /^(text\/|application\/(javascript|json)|image\/svg\+xml)/.test(contentType);
+    const acceptEncoding = req.headers["accept-encoding"] || "";
+
+    if (isCompressible && acceptEncoding.includes("gzip") && stats.size > 1024) {
+      headers["Content-Encoding"] = "gzip";
+      res.writeHead(200, headers);
+      fs.createReadStream(filePath).pipe(zlib.createGzip()).pipe(res);
+    } else {
+      headers["Content-Length"] = stats.size;
+      res.writeHead(200, headers);
+      fs.createReadStream(filePath).pipe(res);
+    }
     return;
   }
 
   // SPA Fallback a index.html
   const indexPath = path.join(__dirname, "index.html");
   if (fs.existsSync(indexPath)) {
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    fs.createReadStream(indexPath).pipe(res);
+    const stats = fs.statSync(indexPath);
+    const etag = `W/"${stats.size.toString(16)}-${Math.floor(stats.mtimeMs).toString(16)}"`;
+    if (req.headers["if-none-match"] === etag) {
+      res.writeHead(304, { "ETag": etag, "Cache-Control": "public, max-age=300" });
+      res.end();
+      return;
+    }
+    const headers = { "Content-Type": "text/html; charset=utf-8", "ETag": etag, "Cache-Control": "public, max-age=300" };
+    const acceptEncoding = req.headers["accept-encoding"] || "";
+    if (acceptEncoding.includes("gzip") && stats.size > 1024) {
+      headers["Content-Encoding"] = "gzip";
+      res.writeHead(200, headers);
+      fs.createReadStream(indexPath).pipe(zlib.createGzip()).pipe(res);
+    } else {
+      headers["Content-Length"] = stats.size;
+      res.writeHead(200, headers);
+      fs.createReadStream(indexPath).pipe(res);
+    }
   } else {
     res.writeHead(404);
     res.end("404 Not Found");

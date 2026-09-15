@@ -6,7 +6,7 @@
   "main": "index.html",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js",
+    "dev": "node --watch server.js",
     "test": "node scripts/test-runner.mjs",
     "lint": "node scripts/check-syntax.mjs",
     "check": "node scripts/check-syntax.mjs",

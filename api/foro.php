@@ -24,14 +24,18 @@ if (!is_dir($dbDir)) {
 }
 
 try {
-    $pdo = new PDO("sqlite:" . $dbPath);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-    // Habilitar Write-Ahead Logging para concurrencia de lecturas y escrituras
+    $pdo = new PDO("sqlite:" . $dbPath, null, null, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false
+    ]);
+    // Habilitar Write-Ahead Logging, caché en RAM y parámetros de alto rendimiento
     $pdo->exec("PRAGMA journal_mode = WAL;");
     $pdo->exec("PRAGMA synchronous = NORMAL;");
+    $pdo->exec("PRAGMA cache_size = -64000;");
     $pdo->exec("PRAGMA busy_timeout = 5000;");
     $pdo->exec("PRAGMA foreign_keys = ON;");
+    $pdo->exec("PRAGMA temp_store = MEMORY;");
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(["status" => "error", "message" => "Error de base de datos: " . $e->getMessage()]);
@@ -114,6 +118,9 @@ CREATE INDEX IF NOT EXISTS idx_comentarios_hilo ON comentarios(hilo_id);
 CREATE INDEX IF NOT EXISTS idx_comentarios_parent ON comentarios(parent_id);
 CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
 CREATE INDEX IF NOT EXISTS idx_reportes_item ON reportes(item_tipo, item_id);
+CREATE INDEX IF NOT EXISTS idx_hilos_canal_compuesto ON hilos(canal_id, oculto, fijado, creado_en);
+CREATE INDEX IF NOT EXISTS idx_comentarios_hilo_compuesto ON comentarios(hilo_id, oculto, creado_en);
+CREATE INDEX IF NOT EXISTS idx_hilos_colegio_compuesto ON hilos(colegio_id, oculto);
 ");
 
 try { $pdo->exec("ALTER TABLE hilos ADD COLUMN noticia_id TEXT;"); } catch (Exception $e) {}
@@ -512,14 +519,17 @@ if ($action === "hilos") {
     $stmt->execute($params);
     $hilosRaw = $stmt->fetchAll();
 
-    $hilos = array_map(function($h) use ($pdo, $viewerGoogleId) {
-        if ($viewerGoogleId) {
-            $chk = $pdo->prepare("SELECT 1 FROM votos WHERE item_tipo = 'hilo' AND item_id = ? AND google_id = ?");
-            $chk->execute([$h["id"], $viewerGoogleId]);
-            $h["user_voted"] = $chk->fetchColumn() ? 1 : 0;
-        } else {
-            $h["user_voted"] = 0;
-        }
+    $votedHilosMap = [];
+    if (!empty($viewerGoogleId) && !empty($hilosRaw)) {
+        $ids = array_column($hilosRaw, "id");
+        $placeholders = implode(",", array_fill(0, count($ids), "?"));
+        $votedStmt = $pdo->prepare("SELECT item_id FROM votos WHERE item_tipo = 'hilo' AND google_id = ? AND item_id IN ($placeholders)");
+        $votedStmt->execute(array_merge([$viewerGoogleId], $ids));
+        $votedHilosMap = array_flip($votedStmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    $hilos = array_map(function($h) use ($votedHilosMap) {
+        $h["user_voted"] = isset($votedHilosMap[$h["id"]]) ? 1 : 0;
         return $h;
     }, $hilosRaw);
 
@@ -602,15 +612,18 @@ if ($action === "hilo") {
     $stmtComentarios->execute([$id]);
     $comentariosRaw = $stmtComentarios->fetchAll();
 
-    // Enriquecer comentarios con user_voted
-    $comentarios = array_map(function($c) use ($pdo, $viewerGoogleId) {
-        if ($viewerGoogleId) {
-            $chkC = $pdo->prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?");
-            $chkC->execute([$c["id"], $viewerGoogleId]);
-            $c["user_voted"] = $chkC->fetchColumn() ? 1 : 0;
-        } else {
-            $c["user_voted"] = 0;
-        }
+    // Enriquecer comentarios con user_voted (batch sin N+1)
+    $votedComentariosMap = [];
+    if (!empty($viewerGoogleId) && !empty($comentariosRaw)) {
+        $cIds = array_column($comentariosRaw, "id");
+        $placeholders = implode(",", array_fill(0, count($cIds), "?"));
+        $votedStmt = $pdo->prepare("SELECT item_id FROM votos WHERE item_tipo = 'comentario' AND google_id = ? AND item_id IN ($placeholders)");
+        $votedStmt->execute(array_merge([$viewerGoogleId], $cIds));
+        $votedComentariosMap = array_flip($votedStmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    $comentarios = array_map(function($c) use ($votedComentariosMap) {
+        $c["user_voted"] = isset($votedComentariosMap[$c["id"]]) ? 1 : 0;
         return $c;
     }, $comentariosRaw);
 
@@ -701,14 +714,17 @@ if ($action === "noticia_hilo") {
     $stmtComentarios->execute([$hilo["id"]]);
     $comentariosRaw = $stmtComentarios->fetchAll();
 
-    $comentarios = array_map(function($c) use ($pdo, $viewerGoogleId) {
-        if ($viewerGoogleId) {
-            $chkC = $pdo->prepare("SELECT 1 FROM votos WHERE item_tipo = 'comentario' AND item_id = ? AND google_id = ?");
-            $chkC->execute([$c["id"], $viewerGoogleId]);
-            $c["user_voted"] = $chkC->fetchColumn() ? 1 : 0;
-        } else {
-            $c["user_voted"] = 0;
-        }
+    $votedNoticiaComentariosMap = [];
+    if (!empty($viewerGoogleId) && !empty($comentariosRaw)) {
+        $cIds = array_column($comentariosRaw, "id");
+        $placeholders = implode(",", array_fill(0, count($cIds), "?"));
+        $votedStmt = $pdo->prepare("SELECT item_id FROM votos WHERE item_tipo = 'comentario' AND google_id = ? AND item_id IN ($placeholders)");
+        $votedStmt->execute(array_merge([$viewerGoogleId], $cIds));
+        $votedNoticiaComentariosMap = array_flip($votedStmt->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    $comentarios = array_map(function($c) use ($votedNoticiaComentariosMap) {
+        $c["user_voted"] = isset($votedNoticiaComentariosMap[$c["id"]]) ? 1 : 0;
         return $c;
     }, $comentariosRaw);
 
