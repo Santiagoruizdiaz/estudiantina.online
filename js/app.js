@@ -14,6 +14,7 @@ import { COLEGIOS, getColegioById, getColegiosPorRubro } from "./colegios.js?v=2
 import { RUBROS, getRolById } from "./roles.js?v=20260904_8";
 import { SimuladorCarrera } from "./simulador.js?v=20260904_8";
 import { rankingManager } from "./ranking.js?v=20260904_8";
+import { UsuarioService } from "./usuario.js";
 
 export const PROPUESTAS_ESPECIALES_POOL = [
   "🔥 Proyecto de Élite: La comisión directiva y los caciques invirtieron fondos extraordinarios en formación juvenil y buscan un talento para liderar la renovación de la banda.",
@@ -2738,4 +2739,5 @@ class EstudiantinaApp {
 
 document.addEventListener("DOMContentLoaded", () => {
   window.estudiantinaApp = new EstudiantinaApp();
+  UsuarioService.initGlobalNavUser({ container: "global-nav-user", sourcePage: "home" });
 });

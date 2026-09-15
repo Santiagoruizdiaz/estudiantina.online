@@ -7,17 +7,45 @@
   <meta name="description" content="Espacio oficial de debate de la Estudiantina de Posadas. Opiná sobre arreglos de percusión, coreografías de baile, carrozas y la pasión de los 33 colegios.">
   <meta name="theme-color" content="#090a0f">
 
-  <!-- Open Graph -->
+  <!-- Favicons e Iconos Oficiales para Navegadores y Google -->
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+
+  <!-- Open Graph / Redes Sociales / Google Search -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Estudiantina Posadas Online">
   <meta property="og:url" content="https://estudiantina.online/foro">
   <meta property="og:title" content="Foro de Debate Estudiantil | estudiantina.online">
   <meta property="og:description" content="Espacio de intercambio, ritmos y opiniones para hinchadas y participantes de los 33 colegios posadeños.">
-  <meta property="og:image" content="https://estudiantina.online/assets/og-cover.png">
+  <meta property="og:image" content="https://estudiantina.online/assets/logo.png">
+  <meta property="og:image:secure_url" content="https://estudiantina.online/assets/logo.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1024">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:image:alt" content="Logo oficial de Estudiantina.online">
   <meta property="og:locale" content="es_AR">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Foro de Debate Estudiantil | estudiantina.online">
+  <meta name="twitter:description" content="Espacio de intercambio, ritmos y opiniones para hinchadas y participantes de los 33 colegios posadeños.">
+  <meta name="twitter:image" content="https://estudiantina.online/assets/logo.png">
+
+  <!-- Schema.org / Logo oficial para Google Search -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Estudiantina Posadas Online",
+    "url": "https://estudiantina.online/",
+    "logo": "https://estudiantina.online/assets/logo.png",
+    "image": "https://estudiantina.online/assets/logo.png"
+  }
+  </script>
 
   <!-- Fuentes Oficiales -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,11 +78,17 @@
   <aside id="admin-top-bar" class="admin-top-bar" aria-label="Barra de herramientas de administrador" style="display:none;">
     <div class="admin-bar-inner">
       <div class="admin-bar-left">
-        <span class="admin-badge">⚡ MODO MODERADOR</span>
+        <span class="admin-badge">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          MODERADOR
+        </span>
         <span class="admin-user-label">Sesión: <strong id="admin-bar-user">admin</strong></span>
       </div>
       <div class="admin-bar-actions">
-        <a href="comunidad.html" class="btn-admin-bar-portal" title="Ir al Administrador de Noticias y Comunidad">📰 Portal Admin</a>
+        <a href="comunidad.html" class="btn-admin-bar-portal" title="Ir al Administrador de Noticias y Comunidad">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+          Portal Admin
+        </a>
         <button type="button" id="btn-admin-logout" class="btn-admin-bar-logout" title="Cerrar sesión de administrador">
           <span>Salir</span>
           <span>✕</span>
@@ -67,35 +101,47 @@
   <header class="foro-app-header">
     <div class="foro-app-header-inner">
 
-      <!-- Lado Izquierdo: Volver a Noticias + Logo Foro -->
+      <!-- Lado Izquierdo: Botón Menú Drawer + Logo Foro -->
       <div class="foro-header-brand-group">
-        <a href="comunidad.html" class="foro-back-link" title="Volver al Portal de Noticias">
-          <span class="back-arrow">←</span>
-          <span class="back-text">Noticias</span>
-        </a>
+        <button type="button" id="btn-toggle-left-nav" class="btn-toggle-nav-drawer" aria-label="Abrir menú de navegación" title="Navegación">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
         <a href="foro.html" class="foro-brand-title" aria-label="Estudiantina Online Foro">
           <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
           <span class="foro-tag-pill">FORO</span>
         </a>
       </div>
 
-      <!-- Centro (Desktop): Buscador estilo Reddit -->
-      <div class="foro-header-search-wrap">
-        <span class="foro-search-lens" aria-hidden="true">🔍</span>
-        <input type="search" id="forum-search-input" class="foro-header-search-input" placeholder="Buscar debates, colegios, arreglos..." autocomplete="off" aria-label="Buscar en el foro">
+      <!-- Centro (Desktop): Omnibar de Búsqueda estilo Reddit -->
+      <div class="foro-header-search-wrap reddit-omnibar-wrap">
+        <span class="foro-search-lens" aria-hidden="true">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="search" id="forum-search-input" class="foro-header-search-input" placeholder="Buscar en Estudiantina Online..." autocomplete="off" aria-label="Buscar en Estudiantina Online">
         <button type="button" id="btn-forum-search-clear" class="forum-search-clear" aria-label="Limpiar búsqueda" style="display:none;">✕</button>
       </div>
 
-      <!-- Lado Derecho: Simulador + Login / Avatar + Botón Publicar -->
+      <!-- Lado Derecho: Acciones + Botón Crear + Perfil -->
       <div class="foro-header-user-actions">
         <!-- Toggle Modo Oscuro -->
         <button type="button" id="theme-toggle" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar entre modo claro y oscuro">
-          <span id="theme-icon">🌙</span>
+          <span id="theme-icon">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </span>
         </button>
 
-        <a href="index.html" class="foro-game-btn" title="Ir al Simulador de Carrera">
-          <span>🎮</span><span class="game-btn-text">Simulador</span>
-        </a>
+        <!-- Botón + Crear Píldora estilo Reddit -->
+        <button type="button" id="btn-propose-topic" class="btn-reddit-header-create" aria-label="Crear publicación" title="Crear debate o publicación">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Create</span>
+        </button>
 
         <!-- Barra de usuario Google -->
         <div id="forum-user-bar" class="forum-user-bar">
@@ -113,7 +159,7 @@
             <img id="user-avatar-img" class="user-avatar-img" src="" alt="Avatar" />
             <div class="user-profile-info">
               <span id="user-profile-name" class="user-profile-name">Usuario</span>
-              <span id="user-profile-school-badge" class="user-profile-school-badge">🥁 El Janssen</span>
+              <span id="user-profile-school-badge" class="user-profile-school-badge"><span class="school-dot"></span> El Janssen</span>
             </div>
             <button type="button" id="btn-logout" class="btn-logout" title="Cerrar sesión">✕</button>
           </div>
@@ -125,176 +171,385 @@
     <!-- Buscador compacto en Mobile -->
     <div class="foro-mobile-search-strip">
       <div class="foro-header-search-wrap">
-        <span class="foro-search-lens" aria-hidden="true">🔍</span>
-        <input type="search" id="forum-search-input-mobile" class="foro-header-search-input" placeholder="Buscar debates, colegios..." autocomplete="off" aria-label="Buscar en mobile">
+        <span class="foro-search-lens" aria-hidden="true">
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <input type="search" id="forum-search-input-mobile" class="foro-header-search-input" placeholder="Buscar en Estudiantina Online..." autocomplete="off" aria-label="Buscar en Estudiantina Online">
+        <button type="button" id="btn-forum-search-clear-mobile" class="forum-search-clear" aria-label="Limpiar búsqueda" style="display:none;">✕</button>
       </div>
     </div>
   </header>
 
-  <!-- BARRA DE CANALES HORIZONTAL STICKY (ESTILO SUBREDDITS REDDIT MOBILE) -->
-  <div class="foro-channels-strip-wrap">
-    <div class="foro-channels-strip-inner">
-      <div id="channels-grid" class="channels-grid-scrollable" role="tablist" aria-label="Canales temáticos">
-        <!-- Generados dinámicamente por JS -->
-      </div>
-    </div>
-  </div>
+  <!-- Overlay para Drawer Lateral en Mobile -->
+  <div id="sidebar-drawer-backdrop" class="sidebar-drawer-backdrop"></div>
 
-  <!-- CONTENEDOR PRINCIPAL DEL FEED (REDDIT STYLE) -->
+  <!-- CONTENEDOR PRINCIPAL DEL FEED (REDDIT 3-COLUMN STYLE) -->
   <main class="foro-main-layout">
     <div class="foro-layout-container">
 
-      <!-- FEED DE DEBATES -->
-      <section class="foro-feed-section" aria-label="Feed de debates">
+      <!-- SIDEBAR IZQUIERDO: FEEDS, CANALES Y FILTRO DE COLEGIOS -->
+      <aside class="foro-left-sidebar" id="foro-left-sidebar" aria-label="Navegación de Canales y Colegios">
+        <div class="left-sidebar-sticky">
 
-        <!-- BARRA DE ORDEN (REDDIT SORT PILLS) -->
-        <div class="forum-sort-bar-reddit">
-          <div class="sort-pills-group" role="tablist" aria-label="Ordenar publicaciones">
-            <button type="button" id="tab-sort-top" class="sort-pill-btn active" data-sort="top" role="tab" aria-selected="true">
-              <span>🔥</span><span>Más Votados</span>
-            </button>
-            <button type="button" id="tab-sort-recent" class="sort-pill-btn" data-sort="recientes" role="tab" aria-selected="false">
-              <span>⏱️</span><span>Recientes</span>
+          <!-- Sección: Feeds Principales -->
+          <div class="left-nav-section">
+            <span class="left-nav-heading">FEEDS</span>
+            <div class="left-nav-list">
+              <button type="button" class="left-nav-item active" id="nav-feed-home" data-feed="todos">
+                <span class="nav-icon">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </span>
+                <span class="nav-label">Feed Principal</span>
+              </button>
+              <button type="button" class="left-nav-item" id="nav-feed-popular" data-feed="top">
+                <span class="nav-icon">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                </span>
+                <span class="nav-label">Populares</span>
+              </button>
+              <button type="button" class="left-nav-item" id="nav-feed-comentados" data-feed="comentados">
+                <span class="nav-icon">
+                  <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                <span class="nav-label">Más Discutidos</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Sección: Canales Temáticos Oficiales -->
+          <div class="left-nav-section">
+            <span class="left-nav-heading">CANALES TEMÁTICOS</span>
+            <div class="left-nav-list" id="sidebar-channels-list">
+              <!-- Renderizado dinámicamente con canales y badges -->
+            </div>
+          </div>
+
+          <!-- Sección: Filtrar por Colegio -->
+          <div class="left-nav-section">
+            <div class="left-nav-heading-row">
+              <span class="left-nav-heading">COLEGIOS</span>
+              <button type="button" id="btn-clear-school-filter" class="btn-clear-school-filter" style="display:none;" title="Limpiar filtro de colegio">
+                Limpiar
+              </button>
+            </div>
+            <div class="sidebar-schools-search-wrap">
+              <input type="text" id="sidebar-school-search" class="sidebar-school-search-input" placeholder="Filtrar colegio..." autocomplete="off">
+            </div>
+            <div class="left-nav-list sidebar-schools-scrollable" id="sidebar-schools-list">
+              <!-- Lista interactiva de los 33 colegios -->
+            </div>
+          </div>
+
+          <!-- Enlaces Rápidos de la Fiesta -->
+          <div class="left-nav-section left-nav-links-section">
+            <a href="comunidad.html" class="left-nav-link-subtle">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>
+              Portal de Noticias
+            </a>
+            <a href="index.html" class="left-nav-link-subtle">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              Simulador de Carrera
+            </a>
+            <a href="index.html#ranking" class="left-nav-link-subtle">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              Salón de la Fama
+            </a>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- FEED CENTRAL DE DEBATES Y PESTAÑA COMPLETA DE HILOS -->
+      <section class="foro-feed-section" aria-label="Feed de debates y publicaciones">
+
+        <!-- SUB-VISTA 1: FEED PRINCIPAL DE DEBATES -->
+        <div id="forum-feed-view" class="forum-feed-view">
+          <!-- TARJETA RÁPIDA ESTILO REDDIT: "CREAR PUBLICACIÓN" -->
+          <div class="reddit-create-post-card" id="reddit-create-box">
+            <img id="reddit-create-avatar" class="reddit-create-avatar" src="assets/avatar-default.webp" alt="Avatar" />
+            <button type="button" id="reddit-create-input-btn" class="reddit-create-input-trigger" aria-label="Crear publicación">
+              <span>Crear una publicación o debate...</span>
             </button>
           </div>
-          <div class="feed-active-indicator">
-            <span id="forum-active-channel-name" class="active-channel-text">Todos los debates</span>
-            <span id="forum-threads-count" class="threads-count-pill">Cargando...</span>
+
+          <!-- BARRA DE ORDEN (OCULTA - REDUNDANTE CON NAVEGACIÓN LATERAL) -->
+          <div class="forum-sort-bar-reddit" style="display:none !important;" aria-hidden="true">
+            <button type="button" id="tab-sort-top" data-sort="top"></button>
+            <button type="button" id="tab-sort-recent" data-sort="recientes"></button>
+            <button type="button" id="tab-sort-comments" data-sort="comentados"></button>
+            <span id="forum-active-school-filter-pill"></span>
+            <span id="forum-active-channel-name"></span>
+            <span id="forum-threads-count"></span>
+          </div>
+
+          <!-- INDICADOR DINÁMICO DE FILTRO ACTIVO EN EL FEED -->
+          <div id="forum-feed-filter-bar" class="forum-feed-filter-bar" style="display:none;">
+            <div class="feed-filter-chips-wrap">
+              <span class="feed-filter-hint">Filtrando:</span>
+              <span id="forum-feed-school-chip" class="feed-filter-chip" style="display:none;" title="Clic para quitar filtro de colegio"></span>
+              <span id="forum-feed-channel-chip" class="feed-filter-chip" style="display:none;" title="Clic para volver a todos los canales"></span>
+            </div>
+            <button type="button" id="btn-feed-clear-all" class="btn-feed-clear-all" title="Limpiar todos los filtros y volver al inicio">
+              Ver todos ✕
+            </button>
+          </div>
+
+          <!-- LISTA DE DEBATES / HILOS REDDIT STYLE -->
+          <div id="threads-container" class="threads-container" aria-live="polite">
+            <!-- Tarjetas renderizadas por JS -->
+          </div>
+
+          <!-- BOTÓN CARGAR MÁS DEBATES -->
+          <div id="forum-load-more-wrap" class="forum-load-more-wrap" style="display:none;">
+            <button type="button" id="btn-load-more-threads" class="btn-load-more-threads">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              <span>Cargar más debates</span>
+            </button>
           </div>
         </div>
 
-        <!-- LISTA DE DEBATES / HILOS REDDIT STYLE -->
-        <div id="threads-container" class="threads-container" aria-live="polite">
-          <!-- Tarjetas renderizadas por JS -->
-        </div>
+        <!-- SUB-VISTA 2: PESTAÑA COMPLETA DEL DEBATE (REDDIT / TWITTER FULL POST PAGE) -->
+        <article id="forum-thread-view" class="forum-thread-view" style="display:none;" aria-label="Vista completa del debate">
 
-        <!-- BOTÓN CARGAR MÁS DEBATES -->
-        <div id="forum-load-more-wrap" class="forum-load-more-wrap" style="display:none;">
-          <button type="button" id="btn-load-more-threads" class="btn-load-more-threads">
-            <span>📥</span><span>Cargar más debates</span>
-          </button>
-        </div>
+          <!-- Barra Superior de Navegación del Hilo (Reddit Minimal Back) -->
+          <nav class="thread-page-nav-bar" aria-label="Navegación del debate">
+            <button type="button" id="btn-back-to-feed" class="btn-thread-nav-back" aria-label="Volver a debates" title="Volver a debates (Esc)">
+              <span class="nav-back-arrow">←</span>
+              <span class="nav-back-text">Volver a debates</span>
+              <kbd class="kbd-back-key">Esc</kbd>
+            </button>
+          </nav>
+
+          <!-- Tarjeta del Post Original estilo Reddit -->
+          <div class="reddit-post-page-card">
+            <div class="reddit-post-header">
+              <img id="thread-page-avatar" class="reddit-avatar-circle" src="assets/avatar-default.webp" alt="Avatar del autor" />
+              <div class="reddit-meta-block">
+                <div class="reddit-community-line">
+                  <span id="thread-page-channel" class="reddit-community-title">r/estudiantina</span>
+                  <span class="reddit-meta-dot">•</span>
+                  <span id="thread-page-date" class="reddit-time-ago">hace 2h</span>
+                </div>
+                <div class="reddit-author-line">
+                  <span id="thread-page-author-name" class="reddit-author-text">u/usuario</span>
+                  <span id="thread-page-author-handle" class="reddit-author-handle" style="display:none;"></span>
+                </div>
+              </div>
+              <button type="button" class="reddit-more-options-btn" id="btn-thread-more-options" title="Más opciones">•••</button>
+            </div>
+
+            <!-- Título del Debate -->
+            <h1 id="thread-page-title" class="reddit-title-text">Título del Debate</h1>
+
+            <!-- Fila de Flairs: Categoría / Colegio -->
+            <div class="reddit-flairs-wrap">
+              <span id="thread-page-flair" class="reddit-flair-tag">Banda de Música</span>
+              <span id="thread-page-school" class="reddit-school-tag"><span class="school-dot"></span> El Janssen</span>
+            </div>
+
+            <!-- Cuerpo del Post -->
+            <div id="thread-page-content" class="reddit-body-content">
+              <!-- Párrafos fluidos cargados por JS -->
+            </div>
+
+            <!-- Barra de Acciones Estilo Reddit (Píldoras Ovaladas) -->
+            <div class="reddit-action-pills-bar">
+              <div class="reddit-pill-btn reddit-vote-pill">
+                <button type="button" id="btn-vote-thread-page" class="reddit-vote-arrow-btn" aria-label="Votar arriba">
+                  <svg class="svg-icon svg-icon-xs arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+                  <span id="thread-page-votes" class="vote-number">0</span>
+                  <svg class="svg-icon svg-icon-xs arrow-icon down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+
+              <div class="reddit-pill-btn">
+                <svg class="svg-icon svg-icon-xs pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span id="thread-page-replies-count">0</span>
+              </div>
+
+              <button type="button" id="btn-share-thread-pill" class="reddit-pill-btn reddit-share-pill" title="Compartir este debate">
+                <svg class="svg-icon svg-icon-xs pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <span>Share</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Barra de Entrada "Join the conversation" estilo Reddit -->
+          <div class="reddit-join-conversation-wrap" id="reddit-join-wrap">
+            <div class="reddit-join-bar" id="reddit-join-trigger" tabindex="0" role="button" aria-label="Unite a la conversación">
+              <span class="reddit-join-placeholder">Join the conversation</span>
+            </div>
+
+            <!-- Formulario desplegable cuando hace clic -->
+            <form id="form-reply-page" class="reddit-expanded-composer" style="display:none;">
+              <div class="reddit-composer-box">
+                <div class="reply-format-toolbar">
+                  <button type="button" class="btn-reply-format" data-format="bold" title="Negrita"><strong>B</strong></button>
+                  <button type="button" class="btn-reply-format" data-format="italic" title="Cursiva"><em>I</em></button>
+                  <button type="button" class="btn-reply-format" data-format="quote" title="Cita">
+                    <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21c3 0 7-1 7-8V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h4c0 3.3-1.8 5-4 5v3zm12 0c3 0 7-1 7-8V5c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h4c0 3.3-1.8 5-4 5v3z"/></svg>
+                  </button>
+                  <button type="button" class="btn-reply-format" data-format="redoble" title="Grito de Hinchada">
+                    <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                  </button>
+                </div>
+                <textarea id="reply-page-content" class="reddit-composer-textarea" rows="3" placeholder="What are your thoughts?" required></textarea>
+                <div class="reddit-composer-footer">
+                  <span id="reply-page-school-hint" class="reddit-composer-hint">Comentando como hincha</span>
+                  <div class="composer-btn-actions">
+                    <button type="button" id="btn-cancel-reply-page" class="reddit-btn-cancel">Cancel</button>
+                    <button type="submit" id="btn-submit-reply-page" class="reddit-btn-comment">Comment</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Filtro de Comentarios estilo Reddit -->
+          <div class="reddit-comments-controls-bar">
+            <div class="reddit-sort-dropdown-wrap">
+              <span class="reddit-sort-label">Sort by:</span>
+              <button type="button" id="btn-toggle-sort-dropdown" class="reddit-sort-select-btn" aria-haspopup="listbox">
+                <span id="current-sort-label">Best</span>
+                <span class="sort-caret">⌵</span>
+              </button>
+              <div id="reddit-sort-menu" class="reddit-sort-popup-menu" style="display:none;">
+                <button type="button" class="reddit-sort-option active" data-sort="top">Best</button>
+                <button type="button" class="reddit-sort-option" data-sort="recientes">New</button>
+              </div>
+            </div>
+
+            <div class="reddit-comments-search-wrap">
+              <span class="search-lens-icon">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
+              <input type="text" id="comments-search-input" class="reddit-comments-search-field" placeholder="Search Comments" autocomplete="off" />
+            </div>
+          </div>
+
+          <!-- Árbol de Comentarios y Respuestas Anidadas (Reddit Thread Tree) -->
+          <div id="thread-comments-stream" class="reddit-comments-tree-stream" aria-live="polite">
+            <!-- Renderizado dinámico de comentarios y respuestas anidadas con threadlines -->
+          </div>
+
+        </article>
       </section>
 
-      <!-- SIDEBAR LATERAL DESKTOP: REGLAS Y ACERCA DE -->
+      <!-- SIDEBAR LATERAL DERECHO: WIDGETS DE COMUNIDAD -->
       <aside class="foro-desktop-sidebar" aria-label="Información de la comunidad">
 
-        <!-- Tarjeta Acerca de la Comunidad -->
-        <div class="sidebar-reddit-card">
-          <div class="reddit-card-header">
-            <span class="reddit-card-icon">🏛️</span>
-            <h3>Acerca de la Estudiantina</h3>
-          </div>
-          <p class="reddit-card-desc">
-            Espacio de debate libre y fraterno entre hinchadas y participantes de la mayor fiesta de los estudiantes misioneros.
-          </p>
-          <div class="reddit-card-stats-grid">
-            <div class="card-stat">
-              <span class="card-stat-num">33</span>
-              <span class="card-stat-label">Colegios</span>
+        <!-- Widget 1: Acerca de la Estudiantina -->
+        <div class="sidebar-reddit-card about-card">
+          <div class="reddit-card-hero-strip"></div>
+          <div class="reddit-card-content">
+            <div class="reddit-card-header">
+              <span class="reddit-card-icon">
+                <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2 2 7h20L12 2z"/></svg>
+              </span>
+              <h3>Estudiantina Posadas</h3>
             </div>
-            <div class="card-stat">
-              <span class="card-stat-num">4</span>
-              <span class="card-stat-label">Tramos Costanera</span>
+            <p class="reddit-card-desc">
+              Espacio de intercambio, ritmos y opiniones de la mayor fiesta estudiantil de Misiones. Pasión, tambores y camaradería en la Costanera.
+            </p>
+            <div class="reddit-card-stats-grid">
+              <div class="card-stat">
+                <span class="card-stat-num">33</span>
+                <span class="card-stat-label">Colegios</span>
+              </div>
+              <div class="card-stat">
+                <span class="card-stat-num">4</span>
+                <span class="card-stat-label">Tramos Costanera</span>
+              </div>
+              <div class="card-stat">
+                <span class="card-stat-num" id="widget-stat-debates">--</span>
+                <span class="card-stat-label">Debates Activos</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Tarjeta Pacto de Convivencia -->
+        <!-- Widget 2: Cuenta Regresiva Estudiantina 2026 -->
+        <div class="sidebar-reddit-card countdown-card">
+          <div class="reddit-card-header">
+            <span class="reddit-card-icon">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <h3>Costanera 2026</h3>
+          </div>
+          <p class="countdown-subtitle">Cuenta regresiva para la 1ª Noche de Calle oficial:</p>
+          <div class="countdown-grid" id="countdown-clock">
+            <div class="countdown-box">
+              <span class="countdown-num" id="countdown-days">--</span>
+              <span class="countdown-label">DÍAS</span>
+            </div>
+            <div class="countdown-box">
+              <span class="countdown-num" id="countdown-hours">--</span>
+              <span class="countdown-label">HORAS</span>
+            </div>
+            <div class="countdown-box">
+              <span class="countdown-num" id="countdown-mins">--</span>
+              <span class="countdown-label">MIN</span>
+            </div>
+            <div class="countdown-box">
+              <span class="countdown-num" id="countdown-secs">--</span>
+              <span class="countdown-label">SEG</span>
+            </div>
+          </div>
+          <div class="countdown-footer-tag">¡Los ensayos ya suenan en Posadas!</div>
+        </div>
+
+        <!-- Widget 3: Top Colegios en Debate -->
+        <div class="sidebar-reddit-card top-colegios-card">
+          <div class="reddit-card-header">
+            <span class="reddit-card-icon">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            </span>
+            <h3>Colegios Más Activos</h3>
+          </div>
+          <div class="sidebar-top-colegios-list" id="sidebar-top-colegios">
+            <!-- Top 5 colegios con mayor actividad -->
+          </div>
+        </div>
+
+        <!-- Widget 4: Pacto de Convivencia -->
         <div class="sidebar-reddit-card rules-card">
           <div class="reddit-card-header">
-            <span class="reddit-card-icon">🤝</span>
-            <h3>Pacto de Convivencia</h3>
+            <span class="reddit-card-icon">
+              <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <h3>Reglas de Convivencia</h3>
           </div>
-          <ul class="rules-list">
-            <li><span class="rule-icon">🥁</span><span>Alentá a tu colegio con pasión y respeto sin agresiones.</span></li>
-            <li><span class="rule-icon">✨</span><span>Reconocé los arreglos musicales y esfuerzo de los demás.</span></li>
-            <li><span class="rule-icon">🛡️</span><span>Contenido tóxico es moderado y eliminado proactivamente.</span></li>
-          </ul>
+          <ol class="rules-list-numbered">
+            <li>
+              <strong>Aliento sin agresiones:</strong>
+              <span>Apoyá a tu escuela con pasión y respeto hacia los rivales.</span>
+            </li>
+            <li>
+              <strong>Valorá el esfuerzo ajeno:</strong>
+              <span>Reconocé los arreglos musicales y trajes de todos los cuerpos.</span>
+            </li>
+            <li>
+              <strong>Cero toxicidad:</strong>
+              <span>Contenido agraviante es moderado y sancionado en el acto.</span>
+            </li>
+          </ol>
         </div>
+
       </aside>
 
     </div>
   </main>
 
-  <!-- MODAL DETALLE DE HILO & COMENTARIOS (REDDIT FULL POST VIEW) -->
-  <div id="modal-thread" class="thread-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="thread-modal-title">
-    <div class="thread-modal-card reddit-post-modal">
-      <div class="thread-modal-header">
-        <div class="thread-modal-header-info">
-          <button id="btn-close-thread" class="btn-modal-back-reddit" aria-label="Volver al feed">
-            <span>←</span><span>Volver</span>
-          </button>
-          <span id="thread-modal-channel" class="thread-channel-badge">Canal</span>
-          <span id="thread-modal-date" class="thread-modal-date">Hace unos momentos</span>
-        </div>
-        <div class="thread-modal-header-actions">
-          <button type="button" id="btn-share-thread-modal" class="btn-share-thread-modal" title="Compartir este debate">
-            <span>↗ Compartir</span>
-          </button>
-          <button type="button" id="btn-close-thread-x" class="btn-modal-close-x" aria-label="Cerrar debate" title="Cerrar">✕</button>
-        </div>
-      </div>
 
-      <div class="thread-modal-body">
-        <!-- Post Principal -->
-        <div class="thread-original-post">
-          <div class="thread-op-author-row">
-            <img id="thread-op-avatar" class="thread-author-avatar" src="" alt="Avatar" />
-            <div class="thread-author-info">
-              <div class="thread-op-names">
-                <span id="thread-op-school" class="thread-author-school">Colegio</span>
-                <span class="meta-dot">&bull;</span>
-                <span id="thread-op-name" class="thread-author-name">Autor</span>
-                <span id="thread-op-handle" class="thread-author-handle"></span>
-              </div>
-            </div>
-          </div>
-          <h2 id="thread-modal-title" class="thread-op-title">Título del Debate</h2>
-          <div id="thread-op-content" class="thread-op-text"></div>
-
-          <div class="thread-op-actions-bar">
-            <button type="button" id="btn-vote-thread" class="reddit-vote-capsule modal-vote-btn" aria-label="Votar debate">
-              <span class="vote-icon">▲</span>
-              <span id="thread-modal-votes">0</span>
-            </button>
-            <span id="thread-modal-replies-count" class="thread-replies-indicator">💬 0 respuestas</span>
-            <button type="button" id="btn-report-thread" class="btn-report-thread-modal" title="Reportar contenido">
-              <span>🚩 Reportar</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Sección de Respuestas -->
-        <div class="thread-replies-section">
-          <h3 class="thread-replies-heading">Comentarios</h3>
-
-          <!-- Formulario de Respuesta -->
-          <form id="form-reply" class="thread-reply-form">
-            <div class="reply-input-wrap">
-              <img id="reply-user-avatar" class="reply-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%2338bdf8'/%3E%3C/svg%3E" alt="Mi Avatar" />
-              <textarea id="reply-input-content" class="reply-input-textarea" rows="2" placeholder="Agregá un comentario o tu opinión..." required></textarea>
-            </div>
-            <div class="reply-action-row">
-              <span id="reply-school-hint" class="reply-school-hint">📍 Comentando como hincha</span>
-              <button type="submit" id="btn-submit-reply" class="btn-submit-reply">Comentar ➤</button>
-            </div>
-          </form>
-
-          <div id="thread-replies-list" class="thread-replies-list">
-            <!-- Respuestas renderizadas aquí -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL CREAR DEBATE -->
   <div id="modal-topic" class="topic-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="topic-modal-title">
     <div class="topic-modal-card">
       <div class="topic-modal-header">
         <div class="modal-title-wrap">
-          <span class="modal-icon">✍️</span>
+          <span class="modal-icon">
+            <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+          </span>
           <h3 id="topic-modal-title">Iniciar Nuevo Debate</h3>
         </div>
         <button id="btn-close-topic" class="btn-close-modal" aria-label="Cerrar">✕</button>
@@ -303,11 +558,13 @@
         <div class="topic-form-group">
           <label for="topic-canal" class="topic-form-label">Canal Temático</label>
           <select id="topic-canal" class="topic-form-select" required>
-            <option value="banda">🥁 Banda de Música</option>
-            <option value="baile">💃 Cuerpo de Baile</option>
-            <option value="hinchadas">📢 Tribunas &amp; Hinchadas</option>
-            <option value="simulador">🎮 Sugerencias para el Simulador</option>
-            <option value="general">💬 General &amp; Comunidad</option>
+            <option value="banda">Banda de Música</option>
+            <option value="baile">Cuerpo de Baile</option>
+            <option value="hinchadas">Tribunas &amp; Hinchadas</option>
+            <option value="simulador">Sugerencias para el Simulador</option>
+            <option value="noticias">Noticias &amp; Cobertura</option>
+            <option value="general">General &amp; Comunidad</option>
+            <option value="offtopic">Off Topic</option>
           </select>
         </div>
         <div class="topic-form-group">
@@ -324,7 +581,7 @@
           <label for="topic-desc" class="topic-form-label">Contenido o Pregunta</label>
           <textarea id="topic-desc" class="topic-form-textarea" rows="4" placeholder="Compartí tu punto de vista, datos, análisis o vivencias de la calle..." required minlength="10" maxlength="2500"></textarea>
         </div>
-        <button type="submit" class="btn-propose-topic" style="width:100%;justify-content:center;padding:0.9rem;font-size:0.92rem">Publicar Debate 🚀</button>
+        <button type="submit" class="btn-propose-topic" style="width:100%;justify-content:center;padding:0.9rem;font-size:0.92rem">Publicar Debate</button>
       </form>
     </div>
   </div>
@@ -333,14 +590,16 @@
   <div id="modal-google-auth" class="auth-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="auth-modal-title">
     <div class="auth-modal-card">
       <div class="auth-modal-header">
-        <span class="auth-modal-icon">🥁</span>
+        <span class="auth-modal-icon">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/></svg>
+        </span>
         <h3 id="auth-modal-title" class="auth-modal-title">Identificate para Participar</h3>
         <p class="auth-modal-desc">Iniciá sesión con tu cuenta de Google. Si es tu primera vez, podrás elegir tu nombre de usuario único (@usuario) y configurar tu perfil de la Estudiantina.</p>
         <button id="btn-close-auth-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
       </div>
       <div class="auth-modal-body">
         <div class="topic-form-group">
-          <label for="auth-select-school" class="topic-form-label">🏟️ Seleccioná tu Colegio Oficial</label>
+          <label for="auth-select-school" class="topic-form-label">Seleccioná tu Colegio Oficial</label>
           <select id="auth-select-school" class="topic-form-select" required>
             <!-- Poblado con los 33 colegios -->
           </select>
@@ -358,7 +617,9 @@
     <div class="auth-modal-card onboarding-modal-card">
       <button id="btn-close-onboarding" class="btn-close-modal" aria-label="Cerrar">✕</button>
       <div class="auth-modal-header">
-        <span class="auth-modal-icon">🎉</span>
+        <span class="auth-modal-icon">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
         <h3 id="onboarding-modal-title" class="auth-modal-title">Completá tu Registro</h3>
         <p class="auth-modal-desc">Elegí tu nombre de usuario único y personalizá tu ficha estudiantil para debatir en la comunidad.</p>
       </div>
@@ -368,7 +629,7 @@
           <div class="photo-preview-wrap">
             <img id="onboarding-photo-preview" class="photo-preview-img" src="" alt="Foto de perfil">
             <label for="onboarding-photo-file" class="photo-upload-badge" title="Cambiar foto">
-              📷
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </label>
             <input type="file" id="onboarding-photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
           </div>
@@ -399,7 +660,7 @@
 
         <!-- Colegio Oficial -->
         <div class="topic-form-group">
-          <label for="onboarding-school" class="topic-form-label">🏟️ Tu Colegio de la Estudiantina <span class="required-star">*</span></label>
+          <label for="onboarding-school" class="topic-form-label">Tu Colegio de la Estudiantina <span class="required-star">*</span></label>
           <select id="onboarding-school" class="topic-form-select" required>
             <!-- Poblado con los 33 colegios -->
           </select>
@@ -407,31 +668,30 @@
 
         <div class="profile-form-grid-2">
           <div class="topic-form-group">
-            <label for="onboarding-role" class="topic-form-label">🥁 Rol Estudiantil</label>
+            <label for="onboarding-role" class="topic-form-label">Rol Estudiantil</label>
             <select id="onboarding-role" class="topic-form-select">
               <optgroup label="Banda de Música">
-                <option value="Chancha (Surdo)">🥁 Chancha (Surdo)</option>
-                <option value="Redoblante">🥁 Redoblante</option>
-                <option value="Cajita">🥁 Cajita</option>
-                <option value="Ton">🥁 Ton</option>
-                <option value="Pilar de Banda">⭐ Pilar de Banda</option>
-                <option value="Director/a de Banda">👑 Director/a de Banda</option>
+                <option value="Chancha (Surdo)">Chancha (Surdo)</option>
+                <option value="Redoblante">Redoblante</option>
+                <option value="Cajita">Cajita</option>
+                <option value="Ton">Ton</option>
+                <option value="Pilar de Banda">Pilar de Banda</option>
+                <option value="Director/a de Banda">Director/a de Banda</option>
               </optgroup>
               <optgroup label="Cuerpo de Baile">
-                <option value="Pasista de Escuadra">💃 Pasista de Escuadra</option>
-                <option value="Bastonera / Coreógrafa">✨ Bastonera / Coreógrafa</option>
-                <option value="Portaestandarte">🚩 Portaestandarte</option>
-                <option value="Reina / Rey">👑 Reina / Rey</option>
+                <option value="Pasista de Escuadra">Pasista de Escuadra</option>
+                <option value="Bastonera / Coreógrafa">Bastonera / Coreógrafa</option>
+                <option value="Portaestandarte">Portaestandarte</option>
+                <option value="Reina / Rey">Reina / Rey</option>
               </optgroup>
               <optgroup label="Comunidad &amp; Hinchada">
-                <option value="Carrocero">🛠️ Carrocero</option>
-                <option value="Hincha de Tribuna" selected>📢 Hincha de Tribuna</option>
-                <option value="Egresado">🎓 Egresado / Exalumno</option>
+                <option value="Carrocero">Carrocero</option>
+                <option value="Hincha de Tribuna" selected>Hincha de Tribuna</option>
               </optgroup>
             </select>
           </div>
           <div class="topic-form-group">
-            <label for="onboarding-grade" class="topic-form-label">📚 Año Escolar</label>
+            <label for="onboarding-grade" class="topic-form-label">Año Escolar</label>
             <select id="onboarding-grade" class="topic-form-select">
               <option value="1° Año">1° Año</option>
               <option value="2° Año">2° Año</option>
@@ -445,7 +705,7 @@
         </div>
 
         <button type="submit" id="btn-submit-onboarding" class="btn-propose-topic" style="width:100%;justify-content:center;padding:0.95rem;font-size:0.95rem;margin-top:0.75rem;">
-          ¡Completar Registro y Entrar! 🚀
+          Completar Registro y Entrar
         </button>
         <button type="button" id="btn-cancel-onboarding" class="btn-secondary-modal" style="width:100%;margin-top:0.5rem;padding:0.65rem;font-size:0.88rem;">
           Cancelar y Salir
@@ -458,7 +718,9 @@
   <div id="modal-admin-login" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-login-title">
     <div class="admin-modal-card">
       <div class="admin-modal-header">
-        <span class="admin-modal-icon">🔐</span>
+        <span class="admin-modal-icon">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
         <h3 id="admin-login-title" class="admin-modal-title">Acceso Privado</h3>
         <p class="admin-modal-desc">Ingresá tu Token de Administración Maestro para acceder al panel de moderación.</p>
         <button id="btn-close-admin-login" class="btn-close-modal" aria-label="Cerrar">✕</button>
@@ -468,11 +730,13 @@
           <label for="admin-login-token" class="topic-form-label">Token de Acceso Maestro</label>
           <div class="password-input-wrap">
             <input type="password" id="admin-login-token" class="topic-form-input" placeholder="Pegá tu token secreto..." required autocomplete="off">
-            <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar">👁️</button>
+            <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar">
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
           </div>
         </div>
         <div id="admin-login-error" class="admin-login-error" style="display:none;"></div>
-        <button type="submit" id="btn-submit-admin-login" class="btn-submit-admin-login">Validar Token y Entrar 🔓</button>
+        <button type="submit" id="btn-submit-admin-login" class="btn-submit-admin-login">Validar Token y Entrar</button>
       </form>
     </div>
   </div>
@@ -481,7 +745,9 @@
   <div id="modal-sanction-user" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="sanction-modal-title">
     <div class="admin-modal-card sanction-modal-card">
       <div class="admin-modal-header">
-        <span class="admin-modal-icon">🚫</span>
+        <span class="admin-modal-icon">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </span>
         <h3 id="sanction-modal-title" class="admin-modal-title">Moderar Usuario</h3>
         <p class="admin-modal-desc">Aplicá una suspensión temporal o baneo permanente por infracciones a las normas del foro.</p>
         <button id="btn-close-sanction-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
@@ -505,21 +771,21 @@
             <label class="sanction-radio-card">
               <input type="radio" name="tipo-sancion" value="suspender" checked>
               <div class="sanction-card-content">
-                <span class="sanction-type-title">⏳ Suspender Temporalmente</span>
+                <span class="sanction-type-title">Suspender Temporalmente</span>
                 <span class="sanction-type-desc">Bloquea debates y comentarios durante un lapso fijado.</span>
               </div>
             </label>
             <label class="sanction-radio-card">
               <input type="radio" name="tipo-sancion" value="banear">
               <div class="sanction-card-content">
-                <span class="sanction-type-title">⛔ Banear Permanentemente</span>
+                <span class="sanction-type-title">Banear Permanentemente</span>
                 <span class="sanction-type-desc">Expulsión definitiva del foro de debates de la Estudiantina.</span>
               </div>
             </label>
             <label class="sanction-radio-card">
               <input type="radio" name="tipo-sancion" value="desbanear">
               <div class="sanction-card-content">
-                <span class="sanction-type-title">✅ Levantar Sanción / Rehabilitar</span>
+                <span class="sanction-type-title">Levantar Sanción / Rehabilitar</span>
                 <span class="sanction-type-desc">Restaura los permisos plenos del usuario en la plataforma.</span>
               </div>
             </label>
@@ -553,7 +819,9 @@
   <div id="modal-admin-confirm-foro" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="confirm-modal-title">
     <div class="admin-modal-card confirm-modal-card" style="max-width: 440px;">
       <div class="admin-modal-header">
-        <span class="admin-modal-icon">⚠️</span>
+        <span class="admin-modal-icon">
+          <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </span>
         <h3 id="confirm-modal-title" class="admin-modal-title">Confirmar Acción</h3>
         <p id="confirm-modal-desc" class="admin-modal-desc">¿Estás seguro de continuar con esta acción?</p>
         <button id="btn-close-confirm-modal" class="btn-close-modal" aria-label="Cerrar">✕</button>
@@ -565,222 +833,276 @@
     </div>
   </div>
 
-  <!-- MODAL UNIFICADO: PERFIL DE USUARIO Y EDICIÓN -->
-  <div id="modal-user-profile" class="profile-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="profile-user-name">
-    <div class="profile-modal-card">
-      <div id="profile-hero-banner" class="profile-hero-banner">
-        <button id="btn-close-profile-modal" class="profile-close-btn" aria-label="Cerrar" title="Cerrar perfil">✕</button>
-        <div class="profile-hero-content">
-          <div class="profile-avatar-outer">
-            <img id="profile-avatar-img" class="profile-avatar-img" src="" alt="Avatar del usuario">
+  <!-- MODAL UNIFICADO: PERFIL DE USUARIO ESTILO REDDIT -->
+  <div id="modal-user-profile" class="profile-modal-overlay reddit-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="profile-user-name">
+    <div class="profile-modal-card reddit-profile-card">
+      <!-- Reddit Hero Banner & Actions -->
+      <div id="profile-hero-banner" class="reddit-hero-banner">
+        <button id="btn-close-profile-modal" class="reddit-close-btn" aria-label="Cerrar perfil" title="Cerrar perfil">✕</button>
+
+        <!-- Acciones Flotantes en Banner -->
+        <div class="reddit-banner-actions">
+          <button type="button" id="btn-open-edit-profile" class="reddit-btn-action reddit-btn-edit" style="display:none;" title="Editar tu perfil">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            <span>Editar Perfil</span>
+          </button>
+          <button type="button" id="btn-profile-share" class="reddit-btn-action reddit-btn-secondary" title="Copiar enlace directo al perfil">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>Compartir</span>
+          </button>
+          <button type="button" id="btn-profile-moderate" class="reddit-btn-action reddit-btn-mod" style="display:none;" title="Moderar o sancionar usuario">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Moderar</span>
+          </button>
+        </div>
+
+        <!-- Avatar superpuesto estilo Reddit con aro institucional -->
+        <div class="reddit-avatar-wrapper">
+          <div class="reddit-avatar-ring">
+            <img id="profile-avatar-img" class="reddit-avatar-img" src="assets/avatar-default.webp" alt="Avatar del usuario">
           </div>
+          <span id="profile-user-badge" class="reddit-flair-badge badge-mod" style="display:none;">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Moderador
+          </span>
         </div>
       </div>
 
-      <div class="profile-body">
-        <!-- Pestañas Principales Unificadas -->
-        <div class="profile-main-tabs-nav" role="tablist" aria-label="Secciones del perfil">
-          <button type="button" id="tab-btn-profile-view" class="profile-main-tab-btn active" role="tab" aria-selected="true">
-            <span class="tab-icon">👤</span><span id="tab-label-profile-view">Mi Perfil</span>
-          </button>
-          <button type="button" id="tab-btn-profile-edit" class="profile-main-tab-btn" role="tab" aria-selected="false" style="display:none;">
-            <span class="tab-icon">✏️</span><span>Editar Perfil</span>
-          </button>
-          <button type="button" id="tab-btn-profile-threads" class="profile-main-tab-btn" role="tab" aria-selected="false">
-            <span class="tab-icon">📢</span><span>Debates (<span id="profile-count-tab-threads">0</span>)</span>
-          </button>
-          <button type="button" id="tab-btn-profile-replies" class="profile-main-tab-btn" role="tab" aria-selected="false">
-            <span class="tab-icon">💬</span><span>Respuestas (<span id="profile-count-tab-replies">0</span>)</span>
-          </button>
-        </div>
-
-        <!-- PANEL 1: VER PERFIL -->
-        <div id="profile-tab-view" class="profile-view-tab-panel">
-          <div class="profile-header-meta">
-            <div class="profile-name-row">
-              <h3 id="profile-user-name" class="profile-user-name">Nombre de Usuario</h3>
-              <span id="profile-user-badge" class="profile-role-pill" style="display:none;">⚡ Moderador</span>
+      <div class="reddit-profile-body">
+        <!-- Bloque de Identidad Estilo Reddit -->
+        <div class="reddit-identity-header">
+          <div class="reddit-names-block">
+            <div class="reddit-title-row">
+              <h2 id="profile-user-name" class="reddit-display-name">Nombre de Usuario</h2>
             </div>
-            <div id="profile-user-handle" class="profile-user-handle">@usuario</div>
-
-            <div class="profile-tags-row">
-              <span id="profile-school-pill" class="profile-tag-pill school-tag">⚙️ El Janssen</span>
-              <span id="profile-role-pill" class="profile-tag-pill role-tag">🥁 Redoblante</span>
-              <span id="profile-grade-pill" class="profile-tag-pill grade-tag">5° Año (Promo)</span>
-            </div>
-
-            <p id="profile-user-bio" class="profile-user-bio"></p>
-
-            <div id="profile-social-row" class="profile-social-row" style="display:none;">
-              <a id="profile-instagram-link" href="#" target="_blank" rel="noopener noreferrer" class="profile-instagram-link">
-                <span class="insta-icon">📷</span>
-                <span id="profile-instagram-text">@instagram</span>
-              </a>
+            <div class="reddit-handle-row">
+              <span id="profile-user-handle" class="reddit-u-handle">u/usuario</span>
             </div>
           </div>
 
-          <!-- Acciones del perfil -->
-          <div class="profile-actions-bar">
-            <button type="button" id="btn-open-edit-profile" class="btn-profile-action btn-profile-edit" style="display:none;">
-              <span>✏️</span><span>Editar Mi Perfil</span>
-            </button>
-            <button type="button" id="btn-profile-share" class="btn-profile-action btn-profile-share" title="Copiar enlace directo a este perfil">
-              <span>🔗</span><span>Compartir Perfil</span>
-            </button>
-            <button type="button" id="btn-profile-moderate" class="btn-profile-action btn-profile-mod" style="display:none;">
-              <span>🚫</span><span>Moderar Usuario</span>
-            </button>
+          <!-- Reddit Flairs (Colegio, Rol y Año) -->
+          <div class="reddit-flairs-wrap">
+            <span id="profile-school-pill" class="reddit-flair-pill flair-school"><span class="school-dot"></span> El Janssen</span>
+            <span id="profile-role-pill" class="reddit-flair-pill flair-role">Redoblante</span>
+            <span id="profile-grade-pill" class="reddit-flair-pill flair-grade">5° Año (Promo)</span>
           </div>
 
-          <!-- Estadísticas de Reputación / Karma -->
-          <div class="profile-stats-grid">
-            <div class="stat-card karma-card">
-              <span class="stat-icon">⚡</span>
-              <span id="profile-stat-karma" class="stat-value">0</span>
-              <span class="stat-label">Karma Posadeño</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">📢</span>
-              <span id="profile-stat-threads" class="stat-value">0</span>
-              <span class="stat-label">Debates</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-icon">💬</span>
-              <span id="profile-stat-replies" class="stat-value">0</span>
-              <span class="stat-label">Respuestas</span>
-            </div>
+          <!-- Biografía -->
+          <p id="profile-user-bio" class="reddit-bio-text"></p>
+
+          <!-- Instagram Link -->
+          <div id="profile-social-row" class="reddit-social-row" style="display:none;">
+            <a id="profile-instagram-link" href="#" target="_blank" rel="noopener noreferrer" class="reddit-instagram-pill">
+              <span class="insta-icon">
+                <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </span>
+              <span id="profile-instagram-text">@instagram</span>
+            </a>
           </div>
 
-          <!-- Insignias Culturales -->
-          <div class="profile-badges-section">
-            <h4 class="profile-section-title">Insignias de la Estudiantina</h4>
-            <div id="profile-badges-list" class="profile-badges-list">
-              <!-- Insignias renderizadas dinámicamente -->
+          <!-- Barra de Reputación y Cake Day Estilo Reddit -->
+          <div class="reddit-karma-cakeday-bar">
+            <div class="reddit-karma-group">
+              <div class="reddit-karma-item karma-highlight" title="Karma total acumulado en Estudiantina.online">
+                <svg class="svg-icon svg-icon-xs karma-spark" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span id="profile-stat-karma" class="karma-number">0</span>
+                <span class="karma-caption">Karma Total</span>
+              </div>
+              <div class="reddit-karma-divider"></div>
+              <div class="reddit-karma-item" title="Karma obtenido por debates publicados">
+                <svg class="svg-icon svg-icon-xs karma-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span id="profile-stat-karma-threads" class="karma-number">0</span>
+                <span class="karma-caption">Debates</span>
+              </div>
+              <div class="reddit-karma-divider"></div>
+              <div class="reddit-karma-item" title="Karma obtenido por comentarios">
+                <svg class="svg-icon svg-icon-xs karma-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                <span id="profile-stat-karma-replies" class="karma-number">0</span>
+                <span class="karma-caption">Comentarios</span>
+              </div>
+            </div>
+
+            <!-- Cake Day / Antigüedad en la tribuna -->
+            <div class="reddit-cakeday-item" title="Fecha en que se unió a la comunidad">
+              <svg class="svg-icon svg-icon-xs cakeday-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span id="profile-cakeday-text" class="cakeday-text">En la tribuna desde septiembre 2026</span>
             </div>
           </div>
         </div>
 
-        <!-- PANEL 2: EDITAR PERFIL (INTEGRADO EN EL MISMO MODAL) -->
-        <div id="profile-tab-edit" class="profile-view-tab-panel" style="display:none;">
-          <div class="profile-edit-header-strip">
-            <h4 class="profile-section-title">✏️ Personalizar Mi Perfil</h4>
-            <p class="profile-edit-subtitle">Modificá tu usuario único, tus datos de hincha, colegio, rol y foto de perfil.</p>
+        <!-- Navegación de Pestañas Estilo Reddit -->
+        <div class="reddit-tabs-nav" role="tablist" aria-label="Secciones del perfil de usuario">
+          <button type="button" id="tab-btn-profile-view" class="reddit-tab-btn active" role="tab" aria-selected="true">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span id="tab-label-profile-view">Resumen</span>
+          </button>
+          <button type="button" id="tab-btn-profile-threads" class="reddit-tab-btn" role="tab" aria-selected="false">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Debates (<span id="profile-count-tab-threads">0</span>)</span>
+          </button>
+          <button type="button" id="tab-btn-profile-replies" class="reddit-tab-btn" role="tab" aria-selected="false">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            <span>Comentarios (<span id="profile-count-tab-replies">0</span>)</span>
+          </button>
+          <button type="button" id="tab-btn-profile-badges" class="reddit-tab-btn" role="tab" aria-selected="false">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            <span>Vitrina de Trofeos (<span id="profile-count-tab-badges">0</span>)</span>
+          </button>
+          <button type="button" id="tab-btn-profile-edit" class="reddit-tab-btn" role="tab" aria-selected="false" style="display:none;">
+            <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Editar Perfil</span>
+          </button>
+        </div>
+
+        <!-- PANEL 1: RESUMEN / OVERVIEW (Feed unificado cronológico estilo Reddit) -->
+        <div id="profile-tab-view" class="reddit-tab-panel">
+          <div id="profile-overview-list" class="reddit-feed-list">
+            <!-- Feed de actividad combinada cargado dinámicamente -->
           </div>
+        </div>
 
-          <form id="form-edit-profile" class="topic-form profile-inline-edit-form">
-            <!-- Foto de Perfil Custom Upload -->
-            <div class="topic-form-group">
-              <label class="topic-form-label">📸 Foto de Perfil</label>
-              <div class="profile-photo-edit-card">
-                <div class="photo-preview-wrap">
-                  <img id="edit-profile-photo-preview" class="photo-preview-img" src="" alt="Foto de perfil">
-                  <label for="edit-profile-photo-file" class="photo-upload-badge" title="Cambiar foto">
-                    📷
-                  </label>
-                  <input type="file" id="edit-profile-photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
-                </div>
-                <div class="photo-actions-wrap">
-                  <label for="edit-profile-photo-file" class="btn-photo-action">Subir Nueva Foto</label>
-                  <button type="button" id="btn-edit-restore-google" class="btn-photo-action-outline">Restaurar Foto Google</button>
+        <!-- PANEL 2: DEBATES CREADOS (Tarjetas de post estilo Reddit) -->
+        <div id="profile-tab-threads" class="reddit-tab-panel" style="display:none;">
+          <div id="profile-threads-list" class="reddit-feed-list"></div>
+        </div>
+
+        <!-- PANEL 3: RESPUESTAS PUBLICADAS (Comentarios con contexto) -->
+        <div id="profile-tab-replies" class="reddit-tab-panel" style="display:none;">
+          <div id="profile-replies-list" class="reddit-feed-list"></div>
+        </div>
+
+        <!-- PANEL 4: VITRINA DE TROFEOS (Reddit Trophy Case) -->
+        <div id="profile-tab-badges" class="reddit-tab-panel" style="display:none;">
+          <div class="reddit-trophy-case">
+            <div class="reddit-trophy-header">
+              <div class="trophy-header-title-wrap">
+                <span class="trophy-header-icon">
+                  <svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                </span>
+                <div>
+                  <h3 class="trophy-header-title">Vitrina de Trofeos de la Estudiantina</h3>
+                  <p class="trophy-header-subtitle">Logros e insignias desbloqueadas por aportes, trayectoria y pasión por los colegios posadeños.</p>
                 </div>
               </div>
             </div>
+            <div id="profile-badges-list" class="reddit-trophy-grid">
+              <!-- Insignias renderizadas con diseño de medallas coleccionables -->
+            </div>
+          </div>
+        </div>
 
-            <!-- Nombre de Usuario Único (@username) -->
-            <div class="topic-form-group">
-              <label for="edit-profile-username" class="topic-form-label">
-                Nombre de Usuario Único <span class="required-star">*</span>
-              </label>
-              <div class="username-input-wrap">
-                <span class="username-at">@</span>
-                <input type="text" id="edit-profile-username" class="topic-form-input username-field" placeholder="tu_usuario" required minlength="3" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="none">
-                <span id="edit-profile-username-status" class="username-status-badge"></span>
-              </div>
-              <small class="form-hint">Letras, números y guión bajo (_). Tu identificador único en el foro.</small>
+        <!-- PANEL 5: EDITAR PERFIL (FORMULARIO INTEGRADO PARA DUEÑO) -->
+        <div id="profile-tab-edit" class="reddit-tab-panel" style="display:none;">
+          <div class="reddit-edit-box">
+            <div class="reddit-edit-header-strip">
+              <h3 class="reddit-edit-title">Personalizá tu Identidad Estudiantil</h3>
+              <p class="reddit-edit-subtitle">Actualizá tu usuario único u/, tus roles de banda o cuerpo de baile, colegio y avatar.</p>
             </div>
 
-            <div class="topic-form-group">
-              <label for="edit-profile-name" class="topic-form-label">Tu Nombre Visible o Apodo</label>
-              <input type="text" id="edit-profile-name" class="topic-form-input" required minlength="2" maxlength="50" placeholder="Ej: Lucas Percusión">
-            </div>
-
-            <div class="topic-form-group">
-              <label for="edit-profile-school" class="topic-form-label">🏟️ Colegio Oficial</label>
-              <select id="edit-profile-school" class="topic-form-select" required>
-                <!-- 33 colegios poblados -->
-              </select>
-            </div>
-
-            <div class="profile-form-grid-2">
+            <form id="form-edit-profile" class="topic-form reddit-edit-form">
+              <!-- Foto de Perfil Custom Upload -->
               <div class="topic-form-group">
-                <label for="edit-profile-role" class="topic-form-label">🥁 Rol Estudiantil</label>
-                <select id="edit-profile-role" class="topic-form-select">
-                  <optgroup label="Banda de Música">
-                    <option value="Chancha (Surdo)">🥁 Chancha (Surdo)</option>
-                    <option value="Redoblante">🥁 Redoblante</option>
-                    <option value="Cajita">🥁 Cajita</option>
-                    <option value="Ton">🥁 Ton</option>
-                    <option value="Pilar de Banda">⭐ Pilar de Banda</option>
-                    <option value="Director/a de Banda">👑 Director/a de Banda</option>
-                  </optgroup>
-                  <optgroup label="Cuerpo de Baile">
-                    <option value="Pasista de Escuadra">💃 Pasista de Escuadra</option>
-                    <option value="Bastonera / Coreógrafa">✨ Bastonera / Coreógrafa</option>
-                    <option value="Portaestandarte">🚩 Portaestandarte</option>
-                    <option value="Reina / Rey">👑 Reina / Rey</option>
-                  </optgroup>
-                  <optgroup label="Comunidad &amp; Hinchada">
-                    <option value="Carrocero">🛠️ Carrocero</option>
-                    <option value="Hincha de Tribuna" selected>📢 Hincha de Tribuna</option>
-                    <option value="Egresado">🎓 Egresado / Exalumno</option>
-                  </optgroup>
+                <label class="topic-form-label">Foto de Perfil</label>
+                <div class="profile-photo-edit-card reddit-photo-edit-card">
+                  <div class="photo-preview-wrap">
+                    <img id="edit-profile-photo-preview" class="photo-preview-img" src="" alt="Foto de perfil">
+                    <label for="edit-profile-photo-file" class="photo-upload-badge" title="Cambiar foto">
+                      <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </label>
+                    <input type="file" id="edit-profile-photo-file" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                  </div>
+                  <div class="photo-actions-wrap">
+                    <label for="edit-profile-photo-file" class="btn-photo-action">Subir Nueva Foto</label>
+                    <button type="button" id="btn-edit-restore-google" class="btn-photo-action-outline">Restaurar Foto Google</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nombre de Usuario Único (@username / u/username) -->
+              <div class="topic-form-group">
+                <label for="edit-profile-username" class="topic-form-label">
+                  Nombre de Usuario Único (u/usuario) <span class="required-star">*</span>
+                </label>
+                <div class="username-input-wrap reddit-username-input-wrap">
+                  <span class="username-at">u/</span>
+                  <input type="text" id="edit-profile-username" class="topic-form-input username-field" placeholder="tu_usuario" required minlength="3" maxlength="20" autocomplete="off" autocorrect="off" autocapitalize="none">
+                  <span id="edit-profile-username-status" class="username-status-badge"></span>
+                </div>
+                <small class="form-hint">Letras, números y guión bajo (_). Tu identificador único en los debates.</small>
+              </div>
+
+              <div class="topic-form-group">
+                <label for="edit-profile-name" class="topic-form-label">Tu Nombre Visible o Apodo</label>
+                <input type="text" id="edit-profile-name" class="topic-form-input" required minlength="2" maxlength="50" placeholder="Ej: Lucas Percusión">
+              </div>
+
+              <div class="topic-form-group">
+                <label for="edit-profile-school" class="topic-form-label">Colegio Oficial</label>
+                <select id="edit-profile-school" class="topic-form-select" required>
+                  <!-- Colegios poblados dinámicamente -->
                 </select>
               </div>
 
+              <div class="profile-form-grid-2">
+                <div class="topic-form-group">
+                  <label for="edit-profile-role" class="topic-form-label">Rol Estudiantil</label>
+                  <select id="edit-profile-role" class="topic-form-select">
+                    <optgroup label="Banda de Música">
+                      <option value="Chancha (Surdo)">Chancha (Surdo)</option>
+                      <option value="Redoblante">Redoblante</option>
+                      <option value="Cajita">Cajita</option>
+                      <option value="Ton">Ton</option>
+                      <option value="Pilar de Banda">Pilar de Banda</option>
+                      <option value="Director/a de Banda">Director/a de Banda</option>
+                    </optgroup>
+                    <optgroup label="Cuerpo de Baile">
+                      <option value="Pasista de Escuadra">Pasista de Escuadra</option>
+                      <option value="Bastonera / Coreógrafa">Bastonera / Coreógrafa</option>
+                      <option value="Portaestandarte">Portaestandarte</option>
+                      <option value="Reina / Rey">Reina / Rey</option>
+                    </optgroup>
+                    <optgroup label="Comunidad &amp; Hinchada">
+                      <option value="Carrocero">Carrocero</option>
+                      <option value="Hincha de Tribuna" selected>Hincha de Tribuna</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <div class="topic-form-group">
+                  <label for="edit-profile-grade" class="topic-form-label">Año Escolar</label>
+                  <select id="edit-profile-grade" class="topic-form-select">
+                    <option value="1° Año">1° Año</option>
+                    <option value="2° Año">2° Año</option>
+                    <option value="3° Año">3° Año</option>
+                    <option value="4° Año">4° Año</option>
+                    <option value="5° Año (Promo)" selected>5° Año (Promo)</option>
+                    <option value="6° Año Técnico">6° Año Técnico</option>
+                    <option value="Egresado">Egresado</option>
+                  </select>
+                </div>
+              </div>
+
               <div class="topic-form-group">
-                <label for="edit-profile-grade" class="topic-form-label">📚 Año Escolar</label>
-                <select id="edit-profile-grade" class="topic-form-select">
-                  <option value="1° Año">1° Año</option>
-                  <option value="2° Año">2° Año</option>
-                  <option value="3° Año">3° Año</option>
-                  <option value="4° Año">4° Año</option>
-                  <option value="5° Año (Promo)" selected>5° Año (Promo)</option>
-                  <option value="6° Año Técnico">6° Año Técnico</option>
-                  <option value="Egresado">Egresado</option>
-                </select>
+                <label for="edit-profile-bio" class="topic-form-label">
+                  Biografía <small id="edit-bio-counter" class="char-counter">(0/160)</small>
+                </label>
+                <textarea id="edit-profile-bio" class="topic-form-textarea" rows="3" maxlength="160" placeholder="Contá tu puesto en la banda, escuadra o pasión por tu colegio..."></textarea>
               </div>
-            </div>
 
-            <div class="topic-form-group">
-              <label for="edit-profile-bio" class="topic-form-label">
-                Biografía <small id="edit-bio-counter" class="char-counter">(0/160)</small>
-              </label>
-              <textarea id="edit-profile-bio" class="topic-form-textarea" rows="3" maxlength="160" placeholder="Contá tu puesto en la banda, escuadra o pasión por tu colegio..."></textarea>
-            </div>
-
-            <div class="topic-form-group">
-              <label for="edit-profile-instagram" class="topic-form-label">📷 Instagram <small>(opcional)</small></label>
-              <div class="instagram-input-wrap">
-                <span class="at-prefix">@</span>
-                <input type="text" id="edit-profile-instagram" class="topic-form-input" maxlength="30" placeholder="usuario_posadas">
+              <div class="topic-form-group">
+                <label for="edit-profile-instagram" class="topic-form-label">Instagram <small>(opcional)</small></label>
+                <div class="instagram-input-wrap">
+                  <span class="at-prefix">@</span>
+                  <input type="text" id="edit-profile-instagram" class="topic-form-input" maxlength="30" placeholder="usuario_posadas">
+                </div>
               </div>
-            </div>
 
-            <div class="modal-actions-dual">
-              <button type="button" id="btn-cancel-edit-profile" class="btn-secondary-modal">Volver a Mi Perfil</button>
-              <button type="submit" id="btn-save-edit-profile" class="btn-propose-topic">Guardar Cambios ✨</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- PANEL 3: DEBATES CREADOS -->
-        <div id="profile-tab-threads" class="profile-view-tab-panel" style="display:none;">
-          <div id="profile-threads-list" class="profile-activity-list"></div>
-        </div>
-
-        <!-- PANEL 4: RESPUESTAS PUBLICADAS -->
-        <div id="profile-tab-replies" class="profile-view-tab-panel" style="display:none;">
-          <div id="profile-replies-list" class="profile-activity-list"></div>
+              <div class="modal-actions-dual reddit-form-actions">
+                <button type="button" id="btn-cancel-edit-profile" class="btn-secondary-modal">Volver al Resumen</button>
+                <button type="submit" id="btn-save-edit-profile" class="btn-propose-topic">Guardar Cambios</button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -794,17 +1116,20 @@
         <p id="foro-footer-copy-text">Comunidad y foro de debate independiente de la Estudiantina de Posadas.</p>
       </div>
       <div class="foro-footer-links">
-        <a href="comunidad.html" class="foro-footer-link">📰 Noticias &amp; Comunidad</a>
-        <a href="index.html" class="foro-footer-link">🎮 Ir al Simulador</a>
-        <a href="index.html#ranking" class="foro-footer-link">🏆 Salón de la Fama</a>
-        <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="foro-footer-link">📷 Instagram</a>
+        <a href="comunidad.html" class="foro-footer-link">Noticias &amp; Comunidad</a>
+        <a href="index.html" class="foro-footer-link">Simulador</a>
+        <a href="index.html#ranking" class="foro-footer-link">Salón de la Fama</a>
+        <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="foro-footer-link">Instagram</a>
+        <button type="button" id="btn-footer-admin-trigger" class="foro-footer-link btn-footer-admin-link" style="background:none;border:none;cursor:pointer;padding:0;font:inherit;" title="Panel de Administración y Moderación">Moderar</button>
       </div>
     </div>
   </footer>
 
   <!-- BOTÓN FLOTANTE ESTILO REDDIT (FAB MOBILE) -->
   <button type="button" id="btn-fab-topic" class="btn-fab-topic" aria-label="Iniciar nuevo debate" title="Crear nuevo debate">
-    <span class="fab-icon">✍️</span>
+    <span class="fab-icon">
+      <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </span>
     <span class="fab-label">Crear Debate</span>
   </button>
 

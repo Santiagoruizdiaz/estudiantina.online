@@ -4,12 +4,20 @@
  */
 
 import { COLEGIOS } from "./colegios.js";
+import { UsuarioService } from "./usuario.js";
 
 function decodeEntities(str) {
   if (!str) return "";
-  const txt = document.createElement("textarea");
-  txt.innerHTML = str;
-  return txt.value;
+  const entityMap = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": "\"",
+    "&#039;": "'",
+    "&#x27;": "'",
+    "&#39;": "'"
+  };
+  return String(str).replace(/&(?:amp|lt|gt|quot|#039|#x27|#39);/g, (match) => entityMap[match] || match);
 }
 
 function escapeHtml(str) {
@@ -21,6 +29,56 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function getSvg(name, extraClass = "") {
+  const cls = extraClass ? `svg-icon ${extraClass}` : "svg-icon";
+  const svgs = {
+    sun: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+    moon: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+    search: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+    message: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+    messageCircle: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+    share: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+    repeat: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+    flag: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`,
+    pin: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>`,
+    trash: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+    shield: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    ban: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
+    trophy: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`,
+    eye: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    eyeOff: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`,
+    chevronUp: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+    chevronDown: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+    minusCircle: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
+    plusCircle: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
+    bolt: `<svg class="${cls}" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    layers: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+    music: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+    award: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`,
+    externalLink: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+    coffee: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
+    newspaper: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>`
+  };
+  return svgs[name] || "";
+}
+
+function getSchoolDot(col) {
+  if (!col) return "";
+  const color = col.color || "#2563eb";
+  return `<span class="school-dot" style="background-color:${color};" title="${escapeHtml(col.nombre || "")}"></span>`;
+}
+
+function getChannelIconSvg(canalId) {
+  if (canalId === "banda") return getSvg("music", "svg-icon-xs");
+  if (canalId === "baile") return getSvg("award", "svg-icon-xs");
+  if (canalId === "hinchadas") return getSvg("messageCircle", "svg-icon-xs");
+  if (canalId === "simulador") return getSvg("bolt", "svg-icon-xs");
+  if (canalId === "noticias") return getSvg("newspaper", "svg-icon-xs");
+  if (canalId === "offtopic") return getSvg("coffee", "svg-icon-xs");
+  if (canalId === "todos") return getSvg("layers", "svg-icon-xs");
+  return getSvg("message", "svg-icon-xs");
 }
 
 function timeAgo(dateStr) {
@@ -67,9 +125,13 @@ class ForoApp {
     this.hasMore = false;
     this.isLoading = false;
 
-    // Usuario y sesión compartida con el portal
-    this.currentUser = JSON.parse(localStorage.getItem("comunidad_google_user") || "null");
+    // Usuario y sesión compartida con el portal vía UsuarioService
+    this.currentUser = UsuarioService.getUser();
     this.userVotes = new Set(JSON.parse(localStorage.getItem("comunidad_voted_threads") || "[]"));
+    UsuarioService.onChange(user => {
+      this.currentUser = user;
+      this.updateUserBar();
+    });
 
     // Moderador / Admin
     this.adminToken = localStorage.getItem("comunidad_admin_token") || null;
@@ -86,6 +148,32 @@ class ForoApp {
     this.searchClearBtn = document.getElementById("btn-forum-search-clear");
     this.loadMoreWrap = document.getElementById("forum-load-more-wrap");
     this.loadMoreBtn = document.getElementById("btn-load-more-threads");
+
+    // Reddit Layout & Filtros
+    this.activeSchoolFilter = "todos";
+    this.countdownInterval = null;
+    this.redditCreateBox = document.getElementById("reddit-create-box");
+    this.redditCreateAvatar = document.getElementById("reddit-create-avatar");
+    this.redditCreateInputBtn = document.getElementById("reddit-create-input-btn");
+    this.sidebarChannelsList = document.getElementById("sidebar-channels-list");
+    this.sidebarSchoolsList = document.getElementById("sidebar-schools-list");
+    this.sidebarSchoolSearch = document.getElementById("sidebar-school-search");
+    this.btnClearSchoolFilter = document.getElementById("btn-clear-school-filter");
+    this.activeFeed = "home";
+    this.forumFeedFilterBar = document.getElementById("forum-feed-filter-bar");
+    this.forumFeedSchoolChip = document.getElementById("forum-feed-school-chip");
+    this.forumFeedChannelChip = document.getElementById("forum-feed-channel-chip");
+    this.btnFeedClearAll = document.getElementById("btn-feed-clear-all");
+    this.tabSortComments = document.getElementById("tab-sort-comments");
+    this.activeSchoolFilterPill = document.getElementById("forum-active-school-filter-pill");
+
+    // Widgets Right Sidebar
+    this.widgetStatDebates = document.getElementById("widget-stat-debates");
+    this.countdownDays = document.getElementById("countdown-days");
+    this.countdownHours = document.getElementById("countdown-hours");
+    this.countdownMins = document.getElementById("countdown-mins");
+    this.countdownSecs = document.getElementById("countdown-secs");
+    this.sidebarTopColegios = document.getElementById("sidebar-top-colegios");
 
     // Barra de usuario
     this.authUnregistered = document.getElementById("auth-unregistered-wrap");
@@ -143,24 +231,74 @@ class ForoApp {
     this.btnAdminLogout = document.getElementById("btn-admin-logout");
     this.btnFooterAdmin = document.getElementById("btn-footer-admin-trigger");
 
-    // Vista de Hilo / Modal
-    this.threadModalTitle = document.getElementById("thread-modal-title");
-    this.threadModalChannel = document.getElementById("thread-modal-channel");
-    this.threadModalDate = document.getElementById("thread-modal-date");
-    this.threadOpAvatar = document.getElementById("thread-op-avatar");
-    this.threadOpName = document.getElementById("thread-op-name");
-    this.threadOpHandle = document.getElementById("thread-op-handle");
-    this.threadOpSchool = document.getElementById("thread-op-school");
-    this.threadOpContent = document.getElementById("thread-op-content");
-    this.threadModalVotes = document.getElementById("thread-modal-votes");
-    this.threadModalRepliesCount = document.getElementById("thread-modal-replies-count");
-    this.btnVoteThread = document.getElementById("btn-vote-thread");
-    this.btnShareThreadModal = document.getElementById("btn-share-thread-modal");
-    this.btnReportThread = document.getElementById("btn-report-thread");
-    this.threadRepliesList = document.getElementById("thread-replies-list");
-    this.formReply = document.getElementById("form-reply");
-    this.replyInputContent = document.getElementById("reply-input-content");
-    this.replyUserAvatar = document.getElementById("reply-user-avatar");
+    // Pestaña Completa de Hilo (Reddit / Twitter Full Page View)
+    this.forumFeedView = document.getElementById("forum-feed-view");
+    this.forumThreadView = document.getElementById("forum-thread-view");
+    this.btnBackToFeed = document.getElementById("btn-back-to-feed");
+    this.threadPageChannel = document.getElementById("thread-page-channel");
+    this.threadPageDate = document.getElementById("thread-page-date");
+    this.threadPageNavChannel = document.getElementById("thread-page-nav-channel");
+    this.threadPageNavDate = document.getElementById("thread-page-nav-date");
+    this.threadPageFlair = document.getElementById("thread-page-flair");
+    this.btnShareThreadPage = document.getElementById("btn-share-thread-page");
+    this.btnShareThreadPill = document.getElementById("btn-share-thread-pill");
+    this.btnReportThreadPage = document.getElementById("btn-report-thread-page");
+    this.btnThreadMoreOptions = document.getElementById("btn-thread-more-options");
+    this.threadPageAvatar = document.getElementById("thread-page-avatar");
+    this.threadPageSchool = document.getElementById("thread-page-school");
+    this.threadPageAuthorName = document.getElementById("thread-page-author-name");
+    this.threadPageAuthorHandle = document.getElementById("thread-page-author-handle");
+    this.threadPageAuthorRole = document.getElementById("thread-page-author-role");
+    this.threadPageTitle = document.getElementById("thread-page-title");
+    this.threadPageContent = document.getElementById("thread-page-content");
+    this.btnVoteThreadPage = document.getElementById("btn-vote-thread-page");
+    this.threadPageVotes = document.getElementById("thread-page-votes");
+    this.threadPageRepliesCount = document.getElementById("thread-page-replies-count");
+    this.replyPageUserAvatar = document.getElementById("reply-page-user-avatar");
+    this.replyPageUserLabel = document.getElementById("reply-page-user-label");
+    this.replyPageSchoolHint = document.getElementById("reply-page-school-hint");
+
+    // Barra de entrada y compositor desplegable estilo Reddit
+    this.redditJoinWrap = document.getElementById("reddit-join-wrap");
+    this.redditJoinTrigger = document.getElementById("reddit-join-trigger");
+    this.formReplyPage = document.getElementById("form-reply-page");
+    this.replyPageContent = document.getElementById("reply-page-content");
+    this.btnCancelReplyPage = document.getElementById("btn-cancel-reply-page");
+    this.btnSubmitReplyPage = document.getElementById("btn-submit-reply-page");
+
+    // Controles de Orden y Búsqueda de Comentarios estilo Reddit
+    this.btnToggleSortDropdown = document.getElementById("btn-toggle-sort-dropdown");
+    this.redditSortMenu = document.getElementById("reddit-sort-menu");
+    this.currentSortLabel = document.getElementById("current-sort-label");
+    this.commentsSearchInput = document.getElementById("comments-search-input");
+    this.commentsSearchQuery = "";
+    this.threadCommentsStreamCount = document.getElementById("thread-comments-stream-count");
+    this.btnSortCommentsTop = document.getElementById("btn-sort-comments-top");
+    this.btnSortCommentsRecent = document.getElementById("btn-sort-comments-recent");
+    this.threadCommentsStream = document.getElementById("thread-comments-stream");
+    this.commentsSortMode = "top";
+    this.currentComments = [];
+    this.currentThread = null;
+    this.feedScrollPosition = 0;
+
+    // Compatibilidad con selectores heredados
+    this.threadModalTitle = document.getElementById("thread-page-title") || document.getElementById("thread-modal-title");
+    this.threadModalChannel = document.getElementById("thread-page-channel") || document.getElementById("thread-modal-channel");
+    this.threadModalDate = document.getElementById("thread-page-date") || document.getElementById("thread-modal-date");
+    this.threadOpAvatar = document.getElementById("thread-page-avatar") || document.getElementById("thread-op-avatar");
+    this.threadOpName = document.getElementById("thread-page-author-name") || document.getElementById("thread-op-name");
+    this.threadOpHandle = document.getElementById("thread-page-author-handle") || document.getElementById("thread-op-handle");
+    this.threadOpSchool = document.getElementById("thread-page-school") || document.getElementById("thread-op-school");
+    this.threadOpContent = document.getElementById("thread-page-content") || document.getElementById("thread-op-content");
+    this.threadModalVotes = document.getElementById("thread-page-votes") || document.getElementById("thread-modal-votes");
+    this.threadModalRepliesCount = document.getElementById("thread-page-replies-count") || document.getElementById("thread-modal-replies-count");
+    this.btnVoteThread = document.getElementById("btn-vote-thread-page") || document.getElementById("btn-vote-thread");
+    this.btnShareThreadModal = document.getElementById("btn-share-thread-page") || document.getElementById("btn-share-thread-modal");
+    this.btnReportThread = document.getElementById("btn-report-thread-page") || document.getElementById("btn-report-thread");
+    this.threadRepliesList = document.getElementById("thread-comments-stream") || document.getElementById("thread-replies-list");
+    this.formReply = document.getElementById("form-reply-page") || document.getElementById("form-reply");
+    this.replyInputContent = document.getElementById("reply-page-content") || document.getElementById("reply-input-content");
+    this.replyUserAvatar = document.getElementById("reply-page-user-avatar") || document.getElementById("reply-user-avatar");
     // Modal Sanción Usuario
     this.modalSanctionUser = document.getElementById("modal-sanction-user");
     this.btnCloseSanctionModal = document.getElementById("btn-close-sanction-modal");
@@ -203,26 +341,33 @@ class ForoApp {
     this.btnProfileShare = document.getElementById("btn-profile-share");
     this.btnProfileModerate = document.getElementById("btn-profile-moderate");
     this.profileStatKarma = document.getElementById("profile-stat-karma");
+    this.profileStatKarmaThreads = document.getElementById("profile-stat-karma-threads");
+    this.profileStatKarmaReplies = document.getElementById("profile-stat-karma-replies");
     this.profileStatThreads = document.getElementById("profile-stat-threads");
     this.profileStatReplies = document.getElementById("profile-stat-replies");
+    this.profileCakedayText = document.getElementById("profile-cakeday-text");
     this.profileBadgesList = document.getElementById("profile-badges-list");
 
-    // Pestañas del perfil unificado
+    // Pestañas del perfil unificado estilo Reddit
     this.tabBtnProfileView = document.getElementById("tab-btn-profile-view");
     this.tabBtnProfileEdit = document.getElementById("tab-btn-profile-edit");
     this.tabBtnProfileThreads = document.getElementById("tab-btn-profile-threads");
     this.tabBtnProfileReplies = document.getElementById("tab-btn-profile-replies");
+    this.tabBtnProfileBadges = document.getElementById("tab-btn-profile-badges");
     this.tabLabelProfileView = document.getElementById("tab-label-profile-view");
 
     this.profileTabView = document.getElementById("profile-tab-view");
     this.profileTabEdit = document.getElementById("profile-tab-edit");
     this.profileTabThreads = document.getElementById("profile-tab-threads");
     this.profileTabReplies = document.getElementById("profile-tab-replies");
+    this.profileTabBadges = document.getElementById("profile-tab-badges");
 
+    this.profileOverviewList = document.getElementById("profile-overview-list");
     this.profileThreadsList = document.getElementById("profile-threads-list");
     this.profileRepliesList = document.getElementById("profile-replies-list");
     this.profileCountTabThreads = document.getElementById("profile-count-tab-threads");
     this.profileCountTabReplies = document.getElementById("profile-count-tab-replies");
+    this.profileCountTabBadges = document.getElementById("profile-count-tab-badges");
 
     // Formulario Editar Perfil (integrado en pestaña)
     this.btnCancelEditProfile = document.getElementById("btn-cancel-edit-profile");
@@ -312,7 +457,7 @@ class ForoApp {
     document.documentElement.classList.add('dark-mode');
     document.documentElement.setAttribute('data-theme', 'dark');
     if (this.themeIcon) {
-      this.themeIcon.textContent = '☀️';
+      this.themeIcon.innerHTML = getSvg('sun', 'svg-icon-sm');
     }
     if (this.themeToggleBtn) {
       this.themeToggleBtn.setAttribute('title', 'Cambiar a modo claro');
@@ -327,7 +472,7 @@ class ForoApp {
     document.documentElement.classList.add('light-mode');
     document.documentElement.setAttribute('data-theme', 'light');
     if (this.themeIcon) {
-      this.themeIcon.textContent = '🌙';
+      this.themeIcon.innerHTML = getSvg('moon', 'svg-icon-sm');
     }
     if (this.themeToggleBtn) {
       this.themeToggleBtn.setAttribute('title', 'Cambiar a modo oscuro');
@@ -352,6 +497,7 @@ class ForoApp {
     const canalParam = params.get("canal");
     if (canalParam) {
       this.activeCanal = canalParam;
+      this.activeFeed = null;
     }
 
     // Acceso oculto por Token en la URL
@@ -368,16 +514,30 @@ class ForoApp {
       this.updateAdminBar();
     }
 
+    // Soporte para filtro de colegio en URL (?colegio=ID)
+    const colegioParam = params.get("colegio");
+    if (colegioParam) {
+      this.activeSchoolFilter = colegioParam;
+      this.activeFeed = null;
+    }
+
     this.bindEvents();
+
+    // Cargar Colegios en Sidebar y Cuenta Regresiva 2026
+    this.populateSidebarSchools();
+    this.startCountdown2026();
+
+    // Sincronizar estado visual de navegación
+    this.syncNavigationUI();
 
     // Cargar Canales y Debates Iniciales
     this.loadChannels();
     this.loadThreads(false);
 
-    // Deep link a hilo específico
-    const hiloParam = params.get("hilo");
+    // Deep link a hilo específico (soporta ?hilo= y ?id= desde noticias)
+    const hiloParam = params.get("hilo") || params.get("id");
     if (hiloParam) {
-      this.openThread(hiloParam);
+      this.openThread(hiloParam, false);
     }
 
     // Deep link a perfil de usuario específico
@@ -402,7 +562,7 @@ class ForoApp {
         localStorage.setItem("comunidad_admin_token", this.adminToken);
         localStorage.setItem("comunidad_admin_user", this.adminUser);
         this.updateAdminBar();
-        this.showToast(`¡Modo Administrador activado (${this.adminUser})! 🔐`);
+        this.showToast(`Modo Administrador activado (${this.adminUser})`);
       } else {
         this.adminToken = null;
         localStorage.removeItem("comunidad_admin_token");
@@ -415,9 +575,9 @@ class ForoApp {
   }
 
   getColegio(id) {
-    if (!id) return { id: "", nombre: "Colegio de Posadas", escudo: "🥁", color: "#0284c7" };
+    if (!id) return { id: "", nombre: "Colegio de Posadas", escudo: "", color: "#0284c7" };
     const found = COLEGIOS.find(c => c.id === id);
-    if (!found) return { id, nombre: id, escudo: "🥁", color: "#0284c7" };
+    if (!found) return { id, nombre: id, escudo: "", color: "#0284c7" };
     const primary = (found.colores && found.colores.primary) || "#0284c7";
     return {
       ...found,
@@ -427,16 +587,21 @@ class ForoApp {
 
   applySchoolTheme(colegioId, targetEl = document.documentElement) {
     if (!colegioId) {
-      if (targetEl === document.documentElement) {
-        const schoolProps = [
-          "--school-primary", "--school-secondary", "--school-accent", "--school-glow",
-          "--school-collar", "--school-text-contrast", "--school-surface", "--school-border",
-          "--school-gradient", "--school-gradient-subtle"
-        ];
-        schoolProps.forEach(p => targetEl.style.removeProperty(p));
-        const themeMeta = document.querySelector('meta[name="theme-color"]');
-        if (themeMeta) themeMeta.setAttribute("content", "#090a0f");
-      }
+      const defaultGrad = "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)";
+      const schoolProps = [
+        "--school-primary", "--school-secondary", "--school-accent", "--school-glow",
+        "--school-collar", "--school-text-contrast", "--school-surface", "--school-border",
+        "--school-gradient", "--school-gradient-subtle", "--foro-accent"
+      ];
+      schoolProps.forEach(p => {
+        if (targetEl) targetEl.style.removeProperty(p);
+        if (document.documentElement) document.documentElement.style.removeProperty(p);
+        if (document.body) document.body.style.removeProperty(p);
+      });
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute("content", "#090a0f");
+      const heroStrip = document.getElementById("about-card-hero-strip");
+      if (heroStrip) heroStrip.style.setProperty("background", defaultGrad, "important");
       return;
     }
 
@@ -450,26 +615,40 @@ class ForoApp {
     const collar = colors.collar || secondary;
     const textContrast = colors.textContrast || "#ffffff";
     const isLight = document.body && document.body.classList.contains("light-mode");
-    const surface = isLight ? this.hexToRgba(primary, 0.07) : (colors.surface || this.hexToRgba(primary, 0.12));
-    const border = isLight ? this.hexToRgba(primary, 0.3) : (colors.border || this.hexToRgba(primary, 0.35));
+    const surface = isLight ? this.hexToRgba(primary, 0.10) : (colors.surface || this.hexToRgba(primary, 0.12));
+    const border = isLight ? this.hexToRgba(primary, 0.28) : (colors.border || this.hexToRgba(primary, 0.35));
     const gradient = colors.gradient || `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`;
     const gradientSubtle = `linear-gradient(180deg, ${surface} 0%, transparent 100%)`;
 
-    targetEl.style.setProperty("--school-primary", primary);
-    targetEl.style.setProperty("--school-secondary", secondary);
-    targetEl.style.setProperty("--school-accent", accent);
-    targetEl.style.setProperty("--school-glow", glow);
-    targetEl.style.setProperty("--school-collar", collar);
-    targetEl.style.setProperty("--school-text-contrast", textContrast);
-    targetEl.style.setProperty("--school-surface", surface);
-    targetEl.style.setProperty("--school-border", border);
-    targetEl.style.setProperty("--school-gradient", gradient);
-    targetEl.style.setProperty("--school-gradient-subtle", gradientSubtle);
+    const allProps = {
+      "--school-primary": primary,
+      "--school-secondary": secondary,
+      "--school-accent": accent,
+      "--school-glow": glow,
+      "--school-collar": collar,
+      "--school-text-contrast": textContrast,
+      "--school-surface": surface,
+      "--school-border": border,
+      "--school-gradient": gradient,
+      "--school-gradient-subtle": gradientSubtle,
+      "--foro-accent": primary
+    };
 
-    if (targetEl === document.documentElement) {
-      const themeMeta = document.querySelector('meta[name="theme-color"]');
-      if (themeMeta) themeMeta.setAttribute("content", primary);
+    Object.entries(allProps).forEach(([k, v]) => {
+      if (document.documentElement) document.documentElement.style.setProperty(k, v);
+      if (document.body) document.body.style.setProperty(k, v);
+      if (targetEl && targetEl !== document.documentElement && targetEl !== document.body) {
+        targetEl.style.setProperty(k, v);
+      }
+    });
+
+    const heroStrip = document.getElementById("about-card-hero-strip");
+    if (heroStrip) {
+      heroStrip.style.setProperty("background", gradient, "important");
     }
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute("content", primary);
   }
 
   hexToRgba(hex, alpha = 1) {
@@ -487,13 +666,226 @@ class ForoApp {
 
   populateSchools() {
     const options = (COLEGIOS || []).map(c =>
-      `<option value="${c.id}">${c.escudo || "🥁"} ${c.nombre}</option>`
+      `<option value="${c.id}">${c.nombre}</option>`
     ).join("");
 
     if (this.topicSchool) this.topicSchool.innerHTML = options;
     if (this.authSelectSchool) this.authSelectSchool.innerHTML = options;
     if (this.onboardingSchool) this.onboardingSchool.innerHTML = options;
     if (this.editProfileSchool) this.editProfileSchool.innerHTML = options;
+  }
+
+  populateSidebarSchools() {
+    if (!this.sidebarSchoolsList) return;
+    const counts = this.schoolCounts || {};
+    const html = (COLEGIOS || []).map(c => {
+      const primary = (c.colores && c.colores.primary) || "#38bdf8";
+      const isAct = this.activeSchoolFilter === c.id;
+      const count = counts[c.id] || 0;
+      return `
+        <button type="button" class="sidebar-school-chip ${isAct ? "active" : ""}" data-school-id="${c.id}">
+          <span class="school-chip-dot" style="background:${primary};"></span>
+          <span class="school-name">${escapeHtml(c.nombre)}</span>
+          ${count > 0 ? `<span class="left-nav-count">${count}</span>` : ""}
+        </button>
+      `;
+    }).join("");
+    this.sidebarSchoolsList.innerHTML = html;
+
+    this.sidebarSchoolsList.querySelectorAll(".sidebar-school-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.schoolId;
+        if (this.activeSchoolFilter === id) {
+          this.setSchoolFilter("todos");
+        } else {
+          this.setSchoolFilter(id);
+        }
+      });
+    });
+  }
+
+  setSchoolFilter(schoolId, shouldReload = true) {
+    this.activeSchoolFilter = schoolId || "todos";
+    if (this.activeSchoolFilter !== "todos") {
+      this.activeFeed = null;
+      // Aplicar dinámicamente los colores del colegio seleccionado al tema global
+      this.applySchoolTheme(this.activeSchoolFilter);
+    } else {
+      // Restaurar el tema del usuario logueado o default
+      const userCol = (this.currentUser && this.currentUser.colegioId) ? this.currentUser.colegioId : null;
+      this.applySchoolTheme(userCol);
+    }
+
+    // Actualizar URL sin recargar
+    const url = new URL(window.location);
+    if (this.activeSchoolFilter !== "todos") {
+      url.searchParams.set("colegio", this.activeSchoolFilter);
+    } else {
+      url.searchParams.delete("colegio");
+    }
+    window.history.replaceState({}, "", url);
+
+    this.syncNavigationUI();
+
+    if (shouldReload) {
+      this.page = 0;
+      this.loadThreads(false);
+    }
+  }
+
+  syncNavigationUI() {
+    // 1. Feeds Principales
+    const navFeedHome = document.getElementById("nav-feed-home");
+    const navFeedPopular = document.getElementById("nav-feed-popular");
+    const navFeedComentados = document.getElementById("nav-feed-comentados");
+
+    const isHomeActive = this.activeFeed === "home" && this.activeCanal === "todos" && this.activeSchoolFilter === "todos";
+    const isPopularActive = this.activeFeed === "popular";
+    const isComentadosActive = this.activeFeed === "comentados";
+
+    if (navFeedHome) navFeedHome.classList.toggle("active", isHomeActive);
+    if (navFeedPopular) navFeedPopular.classList.toggle("active", isPopularActive);
+    if (navFeedComentados) navFeedComentados.classList.toggle("active", isComentadosActive);
+
+    // 2. Canales Temáticos en Sidebar y Grid
+    if (this.sidebarChannelsList) {
+      this.sidebarChannelsList.querySelectorAll(".left-nav-item").forEach(b => {
+        const canalId = b.dataset.canal;
+        b.classList.toggle("active", canalId === this.activeCanal);
+      });
+    }
+    if (this.channelsGrid) {
+      this.channelsGrid.querySelectorAll(".channel-chip").forEach(b => {
+        b.classList.toggle("active", b.dataset.canal === this.activeCanal);
+      });
+    }
+
+    // 3. Colegios en Sidebar
+    if (this.sidebarSchoolsList) {
+      this.sidebarSchoolsList.querySelectorAll(".sidebar-school-chip").forEach(b => {
+        b.classList.toggle("active", b.dataset.schoolId === this.activeSchoolFilter);
+      });
+    }
+    if (this.btnClearSchoolFilter) {
+      this.btnClearSchoolFilter.style.display = (this.activeSchoolFilter && this.activeSchoolFilter !== "todos") ? "inline-block" : "none";
+    }
+
+    // 4. Barra dinámica de filtros en el Feed
+    const hasSchoolFilter = this.activeSchoolFilter && this.activeSchoolFilter !== "todos";
+    const hasChannelFilter = this.activeCanal && this.activeCanal !== "todos";
+
+    if (this.forumFeedFilterBar) {
+      this.forumFeedFilterBar.style.display = (hasSchoolFilter || hasChannelFilter) ? "flex" : "none";
+    }
+
+    if (this.forumFeedSchoolChip) {
+      if (hasSchoolFilter) {
+        const col = this.getColegio(this.activeSchoolFilter);
+        this.forumFeedSchoolChip.style.display = "inline-flex";
+        this.forumFeedSchoolChip.innerHTML = `${getSchoolDot(col)} <span>${escapeHtml(col.nombre)}</span> <span class="chip-dismiss">✕</span>`;
+      } else {
+        this.forumFeedSchoolChip.style.display = "none";
+      }
+    }
+
+    if (this.forumFeedChannelChip) {
+      if (hasChannelFilter) {
+        const canalName = this.getChannelName(this.activeCanal);
+        this.forumFeedChannelChip.style.display = "inline-flex";
+        this.forumFeedChannelChip.innerHTML = `<span>c/${escapeHtml(canalName)}</span> <span class="chip-dismiss">✕</span>`;
+      } else {
+        this.forumFeedChannelChip.style.display = "none";
+      }
+    }
+
+    // Compatibilidad con activeSchoolFilterPill legacy
+    if (this.activeSchoolFilterPill) {
+      if (hasSchoolFilter) {
+        const col = this.getColegio(this.activeSchoolFilter);
+        this.activeSchoolFilterPill.style.display = "inline-flex";
+        this.activeSchoolFilterPill.innerHTML = `<span>${getSchoolDot(col)} ${escapeHtml(col.nombre)}</span> <span style="margin-left:4px;opacity:0.7;">✕</span>`;
+      } else {
+        this.activeSchoolFilterPill.style.display = "none";
+      }
+    }
+
+    // Sincronizar tabs de ordenación legacy si existen
+    const tabSortTop = document.getElementById("tab-sort-top");
+    const tabSortRecent = document.getElementById("tab-sort-recent");
+    const tabSortComments = document.getElementById("tab-sort-comments");
+    if (tabSortTop) tabSortTop.classList.toggle("active", this.activeSort === "top");
+    if (tabSortRecent) tabSortRecent.classList.toggle("active", this.activeSort === "recientes");
+    if (tabSortComments) tabSortComments.classList.toggle("active", this.activeSort === "comentados");
+  }
+
+  startCountdown2026() {
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    // 1ª Noche de Calle oficial Estudiantina 2026: Viernes 18 de Septiembre de 2026, 20:00 hs (Posadas / UTC-3)
+    const targetDate = new Date("2026-09-18T20:00:00-03:00").getTime();
+
+    const updateClock = () => {
+      const now = Date.now();
+      const diff = targetDate - now;
+      if (diff <= 0) {
+        if (this.countdownDays) this.countdownDays.textContent = "0";
+        if (this.countdownHours) this.countdownHours.textContent = "0";
+        if (this.countdownMins) this.countdownMins.textContent = "0";
+        if (this.countdownSecs) this.countdownSecs.textContent = "0";
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (this.countdownDays) this.countdownDays.textContent = String(days);
+      if (this.countdownHours) this.countdownHours.textContent = String(hours).padStart(2, "0");
+      if (this.countdownMins) this.countdownMins.textContent = String(mins).padStart(2, "0");
+      if (this.countdownSecs) this.countdownSecs.textContent = String(secs).padStart(2, "0");
+    };
+
+    updateClock();
+    this.countdownInterval = setInterval(updateClock, 1000);
+  }
+
+  updateTopColegiosWidget(threads) {
+    if (!this.sidebarTopColegios || !Array.isArray(threads)) return;
+    const schoolCounts = {};
+    threads.forEach(t => {
+      if (t.colegio_id) {
+        const weight = 1 + (parseInt(t.respuestas_count || 0, 10) || 0) + (parseInt(t.votos || 0, 10) || 0);
+        schoolCounts[t.colegio_id] = (schoolCounts[t.colegio_id] || 0) + weight;
+      }
+    });
+
+    const sortedIds = Object.keys(schoolCounts).sort((a, b) => schoolCounts[b] - schoolCounts[a]);
+    const fallbackIds = ["janssen", "santa_maria", "industrial", "nacional", "comercio6", "san_basilio"];
+    fallbackIds.forEach(id => {
+      if (!sortedIds.includes(id)) sortedIds.push(id);
+    });
+
+    const top5 = sortedIds.slice(0, 5);
+    const html = top5.map((id, idx) => {
+      const col = this.getColegio(id);
+      const count = schoolCounts[id] || (12 - idx * 2);
+      const isAct = this.activeSchoolFilter === id;
+      return `
+        <div class="top-colegio-item ${isAct ? "active" : ""}" data-school-id="${id}" title="Filtrar debates de ${escapeHtml(col.nombre)}">
+          <span class="top-colegio-rank">${idx + 1}</span>
+          <span class="top-colegio-badge">${getSchoolDot(col)}</span>
+          <span class="top-colegio-name">${escapeHtml(col.nombre)}</span>
+          <span class="top-colegio-count">${count} pts</span>
+        </div>
+      `;
+    }).join("");
+
+    this.sidebarTopColegios.innerHTML = html;
+    this.sidebarTopColegios.querySelectorAll(".top-colegio-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const id = item.dataset.schoolId;
+        this.setSchoolFilter(id);
+      });
+    });
   }
 
   processImageFile(file) {
@@ -725,7 +1117,7 @@ class ForoApp {
       if (json.status === "ok" && json.usuario) {
         this.closeOnboardingModal();
         this.saveUser(json.usuario);
-        this.showToast(`🎉 ¡Bienvenido a la comunidad, @${json.usuario.username}!`);
+        this.showToast(`Bienvenido a la comunidad, @${json.usuario.username}!`);
       } else {
         this.showToast(json.message || "Error al completar registro");
       }
@@ -737,7 +1129,7 @@ class ForoApp {
 
   async saveUser(user) {
     this.currentUser = user;
-    localStorage.setItem("comunidad_google_user", JSON.stringify(user));
+    UsuarioService.setUser(user);
     if (user.colegioId) {
       this.applySchoolTheme(user.colegioId);
     }
@@ -747,7 +1139,7 @@ class ForoApp {
 
     const col = this.getColegio(user.colegioId);
     const handleText = user.username ? ` (@${user.username})` : "";
-    this.showToast(`¡Conectado como ${user.nombre}${handleText}!`);
+    this.showToast(`Conectado como ${user.nombre}${handleText}`);
 
     if (this.activeThreadId) {
       this.openThread(this.activeThreadId);
@@ -789,22 +1181,26 @@ class ForoApp {
       }
     }
 
+    if (this.redditCreateAvatar) {
+      this.redditCreateAvatar.src = isLogged ? (this.currentUser.avatarUrl || "assets/avatar-default.webp") : "assets/avatar-default.webp";
+    }
+
     if (isLogged) {
       if (this.userAvatarImg) this.userAvatarImg.src = this.currentUser.avatarUrl;
       if (this.userProfileName) this.userProfileName.textContent = this.currentUser.nombre;
 
       const col = this.getColegio(this.currentUser.colegioId);
       if (this.userSchoolBadge) {
-        this.userSchoolBadge.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+        this.userSchoolBadge.innerHTML = `${getSchoolDot(col)} <span class="user-school-name" style="color:${col.color};font-weight:700;">${escapeHtml(col.nombre)}</span>`;
       }
       if (this.topicSchool) this.topicSchool.value = this.currentUser.colegioId;
       if (this.replyUserAvatar) this.replyUserAvatar.src = this.currentUser.avatarUrl;
       if (this.replySchoolHint) {
-        this.replySchoolHint.textContent = `📍 Comentando como hincha de ${col.nombre}`;
+        this.replySchoolHint.textContent = `Comentando como hincha de ${col.nombre}`;
       }
     } else {
       if (this.replySchoolHint) {
-        this.replySchoolHint.textContent = "📍 Comentando como hincha anónimo";
+        this.replySchoolHint.textContent = "Comentando como hincha anónimo";
       }
     }
   }
@@ -890,7 +1286,7 @@ class ForoApp {
     if (this.btnLogout) {
       this.btnLogout.addEventListener("click", () => {
         this.currentUser = null;
-        localStorage.removeItem("comunidad_google_user");
+        UsuarioService.clearUser();
         this.applySchoolTheme(null);
         this.updateUserBar();
         this.showToast("Sesión cerrada");
@@ -912,22 +1308,31 @@ class ForoApp {
       });
     }
 
-    // Iniciar debate (botón de hero y FAB)
-    const handleOpenCreateModal = () => {
+    // Iniciar debate (botón de hero, FAB y Reddit quick create post card)
+    const handleOpenCreateModal = (schoolId = null) => {
       if (!this.currentUser) {
         if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
         this.showToast("Por favor identificate para iniciar un debate");
         return;
       }
+      if (schoolId && this.topicSchool) {
+        this.topicSchool.value = schoolId;
+      }
+      if (this.topicCanal && this.activeCanal && this.activeCanal !== "todos") {
+        this.topicCanal.value = this.activeCanal;
+      }
       if (this.modalTopic) this.modalTopic.classList.add("active");
     };
 
     if (this.btnProposeTopic) {
-      this.btnProposeTopic.addEventListener("click", handleOpenCreateModal);
+      this.btnProposeTopic.addEventListener("click", () => handleOpenCreateModal());
     }
     const btnFab = document.getElementById("btn-fab-topic");
     if (btnFab) {
-      btnFab.addEventListener("click", handleOpenCreateModal);
+      btnFab.addEventListener("click", () => handleOpenCreateModal());
+    }
+    if (this.redditCreateInputBtn) {
+      this.redditCreateInputBtn.addEventListener("click", () => handleOpenCreateModal());
     }
     if (this.btnCloseTopic) {
       this.btnCloseTopic.addEventListener("click", () => {
@@ -938,25 +1343,138 @@ class ForoApp {
       this.formTopic.addEventListener("submit", (e) => this.handleCreateTopic(e));
     }
 
-    // Modal Hilo
-    if (this.btnCloseThread) {
-      this.btnCloseThread.addEventListener("click", () => this.closeThreadModal());
+    // Pestaña Completa de Hilo (Reddit & Twitter Full Page View)
+    if (this.btnBackToFeed) {
+      this.btnBackToFeed.addEventListener("click", () => this.showFeedView());
     }
-    const btnCloseThreadX = document.getElementById("btn-close-thread-x");
-    if (btnCloseThreadX) {
-      btnCloseThreadX.addEventListener("click", () => this.closeThreadModal());
+    if (this.btnShareThreadPage) {
+      this.btnShareThreadPage.addEventListener("click", () => this.shareCurrentThread());
     }
-    if (this.modalThread) {
-      this.modalThread.addEventListener("click", (e) => {
-        if (e.target === this.modalThread) this.closeThreadModal();
+    if (this.btnShareThreadPill) {
+      this.btnShareThreadPill.addEventListener("click", () => this.shareCurrentThread());
+    }
+    if (this.btnReportThreadPage) {
+      this.btnReportThreadPage.addEventListener("click", () => {
+        if (this.activeThreadId) this.reportContent("hilo", this.activeThreadId);
+      });
+    }
+    if (this.btnVoteThreadPage) {
+      this.btnVoteThreadPage.addEventListener("click", () => {
+        if (this.activeThreadId) this.toggleVote(this.activeThreadId);
+      });
+    }
+    if (this.btnThreadMoreOptions) {
+      this.btnThreadMoreOptions.addEventListener("click", () => {
+        this.shareCurrentThread();
       });
     }
 
-    // Cerrar modales con tecla Escape
+    // Barra de entrada "Join the conversation" estilo Reddit
+    if (this.redditJoinTrigger) {
+      this.redditJoinTrigger.addEventListener("click", () => {
+        if (!this.currentUser) {
+          if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
+          this.showToast("Iniciá sesión para comentar en el debate");
+          return;
+        }
+        this.redditJoinTrigger.style.display = "none";
+        if (this.formReplyPage) {
+          this.formReplyPage.style.display = "block";
+          if (this.replyPageContent) this.replyPageContent.focus();
+        }
+      });
+    }
+    if (this.btnCancelReplyPage) {
+      this.btnCancelReplyPage.addEventListener("click", () => {
+        if (this.formReplyPage) this.formReplyPage.style.display = "none";
+        if (this.redditJoinTrigger) this.redditJoinTrigger.style.display = "flex";
+        if (this.replyPageContent) this.replyPageContent.value = "";
+      });
+    }
+
+    // Controles de Orden y Búsqueda de Comentarios estilo Reddit
+    if (this.btnToggleSortDropdown) {
+      this.btnToggleSortDropdown.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (this.redditSortMenu) {
+          const isHidden = this.redditSortMenu.style.display === "none";
+          this.redditSortMenu.style.display = isHidden ? "block" : "none";
+        }
+      });
+    }
+    document.querySelectorAll(".reddit-sort-option").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const sort = btn.dataset.sort || "top";
+        this.setCommentsSort(sort);
+        if (this.currentSortLabel) {
+          this.currentSortLabel.textContent = (sort === "top" ? "Best" : "New");
+        }
+        document.querySelectorAll(".reddit-sort-option").forEach(o => o.classList.toggle("active", o.dataset.sort === sort));
+        if (this.redditSortMenu) this.redditSortMenu.style.display = "none";
+      });
+    });
+    window.addEventListener("click", (e) => {
+      if (this.redditSortMenu && this.redditSortMenu.style.display !== "none" && !e.target.closest(".reddit-sort-dropdown-wrap")) {
+        this.redditSortMenu.style.display = "none";
+      }
+    });
+
+    if (this.commentsSearchInput) {
+      let commentSearchTimer = null;
+      this.commentsSearchInput.addEventListener("input", () => {
+        clearTimeout(commentSearchTimer);
+        commentSearchTimer = setTimeout(() => {
+          this.commentsSearchQuery = (this.commentsSearchInput.value || "").trim().toLowerCase();
+          this.renderCommentsStream();
+        }, 150);
+      });
+    }
+
+    if (this.btnSortCommentsTop) {
+      this.btnSortCommentsTop.addEventListener("click", () => this.setCommentsSort("top"));
+    }
+    if (this.btnSortCommentsRecent) {
+      this.btnSortCommentsRecent.addEventListener("click", () => this.setCommentsSort("recientes"));
+    }
+    if (this.formReplyPage) {
+      this.formReplyPage.addEventListener("submit", (e) => this.handlePageSubmitReply(e));
+    }
+    if (this.replyPageContent) {
+      this.replyPageContent.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key === "Enter") {
+          e.preventDefault();
+          this.handlePageSubmitReply(e);
+        }
+      });
+    }
+
+    // Barra de formato rápido para el compositor de la pestaña
+    const formatButtons = document.querySelectorAll("#form-reply-page .btn-reply-format");
+    formatButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const fmt = btn.dataset.format;
+        this.applyFormatToTextarea(this.replyPageContent, fmt);
+      });
+    });
+
+    // Manejo de navegación atrás/adelante del navegador (popstate)
+    window.addEventListener("popstate", () => {
+      const params = new URLSearchParams(window.location.search);
+      const hiloId = params.get("hilo") || params.get("id");
+      if (hiloId) {
+        this.openThread(hiloId, false);
+      } else {
+        this.showFeedView(false);
+      }
+    });
+
+    // Atajo Escape: volver al feed si está en la pestaña completa y ningún modal está abierto
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        if (this.modalThread && this.modalThread.classList.contains("active")) {
-          this.closeThreadModal();
+        const anyModalOpen = document.querySelector(".topic-modal-overlay.active, .auth-modal-overlay.active, .admin-modal-overlay.active, .profile-modal-overlay.active");
+        if (!anyModalOpen && this.forumThreadView && this.forumThreadView.style.display !== "none") {
+          this.showFeedView();
         }
         if (this.modalTopic && this.modalTopic.classList.contains("active")) {
           this.modalTopic.classList.remove("active");
@@ -969,24 +1487,56 @@ class ForoApp {
         }
       }
     });
-    if (this.formReply) {
-      this.formReply.addEventListener("submit", (e) => this.handleSubmitReply(e));
+
+    // Control de Barra Lateral / Canales estilo Reddit (PC Toggle & Mobile Drawer)
+    const btnToggleNav = document.getElementById("btn-toggle-left-nav");
+    const leftSidebar = document.getElementById("foro-left-sidebar");
+    const drawerBackdrop = document.getElementById("sidebar-drawer-backdrop");
+
+    // Restaurar preferencia de sidebar colapsado en PC
+    if (window.innerWidth > 1024 && localStorage.getItem("foro_sidebar_collapsed") === "1") {
+      document.body.classList.add("sidebar-collapsed");
+      if (btnToggleNav) btnToggleNav.setAttribute("title", "Mostrar canales y filtros");
     }
-    if (this.btnVoteThread) {
-      this.btnVoteThread.addEventListener("click", () => {
-        if (this.activeThreadId) this.toggleVote(this.activeThreadId);
-      });
-    }
-    if (this.btnShareThreadModal) {
-      this.btnShareThreadModal.addEventListener("click", () => {
-        if (this.activeThreadId) {
-          this.shareThread(this.activeThreadId, this.threadModalTitle.textContent);
+
+    const toggleDrawerMobile = (forceState) => {
+      if (!leftSidebar) return;
+      const willOpen = forceState !== undefined ? forceState : !leftSidebar.classList.contains("open");
+      leftSidebar.classList.toggle("open", willOpen);
+      if (drawerBackdrop) drawerBackdrop.classList.toggle("active", willOpen);
+      document.body.classList.toggle("drawer-open", willOpen);
+    };
+
+    const toggleSidebarDesktop = () => {
+      const isNowCollapsed = document.body.classList.toggle("sidebar-collapsed");
+      try {
+        localStorage.setItem("foro_sidebar_collapsed", isNowCollapsed ? "1" : "0");
+      } catch (e) {}
+      if (btnToggleNav) {
+        btnToggleNav.setAttribute("title", isNowCollapsed ? "Mostrar canales y filtros" : "Ocultar canales y filtros");
+      }
+    };
+
+    if (btnToggleNav) {
+      btnToggleNav.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.innerWidth > 1024) {
+          toggleSidebarDesktop();
+        } else {
+          toggleDrawerMobile();
         }
       });
     }
-    if (this.btnReportThread) {
-      this.btnReportThread.addEventListener("click", () => {
-        if (this.activeThreadId) this.reportContent("hilo", this.activeThreadId);
+
+    if (drawerBackdrop) {
+      drawerBackdrop.addEventListener("click", () => toggleDrawerMobile(false));
+    }
+
+    if (leftSidebar) {
+      leftSidebar.addEventListener("click", (e) => {
+        if (window.innerWidth <= 1024 && (e.target.closest(".left-nav-item") || e.target.closest(".sidebar-school-chip") || e.target.closest(".sidebar-channel-item"))) {
+          toggleDrawerMobile(false);
+        }
       });
     }
 
@@ -994,8 +1544,19 @@ class ForoApp {
     let searchTimer = null;
     const searchInputs = [
       this.searchInput,
-      document.getElementById("forum-search-input-mobile")
+      this.searchMobileInput || document.getElementById("forum-search-input-mobile")
     ].filter(Boolean);
+
+    const clearBtns = [
+      this.searchClearBtn,
+      this.searchMobileClearBtn || document.getElementById("btn-forum-search-clear-mobile")
+    ].filter(Boolean);
+
+    const updateClearBtns = (val) => {
+      clearBtns.forEach(btn => {
+        btn.style.display = val ? "inline-flex" : "none";
+      });
+    };
 
     searchInputs.forEach(input => {
       input.addEventListener("input", (e) => {
@@ -1005,9 +1566,7 @@ class ForoApp {
         searchInputs.forEach(other => {
           if (other !== input) other.value = e.target.value;
         });
-        if (this.searchClearBtn) {
-          this.searchClearBtn.style.display = val ? "inline-flex" : "none";
-        }
+        updateClearBtns(val);
         searchTimer = setTimeout(() => {
           this.searchQuery = val;
           this.page = 0;
@@ -1016,39 +1575,157 @@ class ForoApp {
       });
     });
 
-    if (this.searchClearBtn) {
-      this.searchClearBtn.addEventListener("click", () => {
+    clearBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
         searchInputs.forEach(input => input.value = "");
-        this.searchClearBtn.style.display = "none";
+        updateClearBtns("");
         this.searchQuery = "";
+        this.page = 0;
+        this.loadThreads(false);
+      });
+    });
+
+    // Ordenamiento (Más Votados / Recientes / Más Comentados)
+    const tabSortTop = document.getElementById("tab-sort-top");
+    const tabSortRecent = document.getElementById("tab-sort-recent");
+    const tabSortComments = document.getElementById("tab-sort-comments");
+
+    const updateSortTabs = (sort) => {
+      this.activeSort = sort;
+      if (sort === "top") this.activeFeed = "popular";
+      else if (sort === "comentados") this.activeFeed = "comentados";
+      else if (sort === "recientes") this.activeFeed = "home";
+      this.syncNavigationUI();
+      this.page = 0;
+      this.loadThreads(false);
+    };
+
+    if (tabSortTop) tabSortTop.addEventListener("click", () => updateSortTabs("top"));
+    if (tabSortRecent) tabSortRecent.addEventListener("click", () => updateSortTabs("recientes"));
+    if (tabSortComments) tabSortComments.addEventListener("click", () => updateSortTabs("comentados"));
+
+    // Feeds del Sidebar Izquierdo
+    const navFeedHome = document.getElementById("nav-feed-home");
+    if (navFeedHome) {
+      navFeedHome.addEventListener("click", () => {
+        this.activeFeed = "home";
+        this.activeCanal = "todos";
+        this.activeSort = "recientes";
+        this.setSchoolFilter("todos", false);
+        const url = new URL(window.location);
+        url.searchParams.delete("canal");
+        url.searchParams.delete("colegio");
+        window.history.replaceState({}, "", url);
+        this.syncNavigationUI();
+        this.page = 0;
+        this.loadThreads(false);
+      });
+    }
+    const navFeedPopular = document.getElementById("nav-feed-popular");
+    if (navFeedPopular) {
+      navFeedPopular.addEventListener("click", () => {
+        this.activeFeed = "popular";
+        this.activeSort = "top";
+        this.syncNavigationUI();
+        this.page = 0;
+        this.loadThreads(false);
+      });
+    }
+    const navFeedComentados = document.getElementById("nav-feed-comentados");
+    if (navFeedComentados) {
+      navFeedComentados.addEventListener("click", () => {
+        this.activeFeed = "comentados";
+        this.activeSort = "comentados";
+        this.syncNavigationUI();
         this.page = 0;
         this.loadThreads(false);
       });
     }
 
-    // Ordenamiento (Más Votados / Recientes)
-    const tabSortTop = document.getElementById("tab-sort-top");
-    const tabSortRecent = document.getElementById("tab-sort-recent");
-    if (tabSortTop && tabSortRecent) {
-      tabSortTop.addEventListener("click", () => {
-        tabSortTop.classList.add("active");
-        tabSortTop.setAttribute("aria-selected", "true");
-        tabSortRecent.classList.remove("active");
-        tabSortRecent.setAttribute("aria-selected", "false");
-        this.activeSort = "top";
-        this.page = 0;
-        this.loadThreads(false);
+    // Botones de filtro del feed bar
+    if (this.forumFeedSchoolChip) {
+      this.forumFeedSchoolChip.addEventListener("click", () => {
+        this.setSchoolFilter("todos");
       });
-      tabSortRecent.addEventListener("click", () => {
-        tabSortRecent.classList.add("active");
-        tabSortRecent.setAttribute("aria-selected", "true");
-        tabSortTop.classList.remove("active");
-        tabSortTop.setAttribute("aria-selected", "false");
-        this.activeSort = "recientes";
+    }
+    if (this.forumFeedChannelChip) {
+      this.forumFeedChannelChip.addEventListener("click", () => {
+        this.activeCanal = "todos";
+        if (!this.activeSchoolFilter || this.activeSchoolFilter === "todos") {
+          this.activeFeed = "home";
+        }
+        const url = new URL(window.location);
+        url.searchParams.delete("canal");
+        window.history.replaceState({}, "", url);
+        this.syncNavigationUI();
         this.page = 0;
         this.loadThreads(false);
       });
     }
+    if (this.btnFeedClearAll) {
+      this.btnFeedClearAll.addEventListener("click", () => {
+        this.activeFeed = "home";
+        this.activeCanal = "todos";
+        this.activeSort = "recientes";
+        this.setSchoolFilter("todos", false);
+        const url = new URL(window.location);
+        url.searchParams.delete("canal");
+        url.searchParams.delete("colegio");
+        window.history.replaceState({}, "", url);
+        this.syncNavigationUI();
+        this.page = 0;
+        this.loadThreads(false);
+      });
+    }
+
+    // Filtro interactivo de Colegios en Sidebar Izquierdo
+    if (this.sidebarSchoolSearch && this.sidebarSchoolsList) {
+      this.sidebarSchoolSearch.addEventListener("input", (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        this.sidebarSchoolsList.querySelectorAll(".sidebar-school-chip").forEach(chip => {
+          const name = chip.textContent.toLowerCase();
+          chip.style.display = name.includes(query) ? "flex" : "none";
+        });
+      });
+    }
+
+    if (this.btnClearSchoolFilter) {
+      this.btnClearSchoolFilter.addEventListener("click", () => {
+        this.setSchoolFilter("todos");
+      });
+    }
+
+    if (this.activeSchoolFilterPill) {
+      this.activeSchoolFilterPill.addEventListener("click", () => {
+        this.setSchoolFilter("todos");
+      });
+    }
+
+    // Barra de formato de comentarios estilo Reddit
+    document.querySelectorAll(".btn-reply-format").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (!this.replyInputContent) return;
+        const fmt = btn.dataset.format;
+        const textarea = this.replyInputContent;
+        const start = textarea.selectionStart || 0;
+        const end = textarea.selectionEnd || 0;
+        const text = textarea.value;
+        const sel = text.substring(start, end);
+
+        let insert = "";
+        if (fmt === "bold") insert = `**${sel || "texto en negrita"}**`;
+        else if (fmt === "italic") insert = `*${sel || "texto en cursiva"}*`;
+        else if (fmt === "quote") insert = `\n> ${sel || "cita"}\n`;
+        else if (fmt === "redoble") {
+          const col = (this.currentUser && this.getColegio(this.currentUser.colegioId)) || { nombre: "MI COLEGIO" };
+          insert = `¡¡VAMOS ${col.nombre.toUpperCase()}!!\n`;
+        }
+
+        textarea.value = text.substring(0, start) + insert + text.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + insert.length, start + insert.length);
+      });
+    });
 
     // Cargar más debates
     if (this.loadMoreBtn) {
@@ -1110,7 +1787,7 @@ class ForoApp {
         if (!inp) return;
         const isPwd = inp.type === "password";
         inp.type = isPwd ? "text" : "password";
-        toggleBtn.textContent = isPwd ? "🙈" : "👁️";
+        toggleBtn.innerHTML = isPwd ? getSvg("eyeOff", "svg-icon-xs") : getSvg("eye", "svg-icon-xs");
       });
     }
 
@@ -1204,6 +1881,9 @@ class ForoApp {
     if (this.tabBtnProfileReplies) {
       this.tabBtnProfileReplies.addEventListener("click", () => this.switchProfileTab("replies"));
     }
+    if (this.tabBtnProfileBadges) {
+      this.tabBtnProfileBadges.addEventListener("click", () => this.switchProfileTab("badges"));
+    }
 
     if (this.btnOpenEditProfile) {
       this.btnOpenEditProfile.addEventListener("click", () => this.switchProfileTab("edit"));
@@ -1218,7 +1898,7 @@ class ForoApp {
         if (!userId) return;
         const shareUrl = `${window.location.origin}${window.location.pathname}?usuario=${encodeURIComponent(userId)}`;
         navigator.clipboard.writeText(shareUrl).then(() => {
-          this.showToast("🔗 Enlace al perfil copiado al portapapeles");
+          this.showToast("Enlace al perfil copiado al portapapeles");
         }).catch(() => {
           this.showToast(shareUrl);
         });
@@ -1331,13 +2011,15 @@ class ForoApp {
       const json = await res.json();
       const canales = json.canales || json.data;
       if (json.status !== "ok" || !Array.isArray(canales)) return;
+      this.channelsList = canales;
       if (this.statChannelsCount) this.statChannelsCount.textContent = canales.length;
 
       let totalHilos = canales.reduce((acc, c) => acc + (parseInt(c.hilos_count, 10) || 0), 0);
 
+      // 1. Barra horizontal scrollable para mobile / tablet
       const html = [
         `<button type="button" class="channel-chip ${this.activeCanal === "todos" ? "active" : ""}" data-canal="todos">
-          <span>🌟 Todos los Canales</span>
+          <span>${getChannelIconSvg("todos")} Todos los Canales</span>
           <span class="channel-count">${totalHilos}</span>
         </button>`
       ];
@@ -1346,7 +2028,7 @@ class ForoApp {
         const isAct = this.activeCanal === c.id;
         html.push(
           `<button type="button" class="channel-chip ${isAct ? "active" : ""}" data-canal="${escapeHtml(c.id)}">
-            <span>${c.icono || "💬"} ${escapeHtml(c.titulo)}</span>
+            <span>${getChannelIconSvg(c.id)} ${escapeHtml(c.titulo)}</span>
             <span class="channel-count">${c.hilos_count || 0}</span>
           </button>`
         );
@@ -1356,17 +2038,97 @@ class ForoApp {
         this.channelsGrid.innerHTML = html.join("");
         this.channelsGrid.querySelectorAll(".channel-chip").forEach(btn => {
           btn.addEventListener("click", () => {
-            this.channelsGrid.querySelectorAll(".channel-chip").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
             this.activeCanal = btn.dataset.canal;
+            if (this.activeCanal === "todos") {
+              if (!this.activeSchoolFilter || this.activeSchoolFilter === "todos") {
+                this.activeFeed = "home";
+              }
+            } else {
+              this.activeFeed = null;
+            }
+            const url = new URL(window.location);
+            if (this.activeCanal !== "todos") {
+              url.searchParams.set("canal", this.activeCanal);
+            } else {
+              url.searchParams.delete("canal");
+            }
+            window.history.replaceState({}, "", url);
+            this.syncNavigationUI();
             this.page = 0;
             this.loadThreads(false);
           });
         });
       }
+
+      // 2. Lista de Canales en Sidebar Izquierdo
+      if (this.sidebarChannelsList) {
+        const sidebarHtml = [
+          `<button type="button" class="left-nav-item ${this.activeCanal === "todos" ? "active" : ""}" data-canal="todos">
+            <span class="nav-icon">${getChannelIconSvg("todos")}</span>
+            <span class="nav-label">Todos los Canales</span>
+            <span class="left-nav-count">${totalHilos}</span>
+          </button>`
+        ];
+
+        canales.forEach(c => {
+          const isAct = this.activeCanal === c.id;
+          sidebarHtml.push(
+            `<button type="button" class="left-nav-item ${isAct ? "active" : ""}" data-canal="${escapeHtml(c.id)}">
+              <span class="nav-icon">${getChannelIconSvg(c.id)}</span>
+              <span class="nav-label">${escapeHtml(c.titulo)}</span>
+              <span class="left-nav-count">${c.hilos_count || 0}</span>
+            </button>`
+          );
+        });
+
+        this.sidebarChannelsList.innerHTML = sidebarHtml.join("");
+        this.sidebarChannelsList.querySelectorAll(".left-nav-item").forEach(btn => {
+          btn.addEventListener("click", () => {
+            this.activeCanal = btn.dataset.canal;
+            if (this.activeCanal === "todos") {
+              if (!this.activeSchoolFilter || this.activeSchoolFilter === "todos") {
+                this.activeFeed = "home";
+              }
+            } else {
+              this.activeFeed = null;
+            }
+            const url = new URL(window.location);
+            if (this.activeCanal !== "todos") {
+              url.searchParams.set("canal", this.activeCanal);
+            } else {
+              url.searchParams.delete("canal");
+            }
+            window.history.replaceState({}, "", url);
+            this.syncNavigationUI();
+            this.page = 0;
+            this.loadThreads(false);
+          });
+        });
+      }
+
+      // 3. Sincronizar opciones del modal de creación de debate
+      if (this.topicCanal && Array.isArray(canales) && canales.length > 0) {
+        const currentVal = this.topicCanal.value;
+        const opts = canales.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.titulo)}</option>`);
+        this.topicCanal.innerHTML = opts.join("");
+        if (currentVal && canales.some(c => c.id === currentVal)) {
+          this.topicCanal.value = currentVal;
+        } else if (this.activeCanal && this.activeCanal !== "todos" && canales.some(c => c.id === this.activeCanal)) {
+          this.topicCanal.value = this.activeCanal;
+        }
+      }
     } catch (e) {
       console.warn("Error al cargar canales del foro:", e);
     }
+  }
+
+  getChannelName(canalId) {
+    if (!canalId || canalId === "todos") return "general";
+    if (this.channelsList && Array.isArray(this.channelsList)) {
+      const found = this.channelsList.find(c => c.id === canalId);
+      if (found) return found.titulo || found.id;
+    }
+    return canalId;
   }
 
   async loadThreads(append = false) {
@@ -1385,7 +2147,8 @@ class ForoApp {
       const offset = this.page * this.pageSize;
       const q = encodeURIComponent(this.searchQuery);
       const googleIdParam = this.currentUser ? `&googleId=${encodeURIComponent(this.currentUser.googleId)}` : "";
-      const url = `/api/foro?action=hilos&canal=${encodeURIComponent(this.activeCanal)}&sort=${this.activeSort}&q=${q}&limit=${this.pageSize}&offset=${offset}${googleIdParam}`;
+      const colegioParam = this.activeSchoolFilter !== "todos" ? `&colegio=${encodeURIComponent(this.activeSchoolFilter)}` : "";
+      const url = `/api/foro?action=hilos&canal=${encodeURIComponent(this.activeCanal)}&sort=${this.activeSort}&q=${q}&limit=${this.pageSize}&offset=${offset}${googleIdParam}${colegioParam}`;
 
       const res = await fetch(url);
       const json = await res.json();
@@ -1404,29 +2167,67 @@ class ForoApp {
       }
 
       if (this.activeChannelPill) {
-        this.activeChannelPill.textContent = this.activeCanal === "todos" ? "Todos los canales" : `Canal: ${this.activeCanal}`;
+        let label = this.activeCanal === "todos" ? "Todos los debates" : `Canal: ${this.activeCanal}`;
+        if (this.activeSchoolFilter !== "todos") {
+          const col = this.getColegio(this.activeSchoolFilter);
+          label += ` • ${col.nombre}`;
+        }
+        this.activeChannelPill.textContent = label;
       }
 
       if (!append) {
+        const total = (json.total_count !== undefined && json.total_count !== null) ? json.total_count : threads.length;
         if (this.threadsCountBadge) {
-          this.threadsCountBadge.textContent = `${threads.length} debates`;
+          this.threadsCountBadge.textContent = `${total} debates`;
         }
         if (this.statThreadsCount) {
-          this.statThreadsCount.textContent = threads.length;
+          this.statThreadsCount.textContent = total;
+        }
+        if (this.widgetStatDebates) {
+          this.widgetStatDebates.textContent = String(total);
         }
 
         if (threads.length === 0) {
+          const hasSchoolFilter = this.activeSchoolFilter && this.activeSchoolFilter !== "todos";
+          const hasChannelFilter = this.activeCanal && this.activeCanal !== "todos";
+          let helpAction = "";
+          if (hasSchoolFilter && hasChannelFilter) {
+            helpAction = `<div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+              <button type="button" class="btn-feed-clear-all" id="btn-empty-clear-canal" style="background:var(--foro-pill-bg);padding:6px 12px;border-radius:var(--r-pill);">Ver debates de este colegio en todos los canales</button>
+              <button type="button" class="btn-feed-clear-all" id="btn-empty-clear-school" style="background:var(--foro-pill-bg);padding:6px 12px;border-radius:var(--r-pill);">Quitar filtro de colegio</button>
+            </div>`;
+          } else if (hasSchoolFilter) {
+            helpAction = `<div style="margin-top:12px;"><button type="button" class="btn-feed-clear-all" id="btn-empty-clear-school" style="background:var(--foro-pill-bg);padding:6px 12px;border-radius:var(--r-pill);">Quitar filtro de colegio</button></div>`;
+          }
+
           this.threadsContainer.innerHTML = `
             <div class="empty-state">
-              <span class="empty-state-icon">🥁</span>
+              <span class="empty-state-icon">${getSvg("message", "svg-icon-lg")}</span>
               <h3>No se encontraron debates</h3>
-              <p>Sé el primero en iniciar un debate sobre este tema o probá con otra búsqueda.</p>
+              <p>Sé el primero en iniciar un debate sobre este tema o probá con otra búsqueda o colegio.</p>
+              ${helpAction}
             </div>`;
+
+          if (document.getElementById("btn-empty-clear-canal")) {
+            document.getElementById("btn-empty-clear-canal").addEventListener("click", () => {
+              this.activeCanal = "todos";
+              this.syncNavigationUI();
+              this.page = 0;
+              this.loadThreads(false);
+            });
+          }
+          if (document.getElementById("btn-empty-clear-school")) {
+            document.getElementById("btn-empty-clear-school").addEventListener("click", () => {
+              this.setSchoolFilter("todos");
+            });
+          }
+          this.updateTopColegiosWidget([]);
           return;
         }
         this.threadsContainer.innerHTML = "";
       }
 
+      this.updateTopColegiosWidget(threads);
       this.renderThreadsList(threads, append);
     } catch (err) {
       this.isLoading = false;
@@ -1442,86 +2243,115 @@ class ForoApp {
 
     threads.forEach(t => {
       const col = this.getColegio(t.colegio_id);
-      const isVoted = (t.user_voted === 1) || this.userVotes.has(t.id) || this.userVotes.has(String(t.id)) || this.userVotes.has(`hilo_${t.id}`);
+      const isVoted = (t.user_voted === 1) || this.userVotes.has(`hilo_${t.id}`);
       const isPinned = t.fijado === 1 || t.fijado === true;
       const dateText = timeAgo(t.creado_en);
       const votosCount = (t.votos !== undefined && t.votos !== null) ? t.votos : 0;
       const respuestasCount = t.respuestas_count ?? t.comentarios_count ?? 0;
 
       const card = document.createElement("article");
-      card.className = `thread-card ${isPinned ? "is-pinned" : ""}`;
+      card.className = `thread-card reddit-feed-card ${isPinned ? "is-pinned" : ""}`;
       card.dataset.id = t.id;
 
       card.innerHTML = `
-        <div class="thread-card-header">
-          <div class="thread-author-wrap" data-author-id="${escapeHtml(t.autor_google_id)}" style="cursor:pointer;" title="Ver perfil de ${escapeHtml(t.autor_nombre || "Hincha")}">
-            <img class="thread-author-avatar" src="${escapeHtml(t.autor_avatar || "assets/avatar-default.webp")}" alt="Avatar" loading="lazy" />
-            <div class="thread-author-meta">
-              <div class="thread-author-row">
-                <span class="thread-school-badge" style="border-left: 3px solid ${col.color || "#38bdf8"}">
-                  ${col.escudo || "🥁"} ${escapeHtml(col.nombre)}
-                </span>
-                <span class="meta-dot">&bull;</span>
-                <span class="thread-author-name">${escapeHtml(t.autor_nombre || "Hincha")}</span>
-                ${t.autor_username ? `<span class="thread-author-handle">@${escapeHtml(t.autor_username)}</span>` : ""}
-                <span class="meta-dot">&bull;</span>
-                <span class="thread-time">${dateText}</span>
-                ${isPinned ? `<span class="pinned-badge">📌 Fijado</span>` : ""}
-              </div>
-              <div class="thread-sub-meta">
-                <span class="thread-channel-badge">${escapeHtml(t.canal_titulo || t.canal_id)}</span>
-              </div>
-            </div>
-          </div>
-          ${this.adminToken ? `
-            <div class="thread-admin-bar">
-              <button type="button" class="btn-mod-action btn-mod-pin ${isPinned ? "pinned-active" : ""}" data-thread-id="${t.id}" data-is-pinned="${isPinned ? "1" : "0"}" title="${isPinned ? "Desfijar de la parte superior" : "Fijar arriba"}">
-                ${isPinned ? "📌 Desfijar" : "📌 Fijar"}
-              </button>
-              <button type="button" class="btn-mod-action btn-mod-del" data-thread-id="${t.id}" data-thread-title="${escapeHtml(t.titulo)}" title="Eliminar debate">
-                🗑️ Borrar
-              </button>
-              <button type="button" class="btn-mod-action btn-mod-sanction" data-author-id="${escapeHtml(t.autor_google_id)}" data-author-name="${escapeHtml(t.autor_nombre)}" data-author-avatar="${escapeHtml(t.autor_avatar || "")}" data-author-school="${escapeHtml(t.colegio_id || "janssen")}" title="Sancionar autor">
-                🚫 Moderar
-              </button>
-            </div>
-          ` : `
-            <button type="button" class="btn-report-thread-sm" title="Reportar debate" data-thread-id="${t.id}">
-              🚩
-            </button>
-          `}
+        <div class="reddit-post-gutter" style="display:none;" data-thread-id="${t.id}">
+          <button type="button" class="btn-gutter-vote vote-up" data-thread-id="${t.id}" aria-label="Upvote">${getSvg("chevronUp", "svg-icon-xs")}</button>
+          <span class="gutter-vote-count">${votosCount}</span>
+          <button type="button" class="btn-gutter-vote vote-down" data-thread-id="${t.id}" aria-label="Downvote">${getSvg("chevronDown", "svg-icon-xs")}</button>
         </div>
-        <h3 class="thread-title">${escapeHtml(t.titulo)}</h3>
-        <p class="thread-excerpt">${escapeHtml(t.contenido)}</p>
-        <div class="thread-card-footer reddit-action-bar">
-          <div class="reddit-vote-capsule ${isVoted ? "voted" : ""}" data-thread-id="${t.id}">
-            <button type="button" class="btn-vote-arrow btn-vote-up" data-thread-id="${t.id}" aria-label="Upvote">▲</button>
-            <span class="vote-count">${votosCount}</span>
+        <div class="reddit-post-main">
+          <!-- 1. Cabecera Comunitaria Reddit (canal • autor • tiempo •••) -->
+          <div class="thread-card-header">
+            <div class="thread-community-meta" data-author-id="${escapeHtml(t.autor_google_id)}" title="Ver perfil de ${escapeHtml(t.autor_nombre || "Hincha")}">
+              <span class="reddit-post-community-badge">
+                ${getSchoolDot(col)}
+                <span class="community-name">c/${escapeHtml(t.canal_titulo || t.canal_id || "general")}</span>
+              </span>
+              <span class="meta-dot">•</span>
+              <span class="thread-card-author-name">u/${escapeHtml(t.autor_username || (t.autor_nombre ? t.autor_nombre.toLowerCase().replace(/\s+/g,"_") : "hincha"))}</span>
+              <span class="meta-dot">•</span>
+              <span class="thread-time">${dateText}</span>
+              ${isPinned ? `<span class="pinned-badge">${getSvg("pin", "svg-icon-xs")} Fijado</span>` : ""}
+            </div>
+            <div class="thread-header-actions">
+              ${this.adminToken ? `
+                <div class="thread-admin-bar">
+                  <button type="button" class="btn-mod-action btn-mod-pin ${isPinned ? "pinned-active" : ""}" data-thread-id="${t.id}" data-is-pinned="${isPinned ? "1" : "0"}" title="${isPinned ? "Desfijar" : "Fijar"}">
+                    ${getSvg("pin", "svg-icon-xs")}
+                  </button>
+                  <button type="button" class="btn-mod-action btn-mod-del" data-thread-id="${t.id}" data-thread-title="${escapeHtml(t.titulo)}" title="Eliminar">
+                    ${getSvg("trash", "svg-icon-xs")}
+                  </button>
+                  <button type="button" class="btn-mod-action btn-mod-sanction" data-author-id="${escapeHtml(t.autor_google_id)}" data-author-name="${escapeHtml(t.autor_nombre)}" data-author-avatar="${escapeHtml(t.autor_avatar || "")}" data-author-school="${escapeHtml(t.colegio_id || "janssen")}" title="Sancionar">
+                    ${getSvg("ban", "svg-icon-xs")}
+                  </button>
+                </div>
+              ` : `
+                <button type="button" class="btn-report-thread-sm reddit-more-dots-btn" title="Opciones / Reportar" data-thread-id="${t.id}">
+                  •••
+                </button>
+              `}
+            </div>
           </div>
-          <button type="button" class="reddit-action-pill btn-open-replies" data-thread-id="${t.id}">
-            <span class="pill-icon">💬</span>
-            <span>${respuestasCount}</span>
-          </button>
-          <button type="button" class="reddit-action-pill btn-share-thread-card" data-thread-id="${t.id}" data-thread-title="${escapeHtml(t.titulo)}" title="Compartir enlace">
-            <span class="pill-icon">↗</span>
-            <span>Compartir</span>
-          </button>
+
+          <!-- 2. Título de Alta Jerarquía -->
+          <h3 class="thread-title">${escapeHtml(t.titulo)}</h3>
+
+          <!-- 3. Flairs de Colegio / Categoría -->
+          <div class="thread-flairs-row">
+            <span class="thread-school-badge">${getSchoolDot(col)} <span class="school-badge-name" style="color:${col.color};font-weight:700;">${escapeHtml(col.nombre)}</span></span>
+          </div>
+
+          <!-- 4. Resumen / Cuerpo del debate -->
+          <p class="thread-excerpt">${escapeHtml(t.contenido)}</p>
+
+          <!-- 5. Barra de Acciones Píldora Estilo Reddit -->
+          <div class="thread-card-footer reddit-action-bar">
+            <div class="reddit-vote-capsule ${isVoted ? "voted" : ""}" data-thread-id="${t.id}">
+              <button type="button" class="btn-vote-arrow btn-vote-up" data-thread-id="${t.id}" aria-label="Upvote">
+                ${getSvg("chevronUp", "svg-icon-xs")}
+              </button>
+              <span class="vote-count">${votosCount}</span>
+              <button type="button" class="btn-vote-arrow btn-vote-down" data-thread-id="${t.id}" aria-label="Downvote">
+                ${getSvg("chevronDown", "svg-icon-xs")}
+              </button>
+            </div>
+
+            <button type="button" class="reddit-action-pill btn-open-replies" data-thread-id="${t.id}">
+              <span class="pill-icon">${getSvg("message", "svg-icon-xs")}</span>
+              <span>${respuestasCount}</span>
+            </button>
+
+            <button type="button" class="reddit-action-pill btn-share-thread-card" data-thread-id="${t.id}" data-thread-title="${escapeHtml(t.titulo)}" title="Compartir enlace">
+              <span class="pill-icon">${getSvg("share", "svg-icon-xs")}</span>
+              <span>Share</span>
+            </button>
+          </div>
         </div>
       `;
 
+
       // Eventos de la tarjeta
       card.addEventListener("click", (e) => {
-        const authorEl = e.target.closest(".thread-author-wrap");
+        const authorEl = e.target.closest(".thread-community-meta");
         if (authorEl && authorEl.dataset.authorId) {
           e.stopPropagation();
           this.openUserProfile(authorEl.dataset.authorId);
           return;
         }
-        if (e.target.closest(".reddit-vote-capsule") || e.target.closest(".btn-share-thread-card") || e.target.closest(".thread-admin-bar") || e.target.closest(".btn-report-thread-sm")) {
+        if (e.target.closest(".reddit-post-gutter") || e.target.closest(".reddit-vote-capsule") || e.target.closest(".btn-share-thread-card") || e.target.closest(".thread-admin-bar") || e.target.closest(".btn-report-thread-sm")) {
           return;
         }
         this.openThread(t.id);
       });
+
+      const postGutter = card.querySelector(".reddit-post-gutter");
+      if (postGutter) {
+        postGutter.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.toggleVote(t.id, false, null, postGutter);
+        });
+      }
 
       const voteCapsule = card.querySelector(".reddit-vote-capsule");
       if (voteCapsule) {
@@ -1588,20 +2418,104 @@ class ForoApp {
     }
   }
 
-  async openThread(id) {
-    this.activeThreadId = id;
-    if (this.modalThread) this.modalThread.classList.add("active");
-
-    // Actualizar URL limpia con ?hilo=ID
-    const url = new URL(window.location);
-    url.searchParams.set("hilo", id);
-    window.history.replaceState({}, "", url);
-
-    if (this.threadOpContent) {
-      this.threadOpContent.innerHTML = `<div class="loading-spinner"></div> Cargando debate...`;
+  showFeedView(updateUrl = true) {
+    document.body.classList.remove("thread-view-active");
+    if (this.forumThreadView) this.forumThreadView.style.display = "none";
+    if (this.forumFeedView) this.forumFeedView.style.display = "flex";
+    document.title = "Foro de Debate Estudiantil | estudiantina.online";
+    if (updateUrl) {
+      const url = new URL(window.location);
+      url.searchParams.delete("hilo");
+      url.searchParams.delete("id");
+      window.history.pushState({ view: "feed" }, "", url.toString());
     }
-    if (this.threadRepliesList) {
-      this.threadRepliesList.innerHTML = `<div class="loading-spinner"></div> Cargando comentarios...`;
+    if (this.feedScrollPosition) {
+      window.scrollTo({ top: this.feedScrollPosition, behavior: "smooth" });
+    }
+    this.activeThreadId = null;
+    this.currentThread = null;
+    this.currentComments = [];
+  }
+
+  closeThreadModal() {
+    this.showFeedView(true);
+  }
+
+  shareCurrentThread() {
+    if (!this.activeThreadId) return;
+    const url = `${window.location.origin}/foro?hilo=${this.activeThreadId}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        this.showToast("Enlace del debate copiado al portapapeles");
+      }).catch(() => {
+        this.showToast(url);
+      });
+    } else {
+      this.showToast(url);
+    }
+  }
+
+  applyFormatToTextarea(textarea, format) {
+    if (!textarea) return;
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const val = textarea.value || "";
+    const selected = val.substring(start, end);
+    let replacement = "";
+
+    switch (format) {
+      case "bold":
+        replacement = selected ? `**${selected}**` : `**texto en negrita**`;
+        break;
+      case "italic":
+        replacement = selected ? `*${selected}*` : `*texto en cursiva*`;
+        break;
+      case "quote":
+        replacement = selected ? `\n> ${selected}\n` : `\n> cita del debate\n`;
+        break;
+      case "redoble":
+        const col = this.currentUser ? this.getColegio(this.currentUser.colegioId) : null;
+        const colName = col ? col.nombre : "la tribuna";
+        replacement = ` ¡Alienta ${colName}! `;
+        break;
+      default:
+        return;
+    }
+
+    textarea.value = val.substring(0, start) + replacement + val.substring(end);
+    textarea.focus();
+    const newCursor = start + replacement.length;
+    textarea.setSelectionRange(newCursor, newCursor);
+  }
+
+  async openThread(id, updateUrl = true) {
+    if (!id) return;
+    document.body.classList.add("thread-view-active");
+    if (!this.activeThreadId) {
+      this.feedScrollPosition = window.scrollY || 0;
+    }
+    this.activeThreadId = id;
+
+    // Cambiar a la vista de pestaña completa
+    if (this.forumFeedView) this.forumFeedView.style.display = "none";
+    if (this.forumThreadView) {
+      this.forumThreadView.style.display = "flex";
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    // Actualizar URL limpia
+    if (updateUrl) {
+      const url = new URL(window.location);
+      url.searchParams.set("hilo", id);
+      window.history.pushState({ view: "thread", hiloId: id }, "", url.toString());
+    }
+
+    // Estado de carga inicial
+    if (this.threadPageContent) {
+      this.threadPageContent.innerHTML = `<div class="loading-spinner"></div> Cargando debate...`;
+    }
+    if (this.threadCommentsStream) {
+      this.threadCommentsStream.innerHTML = `<div class="loading-spinner"></div> Cargando comentarios...`;
     }
 
     try {
@@ -1612,156 +2526,467 @@ class ForoApp {
       const h = json.hilo || (json.data && json.data.hilo);
       if (json.status !== "ok" || !h) {
         this.showToast("El debate solicitado no existe o fue eliminado");
-        this.closeThreadModal();
+        this.showFeedView(true);
         return;
       }
+      this.currentThread = h;
       const col = this.getColegio(h.colegio_id);
 
-      if (this.threadModalTitle) this.threadModalTitle.textContent = decodeEntities(h.titulo);
-      if (this.threadModalChannel) this.threadModalChannel.textContent = h.canal_titulo || h.canal_id;
-      if (this.threadModalDate) this.threadModalDate.textContent = timeAgo(h.creado_en);
-      if (this.threadOpAvatar) {
-        this.threadOpAvatar.src = h.autor_avatar || "assets/avatar-default.webp";
-        this.threadOpAvatar.dataset.authorId = h.autor_google_id;
-        this.threadOpAvatar.style.cursor = "pointer";
-        this.threadOpAvatar.title = `Ver perfil de ${h.autor_nombre || "Hincha"}`;
-        this.threadOpAvatar.onclick = () => {
-          if (this.threadOpAvatar.dataset.authorId) {
-            this.openUserProfile(this.threadOpAvatar.dataset.authorId);
+      // Título de pestaña del navegador y título del post
+      document.title = `${decodeEntities(h.titulo)} | Foro Estudiantina`;
+      if (this.threadPageNavChannel) this.threadPageNavChannel.textContent = h.canal_titulo || h.canal_id;
+      if (this.threadPageNavDate) this.threadPageNavDate.textContent = timeAgo(h.creado_en);
+      if (this.threadPageTitle) this.threadPageTitle.textContent = decodeEntities(h.titulo);
+      if (this.threadPageChannel) {
+        const canalId = h.canal_id || "general";
+        this.threadPageChannel.textContent = `c/${canalId}`;
+        this.threadPageChannel.style.cursor = "pointer";
+        this.threadPageChannel.title = `Ver debates en c/${canalId}`;
+        this.threadPageChannel.onclick = (e) => {
+          e.stopPropagation();
+          this.activeCanal = canalId;
+          this.activeFeed = null;
+          const url = new URL(window.location);
+          url.searchParams.set("canal", canalId);
+          url.searchParams.delete("hilo");
+          url.searchParams.delete("id");
+          window.history.pushState({ view: "feed", canal: canalId }, "", url.toString());
+          this.syncNavigationUI();
+          this.showFeedView(false);
+          this.page = 0;
+          this.loadThreads(false);
+        };
+      }
+      if (this.threadPageDate) this.threadPageDate.textContent = timeAgo(h.creado_en);
+
+      // Metadatos de autor del debate estilo Reddit
+      const rawUser = h.autor_username || (h.autor_nombre ? h.autor_nombre.toLowerCase().replace(/\s+/g, '_') : "hincha");
+      const displayAuthor = `u/${rawUser}`;
+      if (this.threadPageAvatar) {
+        this.threadPageAvatar.src = h.autor_avatar || "assets/avatar-default.webp";
+        this.threadPageAvatar.dataset.authorId = h.autor_google_id;
+        this.threadPageAvatar.title = `Ver perfil de ${displayAuthor}`;
+        this.threadPageAvatar.onclick = () => {
+          if (this.threadPageAvatar.dataset.authorId) {
+            this.openUserProfile(this.threadPageAvatar.dataset.authorId);
           }
         };
       }
-      if (this.threadOpName) {
-        this.threadOpName.textContent = h.autor_nombre || "Hincha";
-        this.threadOpName.dataset.authorId = h.autor_google_id;
-        this.threadOpName.style.cursor = "pointer";
-        this.threadOpName.title = `Ver perfil de ${h.autor_nombre || "Hincha"}`;
-        this.threadOpName.onclick = () => {
-          if (this.threadOpName.dataset.authorId) {
-            this.openUserProfile(this.threadOpName.dataset.authorId);
+      if (this.threadPageAuthorName) {
+        this.threadPageAuthorName.textContent = displayAuthor;
+        this.threadPageAuthorName.dataset.authorId = h.autor_google_id;
+        this.threadPageAuthorName.title = `Ver perfil de ${displayAuthor}`;
+        this.threadPageAuthorName.onclick = () => {
+          if (this.threadPageAuthorName.dataset.authorId) {
+            this.openUserProfile(this.threadPageAuthorName.dataset.authorId);
           }
         };
       }
-      if (this.threadOpHandle) {
-        this.threadOpHandle.textContent = h.autor_username ? `@${h.autor_username}` : "";
-        this.threadOpHandle.style.display = h.autor_username ? "inline-block" : "none";
+      if (this.threadPageAuthorHandle) {
+        this.threadPageAuthorHandle.textContent = "";
+        this.threadPageAuthorHandle.style.display = "none";
       }
-      if (this.threadOpSchool) {
-        this.threadOpSchool.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+      if (this.threadPageFlair) {
+        this.threadPageFlair.textContent = h.canal_titulo || h.canal_id || "Banda de Música";
       }
-      if (this.threadOpContent) {
-        this.threadOpContent.innerHTML = `<p>${escapeHtml(h.contenido).replace(/\n/g, "<br>")}</p>`;
-      }
-      if (this.threadModalVotes) {
-        this.threadModalVotes.textContent = (h.votos !== undefined && h.votos !== null) ? h.votos : 0;
+      if (this.threadPageSchool) {
+        this.threadPageSchool.innerHTML = `${getSchoolDot(col)} ${escapeHtml(col.nombre)}`;
       }
 
-      const isVoted = (h.user_voted === 1) || this.userVotes.has(h.id) || this.userVotes.has(String(h.id)) || this.userVotes.has(`hilo_${h.id}`);
-      if (this.btnVoteThread) {
-        this.btnVoteThread.classList.toggle("voted", isVoted);
+      // Contenido enriquecido con citas y formato
+      if (this.threadPageContent) {
+        this.threadPageContent.innerHTML = this.formatRichText(h.contenido);
       }
 
-      const replies = json.comentarios || (json.data && json.data.comentarios) || [];
-      if (this.threadModalRepliesCount) {
-        this.threadModalRepliesCount.textContent = `💬 ${replies.length} respuestas`;
+      // Votos y estadísticas
+      if (this.threadPageVotes) {
+        this.threadPageVotes.textContent = (h.votos !== undefined && h.votos !== null) ? h.votos : 0;
+      }
+      const isVoted = (h.user_voted === 1) || this.userVotes.has(`hilo_${h.id}`);
+      if (this.btnVoteThreadPage) {
+        this.btnVoteThreadPage.classList.toggle("voted", isVoted);
       }
 
-      this.renderReplies(replies);
+      // Resetear barra de entrada "Join the conversation" y compositor
+      if (this.redditJoinTrigger) this.redditJoinTrigger.style.display = "flex";
+      if (this.formReplyPage) this.formReplyPage.style.display = "none";
+      if (this.replyPageContent) this.replyPageContent.value = "";
+      if (this.commentsSearchInput) this.commentsSearchInput.value = "";
+      this.commentsSearchQuery = "";
+
+      // Actualizar compositor del usuario actual
+      this.updateComposerUserIdentity();
+
+      // Guardar y renderizar comentarios
+      this.currentComments = json.comentarios || (json.data && json.data.comentarios) || [];
+      if (this.threadPageRepliesCount) {
+        this.threadPageRepliesCount.textContent = this.currentComments.length;
+      }
+      if (this.threadCommentsStreamCount) {
+        this.threadCommentsStreamCount.textContent = this.currentComments.length;
+      }
+
+      this.renderCommentsStream();
     } catch (err) {
-      console.error("Error al abrir hilo:", err);
-      this.showToast("Error de conexión al abrir el debate");
+      console.error("Error al abrir debate en pestaña:", err);
+      this.showToast("Error de conexión al cargar el debate");
     }
   }
 
-  renderReplies(replies) {
-    if (!this.threadRepliesList) return;
+  updateComposerUserIdentity() {
+    if (this.replyPageUserAvatar) {
+      this.replyPageUserAvatar.src = (this.currentUser && this.currentUser.avatarUrl) ? this.currentUser.avatarUrl : "assets/avatar-default.webp";
+    }
+    if (this.replyPageUserLabel) {
+      this.replyPageUserLabel.textContent = this.currentUser ? `Comentando como ${this.currentUser.nombre}` : "Comentar en este debate";
+    }
+    if (this.replyPageSchoolHint) {
+      if (this.currentUser) {
+        const col = this.getColegio(this.currentUser.colegioId);
+        this.replyPageSchoolHint.innerHTML = `${getSchoolDot(col)} Hincha de ${escapeHtml(col.nombre)}`;
+      } else {
+        this.replyPageSchoolHint.textContent = "Ingresá con Google para participar";
+      }
+    }
+  }
 
-    if (replies.length === 0) {
-      this.threadRepliesList.innerHTML = `
-        <div class="empty-state-small">
-          <span>🥁</span>
-          <p>Aún no hay comentarios en este debate. ¡Sé el primero en aportar!</p>
+  setCommentsSort(mode) {
+    this.commentsSortMode = mode;
+    if (this.btnSortCommentsTop) this.btnSortCommentsTop.classList.toggle("active", mode === "top");
+    if (this.btnSortCommentsRecent) this.btnSortCommentsRecent.classList.toggle("active", mode === "recientes");
+    this.renderCommentsStream();
+  }
+
+  formatRichText(text) {
+    if (!text) return "";
+    let safe = escapeHtml(text);
+    // Citas en bloque: líneas que empiezan con &gt;
+    const lines = safe.split("\n");
+    const processed = [];
+    let inQuote = false;
+    let quoteLines = [];
+
+    for (const line of lines) {
+      if (line.startsWith("&gt; ") || line.startsWith("&gt;")) {
+        inQuote = true;
+        quoteLines.push(line.replace(/^&gt;\s?/, ""));
+      } else {
+        if (inQuote) {
+          processed.push(`<blockquote>${quoteLines.join("<br>")}</blockquote>`);
+          inQuote = false;
+          quoteLines = [];
+        }
+        processed.push(line);
+      }
+    }
+    if (inQuote) {
+      processed.push(`<blockquote>${quoteLines.join("<br>")}</blockquote>`);
+    }
+
+    safe = processed.join("<br>");
+
+    // Negrita **texto**
+    safe = safe.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    // Cursiva *texto*
+    safe = safe.replace(/\*([^\*]+?)\*/g, "<em>$1</em>");
+    // Párrafos
+    return `<p>${safe}</p>`;
+  }
+
+  renderCommentNode(r, depth = 0) {
+    const col = this.getColegio(r.colegio_id);
+    const isVoted = (r.user_voted === 1) || this.userVotes.has(`comentario_${r.id}`);
+    const dateText = timeAgo(r.creado_en);
+    const rVotos = (r.votos !== undefined && r.votos !== null) ? r.votos : 0;
+    const isOp = (this.currentThread && r.autor_google_id === this.currentThread.autor_google_id);
+    // Use username if available, else fallback to nombre
+    const authorDisplay = r.autor_username
+      ? `u/${r.autor_username}`
+      : `u/${(r.autor_nombre || "hincha").toLowerCase().replace(/\s+/g, "_")}`;
+    // Role flair from the user data (rol_estudiantil field)
+    const rolFlair = r.rol_estudiantil || r.autor_rol || "";
+
+    const repliesHtml = (r.replies && r.replies.length > 0)
+      ? `<div class="reddit-comment-replies">
+          ${r.replies.map(reply => this.renderCommentNode(reply, depth + 1)).join("")}
+        </div>`
+      : "";
+
+    return `
+      <div class="reddit-comment-block ${depth > 0 ? "reddit-comment-reply-block" : ""}" data-comment-id="${r.id}" data-depth="${depth}">
+        <!-- Cabecera del comentario con avatar y autor -->
+        <div class="reddit-comment-header">
+          <img class="reddit-comment-avatar" src="${escapeHtml(r.autor_avatar || "assets/avatar-default.webp")}" alt="Avatar" data-author-id="${escapeHtml(r.autor_google_id)}" loading="lazy" onerror="this.src='assets/avatar-default.webp'" />
+          <div class="reddit-comment-author-info">
+            <span class="reddit-comment-author" data-author-id="${escapeHtml(r.autor_google_id)}">${escapeHtml(authorDisplay)}</span>
+            ${isOp ? `<span class="reddit-op-badge" title="Autor original">OP</span>` : ""}
+            ${rolFlair ? `<span class="reddit-author-role-flair">${escapeHtml(rolFlair)}</span>` : ""}
+            <span class="reddit-meta-dot">•</span>
+            <span class="reddit-comment-time">${dateText}</span>
+            <span class="reddit-comment-school-chip">${getSchoolDot(col)} <span style="color:${col.color};font-weight:700;">${escapeHtml(col.nombre)}</span></span>
+          </div>
+        </div>
+
+        <!-- Cuerpo y Guía Vertical Continua (Reddit Thread Line) -->
+        <div class="reddit-comment-body-wrapper">
+          <div class="reddit-thread-line-container" data-comment-id="${r.id}" title="Colapsar hilo">
+            <div class="reddit-thread-line"></div>
+          </div>
+          <div class="reddit-comment-main-col">
+            <div class="reddit-comment-text">
+              ${this.formatRichText(r.contenido)}
+            </div>
+
+            <!-- Barra de acciones Reddit debajo del comentario -->
+            <div class="reddit-comment-actions">
+              <button type="button" class="reddit-comment-collapse-btn" data-comment-id="${r.id}" title="Colapsar hilo">
+                <span class="collapse-icon">${getSvg("minusCircle", "svg-icon-xs")}</span>
+              </button>
+              <div class="reddit-comment-vote-group">
+                <button type="button" class="reddit-comment-vote-arrow ${isVoted ? "voted" : ""}" data-comment-id="${r.id}" aria-label="Votar arriba">
+                  ${getSvg("chevronUp", "svg-icon-xs")}
+                </button>
+                <span class="reddit-comment-vote-count">${rVotos > 0 ? rVotos : "Vote"}</span>
+                <button type="button" class="reddit-comment-vote-arrow down" data-comment-id="${r.id}" aria-label="Votar abajo">
+                  ${getSvg("chevronDown", "svg-icon-xs")}
+                </button>
+              </div>
+              <button type="button" class="reddit-comment-action-btn btn-comment-reply" data-comment-id="${r.id}" data-author-name="${escapeHtml(authorDisplay)}">
+                <span class="action-icon">${getSvg("message", "svg-icon-xs")}</span>
+                <span>Reply</span>
+              </button>
+              <button type="button" class="reddit-comment-action-btn btn-comment-report" data-comment-id="${r.id}" title="Reportar">
+                <span class="action-icon">•••</span>
+              </button>
+              ${this.adminToken ? `
+                <button type="button" class="reddit-comment-action-btn btn-reply-mod-del" data-comment-id="${r.id}" title="Eliminar respuesta">${getSvg("trash", "svg-icon-xs")}</button>
+                <button type="button" class="reddit-comment-action-btn btn-reply-mod-sanction" data-author-id="${escapeHtml(r.autor_google_id)}" data-author-name="${escapeHtml(r.autor_nombre)}" data-author-avatar="${escapeHtml(r.autor_avatar || "")}" data-author-school="${escapeHtml(r.colegio_id || "janssen")}" title="Sancionar usuario">${getSvg("ban", "svg-icon-xs")}</button>
+              ` : ""}
+            </div>
+
+            <!-- Mini-Compositor Inline desplegable -->
+            <div class="reddit-inline-reply-box" id="inline-reply-box-${r.id}" style="display:none;">
+              <textarea class="reddit-inline-textarea" placeholder="What are your thoughts?"></textarea>
+              <div class="reddit-inline-actions">
+                <button type="button" class="reddit-btn-cancel btn-inline-cancel" data-comment-id="${r.id}">Cancel</button>
+                <button type="button" class="reddit-btn-comment btn-inline-submit" data-comment-id="${r.id}">Comment</button>
+              </div>
+            </div>
+
+            <!-- Respuestas anidadas debajo del comentario -->
+            ${repliesHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderCommentsStream() {
+    if (!this.threadCommentsStream) return;
+
+    if (!this.currentComments || this.currentComments.length === 0) {
+      this.threadCommentsStream.innerHTML = `
+        <div class="empty-state-stream">
+          <span class="empty-icon">${getSvg("message", "svg-icon-lg")}</span>
+          <p>Aún no hay respuestas en este debate. Sé el primero en unirte a la conversación.</p>
         </div>`;
       return;
     }
 
-    const html = replies.map(r => {
-      const col = this.getColegio(r.colegio_id);
-      const isVoted = (r.user_voted === 1) || this.userVotes.has(r.id) || this.userVotes.has(String(r.id)) || this.userVotes.has(`comentario_${r.id}`);
-      const dateText = timeAgo(r.creado_en);
-      const rVotos = (r.votos !== undefined && r.votos !== null) ? r.votos : 0;
+    // Filtrar por buscador en vivo si hay término de búsqueda
+    let commentsToRender = this.currentComments;
+    if (this.commentsSearchQuery) {
+      commentsToRender = commentsToRender.filter(c => {
+        const text = (c.contenido || "").toLowerCase();
+        const author = (c.autor_nombre || "").toLowerCase() + (c.autor_username || "").toLowerCase();
+        return text.includes(this.commentsSearchQuery) || author.includes(this.commentsSearchQuery);
+      });
+    }
 
-      return `
-        <div class="reply-card" data-comment-id="${r.id}">
-          <div class="reply-author-row" data-author-id="${escapeHtml(r.autor_google_id)}" style="cursor:pointer;" title="Ver perfil de ${escapeHtml(r.autor_nombre || "Hincha")}">
-            <img class="reply-avatar" src="${escapeHtml(r.autor_avatar || "assets/avatar-default.webp")}" alt="Avatar" loading="lazy" />
-            <div class="reply-author-meta">
-              <span class="reply-author-name">${escapeHtml(r.autor_nombre || "Hincha")}</span>
-              ${r.autor_username ? `<span class="reply-author-handle">@${escapeHtml(r.autor_username)}</span>` : ""}
-              <span class="reply-author-school">${col.escudo || "🥁"} ${escapeHtml(col.nombre)}</span>
-            </div>
-            <span class="reply-time">${dateText}</span>
-          </div>
-          <div class="reply-content">${escapeHtml(r.contenido).replace(/\n/g, "<br>")}</div>
-          <div class="reply-actions">
-            <button type="button" class="reply-vote-btn ${isVoted ? "voted" : ""}" data-comment-id="${r.id}" aria-label="Votar comentario">
-              <span class="vote-icon">▲</span>
-              <span class="vote-count">${rVotos}</span>
-            </button>
-            <button type="button" class="reply-report-btn" data-comment-id="${r.id}" title="Reportar">
-              🚩
-            </button>
-            ${this.adminToken ? `
-              <div class="reply-admin-bar">
-                <button type="button" class="btn-reply-mod-del" data-comment-id="${r.id}" title="Eliminar comentario">
-                  🗑️ Borrar
-                </button>
-                <button type="button" class="btn-reply-mod-sanction" data-author-id="${escapeHtml(r.autor_google_id)}" data-author-name="${escapeHtml(r.autor_nombre)}" data-author-avatar="${escapeHtml(r.autor_avatar || "")}" data-author-school="${escapeHtml(r.colegio_id || "janssen")}" title="Sancionar usuario">
-                  🚫 Sancionar
-                </button>
-              </div>
-            ` : ""}
-          </div>
-        </div>
-      `;
-    }).join("");
+    if (commentsToRender.length === 0) {
+      this.threadCommentsStream.innerHTML = `
+        <div class="empty-state-stream">
+          <span class="empty-icon">${getSvg("search", "svg-icon-lg")}</span>
+          <p>No se encontraron comentarios que coincidan con "<strong>${escapeHtml(this.commentsSearchQuery)}</strong>"</p>
+        </div>`;
+      return;
+    }
 
-    this.threadRepliesList.innerHTML = html;
+    // 1. Indexar todos los comentarios por id para estructuración en árbol
+    const commentMap = new Map();
+    commentsToRender.forEach(c => {
+      commentMap.set(c.id, { ...c, replies: [] });
+    });
 
-    // Listeners para abrir perfil desde comentarios
-    this.threadRepliesList.querySelectorAll(".reply-author-row").forEach(row => {
-      row.addEventListener("click", () => {
-        if (row.dataset.authorId) {
-          this.openUserProfile(row.dataset.authorId);
+    // 2. Construir jerarquía respetando parent_id y fallback contextual (@Autor)
+    const roots = [];
+    commentsToRender.forEach(c => {
+      const node = commentMap.get(c.id);
+      let parentNode = null;
+      if (node.parent_id && commentMap.has(node.parent_id)) {
+        parentNode = commentMap.get(node.parent_id);
+      } else if (!node.parent_id && node.contenido && node.contenido.trim().startsWith("@")) {
+        // Fallback: Detectar respuesta a comentario previo mediante mención @nombre
+        const match = node.contenido.trim().match(/^@([a-zA-Z0-9_\u00C0-\u00FF\s]+?)(?:\s|$)/);
+        if (match) {
+          const targetName = match[1].trim().toLowerCase();
+          for (const other of commentsToRender) {
+            if (other.id !== node.id && other.id < node.id) {
+              const aName = (other.autor_username || other.autor_nombre || "").toLowerCase();
+              if (aName === targetName || aName.includes(targetName) || targetName.includes(aName)) {
+                parentNode = commentMap.get(other.id);
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      if (parentNode && parentNode.id !== node.id) {
+        parentNode.replies.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    // 3. Ordenar debates principales según el modo seleccionado
+    roots.sort((a, b) => {
+      if (this.commentsSortMode === "top") {
+        const diff = (b.votos || 0) - (a.votos || 0);
+        if (diff !== 0) return diff;
+        return new Date(a.creado_en) - new Date(b.creado_en);
+      } else {
+        return new Date(b.creado_en) - new Date(a.creado_en);
+      }
+    });
+
+    // 4. Ordenar respuestas anidadas de forma cronológica (creado_en ASC) para lectura fluida
+    const sortReplies = (node) => {
+      node.replies.sort((a, b) => new Date(a.creado_en) - new Date(b.creado_en));
+      node.replies.forEach(sortReplies);
+    };
+    roots.forEach(sortReplies);
+
+    const html = roots.map(rootNode => this.renderCommentNode(rootNode, 0)).join("");
+    this.threadCommentsStream.innerHTML = html;
+
+    // Listeners de perfiles
+    this.threadCommentsStream.querySelectorAll(".reddit-comment-avatar, .reddit-comment-author").forEach(el => {
+      el.addEventListener("click", () => {
+        if (el.dataset.authorId) {
+          this.openUserProfile(el.dataset.authorId);
         }
       });
     });
 
-    // Listeners de voto y reporte en comentarios
-    this.threadRepliesList.querySelectorAll(".reply-vote-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
+    // Listeners de colapso de hilo (botón ⊖ y línea vertical guía)
+    const toggleCollapse = (commentId) => {
+      const block = this.threadCommentsStream.querySelector(`.reddit-comment-block[data-comment-id="${commentId}"]`);
+      if (block) {
+        const isCollapsed = block.classList.toggle("is-collapsed");
+        const icon = block.querySelector(".collapse-icon");
+        if (icon) {
+          icon.innerHTML = isCollapsed ? getSvg("plusCircle", "svg-icon-xs") : getSvg("minusCircle", "svg-icon-xs");
+        }
+      }
+    };
+
+    this.threadCommentsStream.querySelectorAll(".reddit-comment-collapse-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const cid = btn.dataset.commentId;
+        toggleCollapse(cid);
+      });
+    });
+
+    this.threadCommentsStream.querySelectorAll(".reddit-thread-line-container").forEach(line => {
+      line.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const cid = line.dataset.commentId;
+        toggleCollapse(cid);
+      });
+    });
+
+    // Listeners de votos en respuestas
+    this.threadCommentsStream.querySelectorAll(".reddit-comment-vote-arrow").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
         const commentId = btn.dataset.commentId;
         this.toggleVote(this.activeThreadId, true, commentId, btn);
       });
     });
 
-    this.threadRepliesList.querySelectorAll(".reply-report-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
+    // Listeners de reporte
+    this.threadCommentsStream.querySelectorAll(".btn-comment-report").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
         const commentId = btn.dataset.commentId;
         this.reportContent("comentario", commentId);
       });
     });
 
-    // Listeners de moderación en comentarios
+    // Listeners de respuestas inline (abrir y enviar)
+    this.threadCommentsStream.querySelectorAll(".btn-comment-reply").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!this.currentUser) {
+          if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
+          this.showToast("Iniciá sesión para responder");
+          return;
+        }
+        const commentId = btn.dataset.commentId;
+        const authorTag = btn.dataset.authorName;
+        const inlineBox = document.getElementById(`inline-reply-box-${commentId}`);
+        if (inlineBox) {
+          const isHidden = inlineBox.style.display === "none";
+          inlineBox.style.display = isHidden ? "flex" : "none";
+          if (isHidden) {
+            const ta = inlineBox.querySelector(".reddit-inline-textarea");
+            if (ta) {
+              ta.value = `@${authorTag} `;
+              ta.focus();
+            }
+          }
+        }
+      });
+    });
+
+    this.threadCommentsStream.querySelectorAll(".btn-inline-cancel").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const commentId = btn.dataset.commentId;
+        const inlineBox = document.getElementById(`inline-reply-box-${commentId}`);
+        if (inlineBox) inlineBox.style.display = "none";
+      });
+    });
+
+    this.threadCommentsStream.querySelectorAll(".btn-inline-submit").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const commentId = btn.dataset.commentId;
+        const inlineBox = document.getElementById(`inline-reply-box-${commentId}`);
+        if (inlineBox) {
+          const ta = inlineBox.querySelector(".reddit-inline-textarea");
+          const text = ta ? ta.value.trim() : "";
+          if (text.length >= 2) {
+            this.handlePageSubmitReply(null, text, commentId);
+          } else {
+            this.showToast("La respuesta es demasiado corta");
+          }
+        }
+      });
+    });
+
+    // Listeners de moderación
     if (this.adminToken) {
-      this.threadRepliesList.querySelectorAll(".btn-reply-mod-del").forEach(btn => {
+      this.threadCommentsStream.querySelectorAll(".btn-reply-mod-del").forEach(btn => {
         btn.addEventListener("click", () => {
           const commentId = btn.dataset.commentId;
           this.adminDeleteComment(commentId, this.activeThreadId);
         });
       });
 
-      this.threadRepliesList.querySelectorAll(".btn-reply-mod-sanction").forEach(btn => {
+      this.threadCommentsStream.querySelectorAll(".btn-reply-mod-sanction").forEach(btn => {
         btn.addEventListener("click", () => {
           this.openSanctionModal({
             googleId: btn.dataset.authorId,
@@ -1774,28 +2999,29 @@ class ForoApp {
     }
   }
 
-  closeThreadModal() {
-    if (this.modalThread) this.modalThread.classList.remove("active");
-    this.activeThreadId = null;
-
-    // Restaurar URL limpia
-    const url = new URL(window.location);
-    url.searchParams.delete("hilo");
-    window.history.replaceState({}, "", url);
+  // Compatibilidad con código existente
+  renderReplies(replies) {
+    this.currentComments = replies || [];
+    this.renderCommentsStream();
   }
 
-  async handleSubmitReply(e) {
-    e.preventDefault();
+  async handlePageSubmitReply(e, customContent = null, parentId = null) {
+    if (e && e.preventDefault) e.preventDefault();
     if (!this.currentUser) {
       if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
-      this.showToast("Debés identificarte para responder");
+      this.showToast("Iniciá sesión para responder al debate");
       return;
     }
 
-    const content = (this.replyInputContent && this.replyInputContent.value.trim()) || "";
+    const content = customContent !== null ? customContent.trim() : (this.replyPageContent ? this.replyPageContent.value.trim() : "");
     if (content.length < 2) {
       this.showToast("El comentario es demasiado corto");
       return;
+    }
+
+    if (this.btnSubmitReplyPage && customContent === null) {
+      this.btnSubmitReplyPage.disabled = true;
+      this.btnSubmitReplyPage.innerHTML = `<span>Enviando...</span>`;
     }
 
     try {
@@ -1808,15 +3034,18 @@ class ForoApp {
           autorNombre: this.currentUser.nombre,
           autorAvatar: this.currentUser.avatarUrl,
           colegioId: this.currentUser.colegioId,
-          contenido: content
+          contenido: content,
+          parentId: parentId ? parseInt(parentId, 10) : null
         })
       });
 
       const json = await res.json();
       if (json.status === "ok") {
-        this.replyInputContent.value = "";
-        this.showToast("¡Comentario publicado!");
-        this.openThread(this.activeThreadId); // Refrescar comentarios
+        if (this.replyPageContent && customContent === null) {
+          this.replyPageContent.value = "";
+        }
+        this.showToast("Comentario publicado");
+        await this.openThread(this.activeThreadId, false); // Refrescar comentarios en pestaña
         this.loadThreads(false); // Refrescar contador en feed
       } else {
         this.showToast(json.message || "No se pudo publicar el comentario");
@@ -1824,7 +3053,17 @@ class ForoApp {
     } catch (err) {
       console.error("Error al enviar comentario:", err);
       this.showToast("Error de conexión al comentar");
+    } finally {
+      if (this.btnSubmitReplyPage) {
+        this.btnSubmitReplyPage.disabled = false;
+        this.btnSubmitReplyPage.innerHTML = `<span>Comentar</span>`;
+      }
     }
+  }
+
+  // Compatibilidad
+  async handleSubmitReply(e) {
+    return this.handlePageSubmitReply(e);
   }
 
   async handleCreateTopic(e) {
@@ -1868,7 +3107,7 @@ class ForoApp {
       if (json.status === "ok") {
         this.formTopic.reset();
         this.modalTopic.classList.remove("active");
-        this.showToast("🚀 ¡Debate creado con éxito!");
+        this.showToast("Debate creado con éxito");
         this.loadChannels();
         this.loadThreads(false);
         const newId = json.hiloId || json.id || (json.data && json.data.id);
@@ -1898,7 +3137,7 @@ class ForoApp {
     if (!targetId || isNaN(targetId)) return;
 
     // Elemento visual que disparó la acción
-    const targetBtn = btnEl || (!isComment ? this.btnVoteThread : null);
+    const targetBtn = btnEl || (!isComment ? (this.btnVoteThreadPage || this.btnVoteThread) : null);
     if (targetBtn) {
       targetBtn.classList.add("vote-pulse");
       setTimeout(() => targetBtn.classList.remove("vote-pulse"), 350);
@@ -1924,41 +3163,49 @@ class ForoApp {
         const key = `${targetType}_${targetId}`;
         if (voted) {
           this.userVotes.add(key);
-          this.userVotes.add(targetId);
-          this.userVotes.add(String(targetId));
         } else {
           this.userVotes.delete(key);
-          this.userVotes.delete(targetId);
-          this.userVotes.delete(String(targetId));
         }
         localStorage.setItem("comunidad_voted_threads", JSON.stringify(Array.from(this.userVotes)));
 
         if (isComment) {
-          // Comentario: sincronizar todos los botones de este comentario
-          const commentBtns = document.querySelectorAll(`.reply-vote-btn[data-comment-id="${targetId}"]`);
+          // Comentario: sincronizar todos los botones de este comentario en el árbol
+          const commentBtns = document.querySelectorAll(`.comment-vote-btn[data-comment-id="${targetId}"], .reply-vote-btn[data-comment-id="${targetId}"]`);
           commentBtns.forEach(b => {
             b.classList.toggle("voted", voted);
             const countSpan = b.querySelector(".vote-count");
             if (countSpan && total !== undefined) countSpan.textContent = total;
           });
         } else {
-          // Hilo: sincronizar modal si está abierto
+          // Hilo: sincronizar pestaña completa si está abierta
+          if (this.btnVoteThreadPage && (this.activeThreadId == targetId)) {
+            this.btnVoteThreadPage.classList.toggle("voted", voted);
+          }
+          if (this.threadPageVotes && (this.activeThreadId == targetId) && total !== undefined) {
+            this.threadPageVotes.textContent = total;
+          }
           if (this.btnVoteThread && (this.activeThreadId == targetId)) {
             this.btnVoteThread.classList.toggle("voted", voted);
           }
           if (this.threadModalVotes && (this.activeThreadId == targetId) && total !== undefined) {
             this.threadModalVotes.textContent = total;
           }
-          // Y sincronizar tarjetas en el feed
+          // Y sincronizar tarjetas en el feed (cápsula y gutter lateral)
           const feedCapsules = document.querySelectorAll(`.reddit-vote-capsule[data-thread-id="${targetId}"]`);
           feedCapsules.forEach(cap => {
             cap.classList.toggle("voted", voted);
             const countSpan = cap.querySelector(".vote-count");
             if (countSpan && total !== undefined) countSpan.textContent = total;
           });
+          const feedGutters = document.querySelectorAll(`.reddit-post-gutter[data-thread-id="${targetId}"]`);
+          feedGutters.forEach(gut => {
+            gut.classList.toggle("voted", voted);
+            const countSpan = gut.querySelector(".gutter-vote-count");
+            if (countSpan && total !== undefined) countSpan.textContent = total;
+          });
         }
 
-        this.showToast(voted ? "¡Voto registrado! ▲" : "Voto retirado");
+        this.showToast(voted ? "Voto registrado" : "Voto retirado");
       } else {
         this.showToast(json.message || "No se pudo registrar el voto");
       }
@@ -1978,7 +3225,7 @@ class ForoApp {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => {
-        this.showToast("¡Enlace directo al debate copiado al portapapeles! 📋");
+        this.showToast("Enlace copiado al portapapeles");
       }).catch(() => {
         prompt("Copiá este enlace para compartir el debate:", url);
       });
@@ -1986,6 +3233,12 @@ class ForoApp {
   }
 
   async reportContent(tipo, id) {
+    if (!this.currentUser) {
+      if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
+      this.showToast("Debés identificarte para reportar publicaciones.");
+      return;
+    }
+
     const motivo = prompt("¿Por qué deseás reportar esta publicación? (ej: agresiones, lenguaje ofensivo, spam)");
     if (!motivo) return;
 
@@ -1994,11 +3247,17 @@ class ForoApp {
       const res = await fetch("/api/foro?action=reportar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tipo, itemId: targetId, id: targetId, motivo })
+        body: JSON.stringify({
+          tipo,
+          itemId: targetId,
+          id: targetId,
+          googleId: this.currentUser.googleId,
+          motivo
+        })
       });
       const json = await res.json();
       if (json.status === "ok") {
-        this.showToast("Publicación reportada para revisión de moderación. Gracias 🛡️");
+        this.showToast(json.message || "Publicación reportada para moderación.");
       } else {
         this.showToast(json.message || "No se pudo enviar el reporte");
       }
@@ -2043,7 +3302,7 @@ class ForoApp {
         localStorage.setItem("comunidad_admin_user", this.adminUser);
         if (this.modalAdminLogin) this.modalAdminLogin.classList.remove("active");
         this.updateAdminBar();
-        this.showToast(`🔓 Sesión de moderador iniciada (${this.adminUser})`);
+        this.showToast(`Sesión de moderador iniciada (${this.adminUser})`);
         this.loadThreads(false);
       } else {
         if (errEl) {
@@ -2087,7 +3346,7 @@ class ForoApp {
       });
       const json = await res.json();
       if (json.status === "ok") {
-        this.showToast(json.fijado === 1 ? "📌 Hilo fijado en la cima" : "📌 Hilo desfijado");
+        this.showToast(json.fijado === 1 ? "Hilo fijado en la cima" : "Hilo desfijado");
         this.loadThreads(false);
       } else {
         this.showToast(json.message || "Error al fijar hilo");
@@ -2115,7 +3374,7 @@ class ForoApp {
           });
           const json = await res.json();
           if (json.status === "ok") {
-            this.showToast("🗑️ Debate eliminado con éxito");
+            this.showToast("Debate eliminado con éxito");
             if (this.activeThreadId == id) {
               this.closeThreadModal();
             }
@@ -2148,7 +3407,7 @@ class ForoApp {
           });
           const json = await res.json();
           if (json.status === "ok") {
-            this.showToast("🗑️ Comentario eliminado");
+            this.showToast("Comentario eliminado");
             if (threadId) {
               this.openThread(threadId); // refrescar comentarios en modal
             }
@@ -2170,7 +3429,7 @@ class ForoApp {
 
     if (this.sanctionTargetGoogleId) this.sanctionTargetGoogleId.value = user.googleId || "";
     if (this.sanctionUserName) this.sanctionUserName.textContent = user.nombre || "Usuario";
-    if (this.sanctionUserSchool) this.sanctionUserSchool.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+    if (this.sanctionUserSchool) this.sanctionUserSchool.innerHTML = `${getSchoolDot(col)} ${escapeHtml(col.nombre)}`;
     if (this.sanctionUserAvatar) {
       this.sanctionUserAvatar.src = user.avatarUrl || "assets/avatar-default.webp";
     }
@@ -2224,7 +3483,7 @@ class ForoApp {
 
       const json = await res.json();
       if (json.status === "ok") {
-        this.showToast(`🛡️ ${json.message}`);
+        this.showToast(json.message || "Sanción aplicada con éxito");
         if (this.modalSanctionUser) this.modalSanctionUser.classList.remove("active");
       } else {
         this.showToast(json.message || "Error al aplicar sanción");
@@ -2260,7 +3519,8 @@ class ForoApp {
       { name: "view", btn: this.tabBtnProfileView, panel: this.profileTabView },
       { name: "edit", btn: this.tabBtnProfileEdit, panel: this.profileTabEdit },
       { name: "threads", btn: this.tabBtnProfileThreads, panel: this.profileTabThreads },
-      { name: "replies", btn: this.tabBtnProfileReplies, panel: this.profileTabReplies }
+      { name: "replies", btn: this.tabBtnProfileReplies, panel: this.profileTabReplies },
+      { name: "badges", btn: this.tabBtnProfileBadges, panel: this.profileTabBadges }
     ];
 
     tabs.forEach(t => {
@@ -2270,7 +3530,7 @@ class ForoApp {
         t.btn.setAttribute("aria-selected", isActive ? "true" : "false");
       }
       if (t.panel) {
-        t.panel.style.display = isActive ? (t.name === "view" || t.name === "edit" ? "flex" : "block") : "none";
+        t.panel.style.display = isActive ? (t.name === "edit" ? "block" : "flex") : "none";
       }
     });
 
@@ -2297,7 +3557,7 @@ class ForoApp {
       }
 
       const u = json.usuario;
-      const m = json.metricas || { totalHilos: 0, totalComentarios: 0, karmaTotal: 0 };
+      const m = json.metricas || { totalHilos: 0, totalComentarios: 0, karmaTotal: 0, karmaHilos: 0, karmaComentarios: 0 };
       const insignias = json.insignias || [];
       const hilos = json.hilosRecientes || [];
       const comentarios = json.comentariosRecientes || [];
@@ -2323,34 +3583,40 @@ class ForoApp {
         this.profileAvatarImg.src = u.avatarUrl || "assets/avatar-default.webp";
       }
 
-      // Nombre y Rol/Badge
+      // Nombre y Handle Estilo Reddit (u/usuario)
       if (this.profileUserName) {
         this.profileUserName.textContent = u.nombre || "Hincha";
       }
       if (this.profileUserHandle) {
-        this.profileUserHandle.textContent = u.username ? `@${u.username}` : "";
-        this.profileUserHandle.style.display = u.username ? "block" : "none";
+        const handle = u.username ? `u/${u.username}` : (u.googleId ? `u/hincha_${u.googleId.slice(-4)}` : "u/hincha");
+        this.profileUserHandle.textContent = handle;
+        this.profileUserHandle.style.display = "inline-block";
       }
+
+      // Badge de Moderador o Estado
       if (this.profileUserBadge) {
         if (u.rol === "admin" || u.rol === "superadmin") {
-          this.profileUserBadge.textContent = "⚡ Moderador Oficial";
+          this.profileUserBadge.innerHTML = `${getSvg("shield", "svg-icon-xs")} Moderador Oficial`;
+          this.profileUserBadge.className = "reddit-flair-badge badge-mod";
           this.profileUserBadge.style.display = "inline-flex";
         } else if (u.estado === "suspendido") {
-          this.profileUserBadge.textContent = "⏳ Suspendido";
-          this.profileUserBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
+          this.profileUserBadge.textContent = "Suspendido";
+          this.profileUserBadge.className = "reddit-flair-badge";
+          this.profileUserBadge.style.background = "#d97706";
           this.profileUserBadge.style.display = "inline-flex";
         } else if (u.estado === "baneado") {
-          this.profileUserBadge.textContent = "⛔ Baneado";
-          this.profileUserBadge.style.background = "linear-gradient(135deg, #ef4444, #dc2626)";
+          this.profileUserBadge.textContent = "Baneado";
+          this.profileUserBadge.className = "reddit-flair-badge";
+          this.profileUserBadge.style.background = "#dc2626";
           this.profileUserBadge.style.display = "inline-flex";
         } else {
           this.profileUserBadge.style.display = "none";
         }
       }
 
-      // Tags de Colegio, Rol Estudiantil y Año
+      // Tags de Colegio, Rol Estudiantil y Año (Flairs)
       if (this.profileSchoolPill) {
-        this.profileSchoolPill.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+        this.profileSchoolPill.innerHTML = `${getSchoolDot(col)} ${escapeHtml(col.nombre)}`;
       }
       if (this.profileRolePill) {
         this.profileRolePill.textContent = u.rolEstudiantil || "Hincha de Tribuna";
@@ -2369,7 +3635,7 @@ class ForoApp {
         } else {
           this.profileUserBio.textContent = isOwner
             ? "Aún no escribiste tu biografía. ¡Hacé click en 'Editar Perfil' para agregarla!"
-            : "Este hincha aún no ha escrito una biografía.";
+            : "Este hincha aún no ha escrito una biografía en su perfil.";
           this.profileUserBio.style.fontStyle = "italic";
           this.profileUserBio.style.display = "block";
           this.profileUserBio.style.removeProperty("color");
@@ -2390,7 +3656,7 @@ class ForoApp {
 
       // Pestaña y Botón Editar (SOLO si es el dueño del perfil)
       if (this.tabLabelProfileView) {
-        this.tabLabelProfileView.textContent = isOwner ? "Mi Perfil" : "Perfil";
+        this.tabLabelProfileView.textContent = "Resumen";
       }
 
       if (this.tabBtnProfileEdit) {
@@ -2441,45 +3707,133 @@ class ForoApp {
         }
       }
 
-      // Métricas
+      // Métricas de Karma Estilo Reddit
       if (this.profileStatKarma) this.profileStatKarma.textContent = m.karmaTotal || 0;
+      if (this.profileStatKarmaThreads) this.profileStatKarmaThreads.textContent = m.karmaHilos ?? 0;
+      if (this.profileStatKarmaReplies) this.profileStatKarmaReplies.textContent = m.karmaComentarios ?? 0;
       if (this.profileStatThreads) this.profileStatThreads.textContent = m.totalHilos || 0;
       if (this.profileStatReplies) this.profileStatReplies.textContent = m.totalComentarios || 0;
 
+      // Cake Day Estudiantil ("En la tribuna desde...")
+      if (this.profileCakedayText) {
+        let cakeText = "En la tribuna desde la Estudiantina 2026";
+        if (u.creadoEn) {
+          try {
+            const d = new Date(u.creadoEn);
+            if (!isNaN(d.getTime())) {
+              const meses = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+              ];
+              cakeText = `En la tribuna desde el ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+            }
+          } catch (e) {}
+        }
+        this.profileCakedayText.textContent = cakeText;
+      }
+
+      // Contadores en Pestañas
       if (this.profileCountTabThreads) this.profileCountTabThreads.textContent = m.totalHilos || 0;
       if (this.profileCountTabReplies) this.profileCountTabReplies.textContent = m.totalComentarios || 0;
+      if (this.profileCountTabBadges) this.profileCountTabBadges.textContent = insignias.length;
 
-      // Insignias
-      if (this.profileBadgesList) {
-        if (insignias.length === 0) {
-          this.profileBadgesList.innerHTML = `<span style="font-size:0.8rem;color:var(--foro-text-muted);">Sin insignias por el momento.</span>`;
+      // Pestaña 1: Feed Unificado "Resumen" (Overview) Estilo Reddit
+      if (this.profileOverviewList) {
+        const feedItems = [
+          ...hilos.map(h => ({ ...h, _tipo: "hilo", _fecha: new Date(h.creado_en).getTime() || 0 })),
+          ...comentarios.map(c => ({ ...c, _tipo: "comentario", _fecha: new Date(c.creado_en).getTime() || 0 }))
+        ].sort((a, b) => b._fecha - a._fecha);
+
+        if (feedItems.length === 0) {
+          this.profileOverviewList.innerHTML = `
+            <div class="reddit-empty-feed">
+              <span class="reddit-empty-icon">${getSvg("message", "svg-icon-lg")}</span>
+              <span>Este hincha todavía no tiene actividad registrada en el foro.</span>
+            </div>`;
         } else {
-          this.profileBadgesList.innerHTML = insignias.map(b => `
-            <div class="badge-item-pill" title="${escapeHtml(b.desc)}" style="border-color: ${b.color || "rgba(255,255,255,0.1)"}">
-              <span class="badge-icon">${b.icono || "⭐"}</span>
-              <span class="badge-title">${escapeHtml(b.titulo)}</span>
-            </div>
-          `).join("");
+          this.profileOverviewList.innerHTML = feedItems.map(item => {
+            if (item._tipo === "hilo") {
+              return `
+                <div class="reddit-post-card" data-thread-id="${item.id}">
+                  <div class="reddit-post-vote-box">
+                    <span class="reddit-vote-arrow">${getSvg("chevronUp", "svg-icon-xs")}</span>
+                    <span>${item.votos || 0}</span>
+                  </div>
+                  <div class="reddit-post-main">
+                    <div class="reddit-post-header">
+                      <span class="reddit-channel-badge">c/${escapeHtml(this.getChannelName(item.canal_id))}</span>
+                      <span>•</span>
+                      <span>Publicó un debate</span>
+                      <span>•</span>
+                      <span>${timeAgo(item.creado_en)}</span>
+                    </div>
+                    <h4 class="reddit-post-title">${escapeHtml(item.titulo)}</h4>
+                    <div class="reddit-post-footer">
+                      <span class="reddit-footer-btn">${getSvg("message", "svg-icon-xs")} ${item.respuestas_count || 0} respuestas</span>
+                      <span class="reddit-footer-btn">${getSvg("externalLink", "svg-icon-xs")} Ver debate</span>
+                    </div>
+                  </div>
+                </div>`;
+            } else {
+              return `
+                <div class="reddit-comment-card" data-thread-id="${item.hilo_id}">
+                  <div class="reddit-comment-meta">
+                    <span>${getSvg("message", "svg-icon-xs")} Comentó en</span>
+                    <span class="reddit-comment-thread-ref">${escapeHtml(item.hilo_titulo || "Debate #" + item.hilo_id)}</span>
+                    <span>•</span>
+                    <span>${timeAgo(item.creado_en)}</span>
+                  </div>
+                  <p class="reddit-comment-body">${escapeHtml(item.contenido)}</p>
+                  <div class="reddit-comment-footer">
+                    <span>${getSvg("chevronUp", "svg-icon-xs")} ${item.votos || 0} votos</span>
+                    <span>•</span>
+                    <span style="color:var(--accent-primary);">Ver en el debate</span>
+                  </div>
+                </div>`;
+            }
+          }).join("");
+
+          this.profileOverviewList.querySelectorAll("[data-thread-id]").forEach(card => {
+            card.addEventListener("click", () => {
+              const threadId = card.dataset.threadId;
+              this.closeUserProfileModal();
+              this.openThread(threadId);
+            });
+          });
         }
       }
 
-      // Pestaña Debates Creados
+      // Pestaña 2: Debates Creados Estilo Reddit
       if (this.profileThreadsList) {
         if (hilos.length === 0) {
-          this.profileThreadsList.innerHTML = `<div style="font-size:0.82rem;color:var(--foro-text-muted);padding:10px 0;">No ha publicado debates todavía.</div>`;
+          this.profileThreadsList.innerHTML = `
+            <div class="reddit-empty-feed">
+              <span class="reddit-empty-icon">${getSvg("message", "svg-icon-lg")}</span>
+              <span>No ha publicado debates todavía.</span>
+            </div>`;
         } else {
           this.profileThreadsList.innerHTML = hilos.map(h => `
-            <div class="profile-activity-item" data-thread-id="${h.id}">
-              <span class="activity-item-title">${escapeHtml(h.titulo)}</span>
-              <div class="activity-item-meta">
-                <span class="activity-meta-metric">▲ ${h.votos || 0}</span>
-                <span class="activity-meta-metric">💬 ${h.respuestas_count || 0}</span>
-                <span>${timeAgo(h.creado_en)}</span>
+            <div class="reddit-post-card" data-thread-id="${h.id}">
+              <div class="reddit-post-vote-box">
+                <span class="reddit-vote-arrow">${getSvg("chevronUp", "svg-icon-xs")}</span>
+                <span>${h.votos || 0}</span>
+              </div>
+              <div class="reddit-post-main">
+                <div class="reddit-post-header">
+                  <span class="reddit-channel-badge">c/${escapeHtml(this.getChannelName(h.canal_id))}</span>
+                  <span>•</span>
+                  <span>${timeAgo(h.creado_en)}</span>
+                </div>
+                <h4 class="reddit-post-title">${escapeHtml(h.titulo)}</h4>
+                <div class="reddit-post-footer">
+                  <span class="reddit-footer-btn">${getSvg("message", "svg-icon-xs")} ${h.respuestas_count || 0} respuestas</span>
+                  <span class="reddit-footer-btn">${getSvg("externalLink", "svg-icon-xs")} Ver debate</span>
+                </div>
               </div>
             </div>
           `).join("");
 
-          this.profileThreadsList.querySelectorAll(".profile-activity-item").forEach(item => {
+          this.profileThreadsList.querySelectorAll(".reddit-post-card").forEach(item => {
             item.addEventListener("click", () => {
               const threadId = item.dataset.threadId;
               this.closeUserProfileModal();
@@ -2489,29 +3843,60 @@ class ForoApp {
         }
       }
 
-      // Pestaña Comentarios / Respuestas
+      // Pestaña 3: Comentarios / Respuestas Estilo Reddit
       if (this.profileRepliesList) {
         if (comentarios.length === 0) {
-          this.profileRepliesList.innerHTML = `<div style="font-size:0.82rem;color:var(--foro-text-muted);padding:10px 0;">No ha participado en comentarios todavía.</div>`;
+          this.profileRepliesList.innerHTML = `
+            <div class="reddit-empty-feed">
+              <span class="reddit-empty-icon">${getSvg("message", "svg-icon-lg")}</span>
+              <span>No ha participado en comentarios todavía.</span>
+            </div>`;
         } else {
           this.profileRepliesList.innerHTML = comentarios.map(c => `
-            <div class="profile-activity-item" data-thread-id="${c.hilo_id}">
-              <span style="font-size:0.75rem;color:var(--foro-cyan);font-weight:700;">En: ${escapeHtml(c.hilo_titulo || "Debate #" + c.hilo_id)}</span>
-              <span class="activity-item-title" style="font-weight:400;">${escapeHtml(c.contenido)}</span>
-              <div class="activity-item-meta">
-                <span class="activity-meta-metric">▲ ${c.votos || 0}</span>
+            <div class="reddit-comment-card" data-thread-id="${c.hilo_id}">
+              <div class="reddit-comment-meta">
+                <span>${getSvg("message", "svg-icon-xs")} Comentó en</span>
+                <span class="reddit-comment-thread-ref">${escapeHtml(c.hilo_titulo || "Debate #" + c.hilo_id)}</span>
+                <span>•</span>
                 <span>${timeAgo(c.creado_en)}</span>
+              </div>
+              <p class="reddit-comment-body">${escapeHtml(c.contenido)}</p>
+              <div class="reddit-comment-footer">
+                <span>${getSvg("chevronUp", "svg-icon-xs")} ${c.votos || 0} votos</span>
+                <span>•</span>
+                <span style="color:var(--accent-primary);">Ver en el debate</span>
               </div>
             </div>
           `).join("");
 
-          this.profileRepliesList.querySelectorAll(".profile-activity-item").forEach(item => {
+          this.profileRepliesList.querySelectorAll(".reddit-comment-card").forEach(item => {
             item.addEventListener("click", () => {
               const threadId = item.dataset.threadId;
               this.closeUserProfileModal();
               this.openThread(threadId);
             });
           });
+        }
+      }
+
+      // Pestaña 4: Vitrina de Trofeos Estilo Reddit (Trophy Case)
+      if (this.profileBadgesList) {
+        if (insignias.length === 0) {
+          this.profileBadgesList.innerHTML = `
+            <div class="reddit-empty-feed" style="grid-column: 1 / -1;">
+              <span class="reddit-empty-icon">${getSvg("award", "svg-icon-lg")}</span>
+              <span>Aún no ha obtenido trofeos culturales de la Estudiantina. ¡Participá en los debates y sumá votos para desbloquearlos!</span>
+            </div>`;
+        } else {
+          this.profileBadgesList.innerHTML = insignias.map(b => `
+            <div class="reddit-trophy-card" title="${escapeHtml(b.desc)}" style="border-color: ${b.color || "var(--border-subtle)"};">
+              <div class="reddit-trophy-icon" style="background: ${b.color ? b.color + '18' : 'var(--bg-elevated)'};">${getSvg("award", "svg-icon-md")}</div>
+              <div class="reddit-trophy-info">
+                <span class="reddit-trophy-title">${escapeHtml(b.titulo)}</span>
+                <span class="reddit-trophy-desc">${escapeHtml(b.desc)}</span>
+              </div>
+            </div>
+          `).join("");
         }
       }
 
@@ -2575,16 +3960,8 @@ class ForoApp {
       const json = await res.json();
       if (json.status === "ok" && json.usuario) {
         // Actualizar currentUser
-        this.currentUser.username = json.usuario.username || "";
-        this.currentUser.nombre = json.usuario.nombre;
-        this.currentUser.colegioId = json.usuario.colegioId;
-        this.currentUser.bio = json.usuario.bio;
-        this.currentUser.rolEstudiantil = json.usuario.rolEstudiantil;
-        this.currentUser.anoEscolar = json.usuario.anoEscolar;
-        this.currentUser.instagram = json.usuario.instagram;
-        this.currentUser.avatarUrl = json.usuario.avatarUrl;
-
-        localStorage.setItem("comunidad_google_user", JSON.stringify(this.currentUser));
+        this.currentUser = { ...this.currentUser, ...json.usuario };
+        UsuarioService.setUser(this.currentUser);
 
         this._pendingEditPhoto = null;
         this._restoreGoogleAvatar = false;
@@ -2594,7 +3971,7 @@ class ForoApp {
         }
 
         this.updateUserBar();
-        this.showToast("✨ ¡Perfil actualizado con éxito!");
+        this.showToast("Perfil actualizado con éxito");
 
         // Refrescar modal de perfil directamente en la pestaña "view"
         this.openUserProfile(this.currentUser.googleId, "view");

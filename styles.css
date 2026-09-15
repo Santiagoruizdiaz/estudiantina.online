@@ -3628,7 +3628,7 @@ body::before {
     margin-bottom: 0.75rem;
   }
 
-  .brand-logo { 
+  .brand-logo {
     font-size: 1.3rem;
     letter-spacing: -0.7px;
   }
@@ -6435,5 +6435,113 @@ body::before {
 @media (max-width: 380px) {
   .brand-logo {
     font-size: 1.15rem;
+  }
+}
+
+/* ==========================================================================
+   SISTEMA DE USUARIOS ÚNICOS — COMPONENTES GLOBALES DE NAVEGACIÓN
+   ========================================================================== */
+.global-nav-user-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+.global-nav-user-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.28rem 0.65rem 0.28rem 0.35rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  color: #f1f5f9;
+  text-decoration: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.global-nav-user-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+  transform: translateY(-1px);
+}
+
+.global-nav-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #38bdf8;
+  background: #0f172a;
+}
+
+.global-nav-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+
+.global-nav-user-name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ffffff;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.global-nav-user-handle {
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: #38bdf8;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-global-nav-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 0.8rem;
+  background: linear-gradient(135deg, rgba(230, 0, 126, 0.15), rgba(56, 189, 248, 0.15));
+  border: 1px solid rgba(230, 0, 126, 0.35);
+  border-radius: 9999px;
+  color: #f1f5f9;
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Outfit', system-ui, sans-serif;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
+}
+
+.btn-global-nav-login:hover {
+  background: linear-gradient(135deg, rgba(230, 0, 126, 0.3), rgba(56, 189, 248, 0.3));
+  border-color: rgba(230, 0, 126, 0.6);
+  box-shadow: 0 0 14px rgba(230, 0, 126, 0.25);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .global-nav-user-info {
+    display: none;
+  }
+  .global-nav-user-pill {
+    padding: 0.25rem;
+  }
+  .global-nav-user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  .btn-global-nav-login .nav-login-text {
+    display: none;
+  }
+  .btn-global-nav-login {
+    padding: 0.38rem 0.5rem;
   }
 }

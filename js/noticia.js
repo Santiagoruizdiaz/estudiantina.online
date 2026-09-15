@@ -3,7 +3,8 @@
  * Gestión del artículo individual, pestañas, galería, barra de lectura, lightbox y modo admin.
  */
 
-import { COLEGIOS } from "./colegios.js";
+import { COLEGIOS_DB } from "./colegios.js";
+import { UsuarioService } from "./usuario.js";
 
 function decodeEntities(str) {
   if (!str) return "";
@@ -61,8 +62,14 @@ class NoticiaPageApp {
     this.article = null;
     this.adminToken = localStorage.getItem("comunidad_admin_token") || null;
 
-    // Sesión del foro y datos del debate
-    this.currentUser = JSON.parse(localStorage.getItem("comunidad_google_user") || "null");
+    // Sesión única centralizada y datos del debate
+    this.currentUser = UsuarioService.getUser();
+    UsuarioService.onChange(user => {
+      this.currentUser = user;
+      if (this.hiloData) {
+        this.renderCommentsSection();
+      }
+    });
     this.hiloData = null;
     this.comentarios = [];
     this.isSubmittingComment = false;
@@ -751,13 +758,17 @@ class NoticiaPageApp {
           const col = this.getColegio(c.colegio_id);
           const hasVoted = Number(c.user_voted) === 1;
           const votosCount = Number(c.votos || 0);
+          const rawUser = c.autor_username || (c.autor_nombre ? c.autor_nombre.toLowerCase().replace(/\s+/g, "_") : "hincha");
+          const displayHandle = `u/${rawUser}`;
           return `
             <article class="noticia-comment-card" data-comment-id="${c.id}">
               <div class="noticia-comment-card-header">
                 <div class="noticia-comment-author-box">
-                  <img src="${c.autor_avatar || 'assets/avatar-redaccion.webp'}" alt="${escapeHtml(c.autor_nombre)}" class="noticia-comment-author-avatar">
+                  <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}" title="Ver perfil de ${displayHandle}">
+                    <img src="${c.autor_avatar || 'assets/avatar-default.webp'}" alt="${escapeHtml(c.autor_nombre || 'Hincha')}" class="noticia-comment-author-avatar" onerror="this.src='assets/avatar-default.webp'">
+                  </a>
                   <div>
-                    <span class="noticia-comment-author-name">${escapeHtml(c.autor_nombre)}</span>
+                    <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}" class="noticia-comment-author-name" style="color:inherit; text-decoration:none; font-weight:700;">${displayHandle}</a>
                     <span class="noticia-comment-school-badge" style="margin-left:5px;">${col.escudo || "🥁"} ${col.nombre}</span>
                   </div>
                 </div>
@@ -853,29 +864,24 @@ class NoticiaPageApp {
   }
 
   async handleGoogleLogin() {
-    this.quickLogin();
+    // Si ya está logueado en otra pestaña/página, sincronizar
+    const current = UsuarioService.getUser();
+    if (current) {
+      this.currentUser = current;
+      this.loadForumThread();
+      return;
+    }
+    // Redirigir al portal del foro para login seguro oficial
+    window.location.href = `foro.html?login=1&redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
   }
 
   quickLogin() {
-    const demoNames = ["Pasista Costanera", "Redoblante de Oro", "Hincha de la Tribuna", "Bastonera Central", "Director de Banda", "Trombonista de Ley"];
-    const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
-    const randomId = "google_user_" + Math.floor(Math.random() * 89999 + 10000);
-    const schoolId = this.article?.colegioId || "janssen";
-
-    const user = {
-      googleId: randomId,
-      nombre: randomName,
-      email: `${randomId}@gmail.com`,
-      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${randomId}`,
-      colegioId: schoolId
-    };
-
-    this.saveUser(user);
+    this.handleGoogleLogin();
   }
 
   async saveUser(user) {
     this.currentUser = user;
-    localStorage.setItem("comunidad_google_user", JSON.stringify(user));
+    UsuarioService.setUser(user);
     const col = this.getColegio(user.colegioId);
     this.showToast(`¡Conectado como ${user.nombre} (${col.nombre})!`);
 

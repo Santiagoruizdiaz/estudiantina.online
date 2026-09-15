@@ -160,7 +160,7 @@ El portal (`comunidad.html`) ofrece una cobertura periodística completa:
 
 El foro (`foro.html`) es un espacio temático de intercambio con alta protección y moderación:
 
-- **Canales temáticos**: General, Banda de Música, Cuerpo de Baile, Noches de Calle y Propuestas.
+- **Canales temáticos**: General & Comunidad, Banda de Música, Cuerpo de Baile, Tribunas & Hinchadas, Sugerencias del Simulador, Noticias & Cobertura y Off Topic.
 - **Autenticación**: Google Identity Services (GSI / OAuth 2.0) sin overhead de librerías externas.
 - **Interacciones**: Hilos de debate, respuestas, sistema de upvotes comunitarios y reporte de contenido.
 - **Seguridad**: Inmunidad contra XSS mediante sanitización estricta (`escapeHtml`) y Prepared Statements en SQLite.

@@ -4,6 +4,7 @@
  */
 
 import { COLEGIOS } from "./colegios.js";
+import { UsuarioService } from "./usuario.js";
 
 class ComunidadApp {
   constructor() {
@@ -15,9 +16,13 @@ class ComunidadApp {
     this.activeThreadId = null;
     this.editingNewsId = null;
 
-    // Usuario y Votos
-    this.currentUser = JSON.parse(localStorage.getItem("comunidad_google_user") || "null");
+    // Usuario y Votos centralizados
+    this.currentUser = UsuarioService.getUser();
     this.userVotes = new Set(JSON.parse(localStorage.getItem("comunidad_voted_threads") || "[]"));
+    UsuarioService.onChange(user => {
+      this.currentUser = user;
+      this.updateUserBar();
+    });
 
     // Modo Administrador
     this.adminToken = localStorage.getItem("comunidad_admin_token") || null;
@@ -362,26 +367,21 @@ class ComunidadApp {
   }
 
   quickLogin() {
-    const schoolId = (this.authSelectSchool && this.authSelectSchool.value) || "janssen";
-    const col = this.getColegio(schoolId);
-    const demoNames = ["Pasista Costanera", "Redoblante de Oro", "Hincha de la Tribuna", "Bastonera Central", "Director de Banda"];
-    const randomName = demoNames[Math.floor(Math.random() * demoNames.length)];
-    const randomId = "google_user_" + Math.floor(Math.random() * 89999 + 10000);
-
-    const user = {
-      googleId: randomId,
-      nombre: randomName,
-      email: `${randomId}@gmail.com`,
-      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${randomId}`,
-      colegioId: schoolId
-    };
-
-    this.saveUser(user);
+    const current = UsuarioService.getUser();
+    if (current) {
+      this.currentUser = current;
+      this.updateUserBar();
+      if (this.modalGoogleAuth) this.modalGoogleAuth.classList.remove("active");
+      this.showToast(`¡Conectado como ${current.nombre}!`);
+      return;
+    }
+    // Redirigir al portal oficial con GIS
+    window.location.href = `foro.html?login=1&redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
   }
 
   async saveUser(user) {
     this.currentUser = user;
-    localStorage.setItem("comunidad_google_user", JSON.stringify(user));
+    UsuarioService.setUser(user);
     this.updateUserBar();
 
     if (this.modalGoogleAuth) this.modalGoogleAuth.classList.remove("active");
@@ -426,7 +426,7 @@ class ComunidadApp {
 
   logout() {
     this.currentUser = null;
-    localStorage.removeItem("comunidad_google_user");
+    UsuarioService.clearUser();
     this.updateUserBar();
     this.showToast("Sesión cerrada.");
     if (this.activeThreadId) {
@@ -1778,8 +1778,10 @@ class ComunidadApp {
     this.threadsContainer.innerHTML = hilos.map(h => {
       const col = this.getColegio(h.colegio_id);
       const hasVoted = this.userVotes.has(`hilo_${h.id}`);
-      const avatarSrc = h.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${h.autor_google_id}`;
+      const avatarSrc = h.autor_avatar || `assets/avatar-default.webp`;
       const timeAgo = this.formatTimeAgo(h.creado_en);
+      const rawUser = h.autor_username || (h.autor_nombre ? h.autor_nombre.toLowerCase().replace(/\s+/g, '_') : 'hincha');
+      const displayAuthor = `u/${rawUser}`;
 
       return `
         <article class="thread-item ${h.fijado ? "pinned" : ""}" data-thread-id="${h.id}">
@@ -1791,8 +1793,10 @@ class ComunidadApp {
             <div class="thread-content-block">
               <div class="thread-meta-top">
                 ${h.fijado ? `<span class="thread-pinned-badge">📌 FIJADO</span>` : ""}
-                <img class="thread-author-avatar-mini" src="${avatarSrc}" alt="${h.autor_nombre}" />
-                <span class="thread-author-name-text">${h.autor_nombre}</span>
+                <a href="foro.html?user=${encodeURIComponent(h.autor_google_id)}" style="display:inline-flex; align-items:center; gap:6px; color:inherit; text-decoration:none;">
+                  <img class="thread-author-avatar-mini" src="${avatarSrc}" alt="${h.autor_nombre || 'Hincha'}" onerror="this.src='assets/avatar-default.webp'" />
+                  <span class="thread-author-name-text" style="font-weight:700;">${displayAuthor}</span>
+                </a>
                 <span class="thread-school-badge">${col.escudo || "🥁"} ${col.nombre}</span>
                 <span class="thread-channel-tag">${h.canal_id}</span>
                 <span class="thread-time-ago">${timeAgo}</span>
@@ -1968,20 +1972,24 @@ class ComunidadApp {
         } else {
           this.threadRepliesList.innerHTML = comments.map(c => {
             const colC = this.getColegio(c.colegio_id);
-            const avatarC = c.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${c.autor_google_id}`;
+            const avatarC = c.autor_avatar || `assets/avatar-default.webp`;
             const timeC = this.formatTimeAgo(c.creado_en);
             const commentVoted = c.user_voted === 1;
+            const rawUserC = c.autor_username || (c.autor_nombre ? c.autor_nombre.toLowerCase().replace(/\s+/g, '_') : 'hincha');
+            const displayAuthorC = `u/${rawUserC}`;
             return `
               <div class="reply-item" data-comment-id="${c.id}">
-                <img class="reply-avatar" src="${avatarC}" alt="${c.autor_nombre}" />
+                <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}">
+                  <img class="reply-avatar" src="${avatarC}" alt="${c.autor_nombre || 'Hincha'}" onerror="this.src='assets/avatar-default.webp'" />
+                </a>
                 <div class="reply-body">
                   <div class="reply-header">
-                    <strong class="reply-author">${c.autor_nombre}</strong>
-                    <span class="reply-school">${colC.escudo || "\uD83E\uDD41"} ${colC.nombre}</span>
+                    <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}" class="reply-author" style="color:inherit; text-decoration:none; font-weight:700;">${displayAuthorC}</a>
+                    <span class="reply-school">${colC.escudo || "🥁"} ${colC.nombre}</span>
                     <span class="reply-time">${timeC}</span>
                     ${this.adminToken ? `
                       <button type="button" class="btn-admin-action-sm btn-admin-del-comment" data-comment-id="${c.id}" style="margin-left:auto; font-size:0.75rem; padding:2px 8px;">
-                        \uD83D\uDDD1\uFE0F Eliminar
+                        🗑️ Eliminar
                       </button>
                     ` : ""}
                   </div>

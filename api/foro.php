@@ -83,6 +83,7 @@ CREATE TABLE IF NOT EXISTS comentarios (
     autor_nombre TEXT NOT NULL,
     autor_avatar TEXT,
     colegio_id TEXT DEFAULT 'janssen',
+    parent_id INTEGER DEFAULT NULL,
     votos INTEGER DEFAULT 0,
     reportes INTEGER DEFAULT 0,
     oculto INTEGER DEFAULT 0,
@@ -97,15 +98,28 @@ CREATE TABLE IF NOT EXISTS votos (
     PRIMARY KEY(item_tipo, item_id, google_id)
 );
 
+CREATE TABLE IF NOT EXISTS reportes (
+    item_tipo TEXT NOT NULL,
+    item_id INTEGER NOT NULL,
+    reporter_google_id TEXT NOT NULL,
+    motivo TEXT DEFAULT '',
+    creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY(item_tipo, item_id, reporter_google_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_hilos_canal ON hilos(canal_id);
 CREATE INDEX IF NOT EXISTS idx_hilos_creado ON hilos(creado_en);
 CREATE INDEX IF NOT EXISTS idx_hilos_votos ON hilos(votos);
 CREATE INDEX IF NOT EXISTS idx_comentarios_hilo ON comentarios(hilo_id);
+CREATE INDEX IF NOT EXISTS idx_comentarios_parent ON comentarios(parent_id);
 CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
+CREATE INDEX IF NOT EXISTS idx_reportes_item ON reportes(item_tipo, item_id);
 ");
 
 try { $pdo->exec("ALTER TABLE hilos ADD COLUMN noticia_id TEXT;"); } catch (Exception $e) {}
 try { $pdo->exec("CREATE INDEX IF NOT EXISTS idx_hilos_noticia ON hilos(noticia_id);"); } catch (Exception $e) {}
+try { $pdo->exec("ALTER TABLE comentarios ADD COLUMN parent_id INTEGER DEFAULT NULL;"); } catch (Exception $e) {}
+try { $pdo->exec("CREATE INDEX IF NOT EXISTS idx_comentarios_parent ON comentarios(parent_id);"); } catch (Exception $e) {}
 try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN estado TEXT DEFAULT 'activo';"); } catch (Exception $e) {}
 try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN motivo_sancion TEXT;"); } catch (Exception $e) {}
 try { $pdo->exec("ALTER TABLE usuarios ADD COLUMN sancionado_hasta DATETIME;"); } catch (Exception $e) {}
@@ -247,7 +261,8 @@ if ($checkCanales == 0) {
         ["baile", "Cuerpo de Baile", "Coreografías, temáticas, trajes, tocados y evolución en calle.", "💃", "#ec4899"],
         ["hinchadas", "Tribunas & Hinchadas", "Cantos, banderas, color y aliento de cada colegio.", "📢", "#22c55e"],
         ["simulador", "Sugerencias del Juego", "Ideas, reportes de eventos y mejoras para el Simulador.", "🎮", "#a855f7"],
-        ["noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8"]
+        ["noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8"],
+        ["offtopic", "Off Topic", "Charlas libres, memes, debates abiertos y anécdotas fuera de competencia.", "☕", "#f43f5e"]
     ];
     foreach ($canalesInit as $c) {
         $ins->execute($c);
@@ -258,13 +273,80 @@ if ($checkCanales == 0) {
         $insN = $pdo->prepare("INSERT INTO canales (id, titulo, descripcion, icono, color) VALUES (?, ?, ?, ?, ?)");
         $insN->execute(["noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8"]);
     }
+    $checkOfftopic = $pdo->query("SELECT COUNT(*) FROM canales WHERE id = 'offtopic'")->fetchColumn();
+    if ($checkOfftopic == 0) {
+        $insOff = $pdo->prepare("INSERT INTO canales (id, titulo, descripcion, icono, color) VALUES (?, ?, ?, ?, ?)");
+        $insOff->execute(["offtopic", "Off Topic", "Charlas libres, memes, debates abiertos y anécdotas fuera de competencia.", "☕", "#f43f5e"]);
+    }
 }
 
 // Sembrar usuarios demo si no existen
 $insU = $pdo->prepare("INSERT OR IGNORE INTO usuarios (google_id, email, nombre, username, avatar_url, colegio_id, rol_estudiantil, ano_escolar, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$insU->execute(["admin-redaccion", "redaccion@estudiantina.online", "Redacción Oficial", "redaccion", "assets/avatar-redaccion.webp", "posadas", "Redacción Oficial", "Equipo Editorial", "Cobertura oficial y crónica minuto a minuto de la Estudiantina."]);
 $insU->execute(["demo-user-1", "lucas@example.com", "Lucas Percusión", "lucas_percusion", "assets/avatar-default.webp", "janssen", "Redoblante", "5° Año (Promo)", "Apasionado del ritmo y los cortes de batería del Janssen."]);
 $insU->execute(["demo-user-2", "valentina@example.com", "Valentina Pasista", "valen_pasista", "assets/avatar-default.webp", "santa_maria", "Pasista de Escuadra", "4° Año", "Bailando en la costanera con el corazón azul y blanco."]);
 $insU->execute(["demo-user-3", "agustin@example.com", "Agustín Gamer", "agustin_gamer", "assets/avatar-default.webp", "industrial", "Director/a de Banda", "6° Año Técnico", "Simulador y tambores en la previa de la fiesta."]);
+$insU->execute(["seed-roque-1", "bautista@example.com", "Bautista Roque", "bauti_roque", "assets/avatar-default.webp", "roque", "Chanchero Mayor", "5° Año (Promo)", "Dejando la piel en cada golpe de chancha por el Roque."]);
+$insU->execute(["seed-roque-2", "camila@example.com", "Camila Pasista", "camila_pasista", "assets/avatar-default.webp", "roque", "Pasista Principal", "4° Año", "Brillo y sincronización en la Costanera."]);
+$insU->execute(["seed-santa-1", "valen_sm@example.com", "Valentina Pasista", "valentina_sm", "assets/avatar-default.webp", "santa_maria", "Bastonera", "5° Año (Promo)", "Orgullo y pasión albiazul en cada pasada."]);
+$insU->execute(["seed-santa-2", "sofi@example.com", "Sofi Santa", "sofi_santa", "assets/avatar-default.webp", "santa_maria", "Hincha de Tribuna", "3° Año", "La tribuna del Santa copando el cuarto tramo."]);
+$insU->execute(["seed-sanba-1", "mateo@example.com", "Mateo Sanba", "mateo_sanba", "assets/avatar-default.webp", "san_basilio", "Redoblante", "4° Año", "El compás dinámico del San Basilio."]);
+$insU->execute(["seed-madre-1", "lucia@example.com", "Lucía Pasista", "lucia_madre", "assets/avatar-default.webp", "madre_misericordia", "Cuerpo de Baile", "5° Año (Promo)", "Coreografía y elegancia en la pista."]);
+$insU->execute(["seed-indu-2", "franco@example.com", "Franco Indu", "franco_indu", "assets/avatar-default.webp", "industrial", "Banda de Música", "6° Año Técnico", "Potencia pesada de la EPET 1."]);
+$insU->execute(["seed-janssen-1", "lucas_j@example.com", "Lucas Percusión", "lucas_janssen", "assets/avatar-default.webp", "janssen", "Caja / Redoble", "5° Año", "Tradición y cortes precisos en los palcos."]);
+$insU->execute(["seed-34-1", "santy@example.com", "Santy Ruiz Diaz", "sonta", "assets/avatar-default.webp", "epet_34", "Director/a de Banda", "6° Año Técnico", "Liderando los parches y el simulador."]);
+$insU->execute(["seed-goyena-1", "julieta@example.com", "Julieta Goyena", "juli_goyena", "assets/avatar-default.webp", "goyena", "Cuerpo de Baile", "4° Año", "Alegría y ritmo del Goyena."]);
+$insU->execute(["seed-nacional-1", "rodrigo@example.com", "Rodrigo Nacional", "rodrigo_nacional", "assets/avatar-default.webp", "nacional", "Banda de Música", "5° Año", "Aliento sin pausa del Martín de Moussy."]);
+$insU->execute(["seed-normal-1", "nahuel@example.com", "Nahuel Normal", "nahuel_normal", "assets/avatar-default.webp", "normal_estados_unidos", "Banda de Música", "5° Año", "Fuerza histórica de la Normal."]);
+$insU->execute(["seed-c6-1", "joaquin@example.com", "Joaquín C6", "joaquin_c6", "assets/avatar-default.webp", "comercio_6", "Banda de Música", "5° Año", "Los cortes del Comercio 6 en el anfiteatro."]);
+$insU->execute(["seed-c18-1", "belen@example.com", "Belén C18", "belen_c18", "assets/avatar-default.webp", "comercio_18", "Cuerpo de Baile", "4° Año", "La magia y color del Comercio 18."]);
+$insU->execute(["seed-bachi-1", "clara@example.com", "Clara Bachi", "clara_bachi", "assets/avatar-default.webp", "humanista", "Estandarte Alegórico", "5° Año (Promo)", "Fineza conceptual del Bachillerato Humanista."]);
+
+// Auto-reparación de autores sin usuario en PHP
+try {
+    $autoresSinU = $pdo->query("
+        SELECT DISTINCT autor_google_id, autor_nombre, autor_avatar, colegio_id
+        FROM (
+            SELECT autor_google_id, autor_nombre, autor_avatar, colegio_id FROM hilos
+            UNION
+            SELECT autor_google_id, autor_nombre, autor_avatar, colegio_id FROM comentarios
+        ) a
+        WHERE a.autor_google_id NOT IN (SELECT google_id FROM usuarios)
+    ")->fetchAll();
+
+    foreach ($autoresSinU as $a) {
+        if (empty($a['autor_google_id'])) continue;
+        $cleanName = trim($a['autor_nombre'] ?? "Hincha");
+        $base = preg_replace('/[^a-z0-9_]/', '', strtolower($cleanName));
+        if (empty($base) || strlen($base) < 3) $base = "hincha_" . substr($a['autor_google_id'], -4);
+        $base = substr($base, 0, 16);
+
+        $chkU = $pdo->prepare("SELECT 1 FROM usuarios WHERE LOWER(username) = LOWER(?)");
+        $chkU->execute([$base]);
+        $finalU = $chkU->fetchColumn() ? ($base . "_" . substr($a['autor_google_id'], -4)) : $base;
+
+        $insU->execute([
+            $a['autor_google_id'],
+            $finalU . "@estudiantina.online",
+            $cleanName,
+            $finalU,
+            $a['autor_avatar'] ?: "assets/avatar-default.webp",
+            $a['colegio_id'] ?: "janssen",
+            "Hincha de Tribuna",
+            "Secundaria",
+            "Hincha posadeño de la fiesta estudiantil."
+        ]);
+    }
+
+    $sinUsernames = $pdo->query("SELECT google_id, nombre FROM usuarios WHERE username IS NULL OR username = ''")->fetchAll();
+    $updU = $pdo->prepare("UPDATE usuarios SET username = ? WHERE google_id = ?");
+    foreach ($sinUsernames as $u) {
+        $base = substr(preg_replace('/[^a-z0-9_]/', '', strtolower($u['nombre'] ?? "hincha")), 0, 12);
+        if (strlen($base) < 3) $base = "hincha";
+        $unique = $base . "_" . substr($u['google_id'], -4);
+        $updU->execute([$unique, $u['google_id']]);
+    }
+} catch (Exception $e) {}
 
 // Sembrar hilos iniciales si no hay ninguno
 $checkHilos = $pdo->query("SELECT COUNT(*) FROM hilos")->fetchColumn();
@@ -289,13 +371,30 @@ if ($checkHilos == 0) {
     ");
 }
 
-// Rate-limiting simple en sesión PHP (APCu si disponible, sino skip)
-function checkPhpRateLimit(string $googleId, int $windowSec = 30): bool {
-    if (!function_exists('apcu_fetch')) return true; // sin APCu: skip rate-limit
-    $key = 'rl_hilo_' . $googleId;
-    $last = apcu_fetch($key);
-    if ($last !== false && (time() - $last) < $windowSec) return false;
-    apcu_store($key, time(), $windowSec);
+// Rate-limiting con soporte de APCu y fallback a SQLite
+function checkPhpRateLimit($pdo, string $googleId, string $tipo = "hilo", int $windowSec = 30): bool {
+    if (empty($googleId)) return false;
+    if (function_exists('apcu_fetch')) {
+        $key = 'rl_' . $tipo . '_' . $googleId;
+        $last = apcu_fetch($key);
+        if ($last !== false && (time() - $last) < $windowSec) return false;
+        apcu_store($key, time(), $windowSec);
+        return true;
+    }
+    // Fallback a SQLite cuando APCu no está disponible (ej. Hosting compartido)
+    try {
+        $table = $tipo === "hilo" ? "hilos" : "comentarios";
+        $colAuthor = "autor_google_id";
+        $stmt = $pdo->prepare("SELECT creado_en FROM {$table} WHERE {$colAuthor} = ? ORDER BY id DESC LIMIT 1");
+        $stmt->execute([$googleId]);
+        $lastDate = $stmt->fetchColumn();
+        if ($lastDate) {
+            $lastTime = strtotime($lastDate);
+            if ($lastTime && (time() - $lastTime) < $windowSec) {
+                return false;
+            }
+        }
+    } catch (Exception $e) {}
     return true;
 }
 
@@ -329,13 +428,28 @@ if ($action === "check_username") {
 // -------------------------------------------------------------
 if ($action === "canales") {
     $stmt = $pdo->query("
-        SELECT c.*, COUNT(h.id) as hilos_count 
-        FROM canales c 
+        SELECT c.*, COUNT(h.id) as hilos_count
+        FROM canales c
         LEFT JOIN hilos h ON c.id = h.canal_id AND h.oculto = 0
         GROUP BY c.id
     ");
     $canales = $stmt->fetchAll();
-    echo json_encode(["status" => "ok", "canales" => $canales]);
+
+    $stmtCol = $pdo->query("
+        SELECT colegio_id, COUNT(id) as count
+        FROM hilos
+        WHERE oculto = 0
+        GROUP BY colegio_id
+    ");
+    $colegiosCountsRaw = $stmtCol->fetchAll();
+    $colegiosCounts = [];
+    foreach ($colegiosCountsRaw as $r) {
+        if (!empty($r["colegio_id"])) {
+            $colegiosCounts[$r["colegio_id"]] = (int)$r["count"];
+        }
+    }
+
+    echo json_encode(["status" => "ok", "canales" => $canales, "colegiosCounts" => $colegiosCounts]);
     exit;
 }
 
@@ -344,17 +458,34 @@ if ($action === "canales") {
 // -------------------------------------------------------------
 if ($action === "hilos") {
     $canal = $_GET["canal"] ?? "todos";
-    $sort = $_GET["sort"] ?? "top"; // 'top' o 'recientes'
+    $sort = $_GET["sort"] ?? "top"; // 'top', 'recientes' o 'comentados'
+    $colegio = $_GET["colegio"] ?? "todos";
     $limit = min(50, max(1, (int)($_GET["limit"] ?? 10)));
     $offset = max(0, (int)($_GET["offset"] ?? 0));
     $q = trim($_GET["q"] ?? "");
 
-    $sql = "SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0";
+    $sql = "
+        SELECT
+            h.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+        FROM hilos h
+        LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+        WHERE h.oculto = 0
+    ";
     $params = [];
 
     if ($canal !== "todos" && !empty($canal)) {
         $sql .= " AND h.canal_id = ?";
         $params[] = $canal;
+    }
+
+    if ($colegio !== "todos" && !empty($colegio)) {
+        $sql .= " AND h.colegio_id = ?";
+        $params[] = $colegio;
     }
 
     // Búsqueda full-text sobre título, contenido, nombre de autor y username
@@ -371,6 +502,8 @@ if ($action === "hilos") {
 
     if ($sort === "recientes") {
         $sql .= " ORDER BY h.fijado DESC, h.creado_en DESC LIMIT $limit OFFSET $offset";
+    } elseif ($sort === "comentados") {
+        $sql .= " ORDER BY h.fijado DESC, h.respuestas_count DESC, h.votos DESC, h.creado_en DESC LIMIT $limit OFFSET $offset";
     } else {
         $sql .= " ORDER BY h.fijado DESC, h.votos DESC, h.creado_en DESC LIMIT $limit OFFSET $offset";
     }
@@ -390,7 +523,30 @@ if ($action === "hilos") {
         return $h;
     }, $hilosRaw);
 
-    echo json_encode(["status" => "ok", "hilos" => $hilos]);
+    // Conteo total para métricas y paginación
+    $countSql = "SELECT COUNT(*) FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0";
+    $countParams = [];
+    if ($canal !== "todos" && !empty($canal)) {
+        $countSql .= " AND h.canal_id = ?";
+        $countParams[] = $canal;
+    }
+    if ($colegio !== "todos" && !empty($colegio)) {
+        $countSql .= " AND h.colegio_id = ?";
+        $countParams[] = $colegio;
+    }
+    if (!empty($q)) {
+        $like = "%$q%";
+        $countSql .= " AND (h.titulo LIKE ? OR h.contenido LIKE ? OR h.autor_nombre LIKE ? OR u.username LIKE ?)";
+        $countParams[] = $like;
+        $countParams[] = $like;
+        $countParams[] = $like;
+        $countParams[] = $like;
+    }
+    $stmtCount = $pdo->prepare($countSql);
+    $stmtCount->execute($countParams);
+    $totalCount = (int)$stmtCount->fetchColumn();
+
+    echo json_encode(["status" => "ok", "total_count" => $totalCount, "hilos" => $hilos]);
     exit;
 }
 
@@ -400,7 +556,18 @@ if ($action === "hilos") {
 if ($action === "hilo") {
     $id = (int)($_GET["id"] ?? 0);
     $viewerGoogleId = trim($_GET["googleId"] ?? "");
-    $stmt = $pdo->prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.id = ? AND h.oculto = 0");
+    $stmt = $pdo->prepare("
+        SELECT
+            h.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+        FROM hilos h
+        LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+        WHERE h.id = ? AND h.oculto = 0
+    ");
     $stmt->execute([$id]);
     $hilo = $stmt->fetch();
 
@@ -419,7 +586,19 @@ if ($action === "hilo") {
         $hilo["user_voted"] = 0;
     }
 
-    $stmtComentarios = $pdo->prepare("SELECT c.*, u.username as autor_username FROM comentarios c LEFT JOIN usuarios u ON c.autor_google_id = u.google_id WHERE c.hilo_id = ? AND c.oculto = 0 ORDER BY c.creado_en ASC");
+    $stmtComentarios = $pdo->prepare("
+        SELECT
+            c.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), c.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), c.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), c.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+        FROM comentarios c
+        LEFT JOIN usuarios u ON c.autor_google_id = u.google_id
+        WHERE c.hilo_id = ? AND c.oculto = 0
+        ORDER BY c.creado_en ASC
+    ");
     $stmtComentarios->execute([$id]);
     $comentariosRaw = $stmtComentarios->fetchAll();
 
@@ -452,7 +631,18 @@ if ($action === "noticia_hilo") {
         exit;
     }
 
-    $stmt = $pdo->prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.noticia_id = ? AND h.oculto = 0");
+    $stmt = $pdo->prepare("
+        SELECT
+            h.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+        FROM hilos h
+        LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+        WHERE h.noticia_id = ? AND h.oculto = 0
+    ");
     $stmt->execute([$noticiaId]);
     $hilo = $stmt->fetch();
 
@@ -471,7 +661,18 @@ if ($action === "noticia_hilo") {
         $ins->execute(["noticias", $titulo, $contenido, "admin-redaccion", "Redacción Oficial", "assets/avatar-redaccion.webp", "posadas", $noticiaId]);
         $newId = (int)$pdo->lastInsertId();
 
-        $stmt = $pdo->prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.id = ?");
+        $stmt = $pdo->prepare("
+            SELECT
+                h.*,
+                COALESCE(NULLIF(u.username, ''), '') as autor_username,
+                COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+                COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+                COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+                COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+            FROM hilos h
+            LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+            WHERE h.id = ?
+        ");
         $stmt->execute([$newId]);
         $hilo = $stmt->fetch();
     }
@@ -484,7 +685,19 @@ if ($action === "noticia_hilo") {
         $hilo["user_voted"] = 0;
     }
 
-    $stmtComentarios = $pdo->prepare("SELECT c.*, u.username as autor_username FROM comentarios c LEFT JOIN usuarios u ON c.autor_google_id = u.google_id WHERE c.hilo_id = ? AND c.oculto = 0 ORDER BY c.creado_en ASC");
+    $stmtComentarios = $pdo->prepare("
+        SELECT
+            c.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), c.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), c.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), c.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+        FROM comentarios c
+        LEFT JOIN usuarios u ON c.autor_google_id = u.google_id
+        WHERE c.hilo_id = ? AND c.oculto = 0
+        ORDER BY c.creado_en ASC
+    ");
     $stmtComentarios->execute([$hilo["id"]]);
     $comentariosRaw = $stmtComentarios->fetchAll();
 
@@ -617,7 +830,9 @@ if ($action === "perfil") {
         "metricas" => [
             "totalHilos" => $totalHilos,
             "totalComentarios" => $totalComentarios,
-            "karmaTotal" => $karmaTotal
+            "karmaTotal" => $karmaTotal,
+            "karmaHilos" => $karmaHilos,
+            "karmaComentarios" => $karmaComentarios
         ],
         "insignias" => $insignias,
         "hilosRecientes" => $hilosRecientes,
@@ -914,7 +1129,7 @@ if ($action === "crear_hilo" && $method === "POST") {
     }
 
     // Rate-limiting: 1 debate cada 30 segundos por usuario
-    if (!checkPhpRateLimit($googleId, 30)) {
+    if (!checkPhpRateLimit($pdo, $googleId, "hilo", 30)) {
         http_response_code(429);
         echo json_encode(["status" => "error", "message" => "Esperá 30 segundos entre debates. ¡No hagas spam!"]);
         exit;
@@ -959,6 +1174,13 @@ if ($action === "comentar" && $method === "POST") {
         exit;
     }
 
+    // Rate-limiting: 1 comentario cada 5 segundos por usuario
+    if (!checkPhpRateLimit($pdo, $googleId, "comentario", 5)) {
+        http_response_code(429);
+        echo json_encode(["status" => "error", "message" => "Esperá unos segundos entre comentarios. ¡No hagas spam!"]);
+        exit;
+    }
+
     // Verificar si el usuario está suspendido o baneado
     $sanctionCom = checkPhpUserSanction($pdo, $googleId);
     if ($sanctionCom && !empty($sanctionCom["bloqueado"])) {
@@ -967,14 +1189,25 @@ if ($action === "comentar" && $method === "POST") {
         exit;
     }
 
+    // Validar que el hilo exista y no esté oculto
+    $stmtCheckHilo = $pdo->prepare("SELECT id FROM hilos WHERE id = ? AND oculto = 0");
+    $stmtCheckHilo->execute([$hiloId]);
+    if (!$stmtCheckHilo->fetch()) {
+        http_response_code(404);
+        echo json_encode(["status" => "error", "message" => "El debate no existe o fue eliminado"]);
+        exit;
+    }
+
     $contenido = htmlspecialchars($contenido, ENT_QUOTES, "UTF-8");
     $autorNombre = htmlspecialchars($autorNombre, ENT_QUOTES, "UTF-8");
 
+    $parentId = !empty($body["parentId"]) ? (int)$body["parentId"] : null;
+
     $stmt = $pdo->prepare("
-        INSERT INTO comentarios (hilo_id, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO comentarios (hilo_id, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id, parent_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->execute([$hiloId, $contenido, $googleId, $autorNombre, $autorAvatar, $colegioId]);
+    $stmt->execute([$hiloId, $contenido, $googleId, $autorNombre, $autorAvatar, $colegioId, $parentId]);
 
     // Incrementar contador de respuestas en el hilo
     $pdo->prepare("UPDATE hilos SET respuestas_count = respuestas_count + 1 WHERE id = ?")->execute([$hiloId]);
@@ -1024,12 +1257,14 @@ if ($action === "votar" && $method === "POST") {
 }
 
 // -------------------------------------------------------------
-// ACTION: REPORTAR (Auto-moderación con 3 reportes)
+// ACTION: REPORTAR (Auto-moderación protegida con 3 reportes únicos)
 // -------------------------------------------------------------
 if ($action === "reportar" && $method === "POST") {
     $body = json_decode(file_get_contents("php://input"), true);
     $tipo = ($body["tipo"] ?? "") === "comentario" ? "comentario" : "hilo";
     $itemId = (int)($body["itemId"] ?? $body["id"] ?? 0);
+    $reporterGoogleId = trim($body["googleId"] ?? "");
+    $motivo = htmlspecialchars(trim(mb_substr($body["motivo"] ?? "", 0, 200)), ENT_QUOTES, "UTF-8");
 
     if ($itemId <= 0) {
         http_response_code(400);
@@ -1037,12 +1272,52 @@ if ($action === "reportar" && $method === "POST") {
         exit;
     }
 
-    $table = $tipo === "hilo" ? "hilos" : "comentarios";
-    $pdo->prepare("UPDATE $table SET reportes = reportes + 1 WHERE id = ?")->execute([$itemId]);
-    // Si acumula 3 o más reportes, se oculta preventivamente
-    $pdo->prepare("UPDATE $table SET oculto = 1 WHERE id = ? AND reportes >= 3")->execute([$itemId]);
+    if (empty($reporterGoogleId)) {
+        http_response_code(401);
+        echo json_encode(["status" => "error", "message" => "Debés identificarte para reportar contenido."]);
+        exit;
+    }
 
-    echo json_encode(["status" => "ok", "message" => "Gracias por tu reporte. Nuestro equipo lo revisará."]);
+    $table = $tipo === "hilo" ? "hilos" : "comentarios";
+    $stmtItem = $pdo->prepare("SELECT id, autor_google_id FROM {$table} WHERE id = ?");
+    $stmtItem->execute([$itemId]);
+    $item = $stmtItem->fetch();
+
+    if (!$item) {
+        http_response_code(404);
+        echo json_encode(["status" => "error", "message" => "Publicación no encontrada"]);
+        exit;
+    }
+
+    if ($item["autor_google_id"] === $reporterGoogleId) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "No podés reportar tu propia publicación."]);
+        exit;
+    }
+
+    // Validar si ya reportó este ítem
+    $chkRep = $pdo->prepare("SELECT 1 FROM reportes WHERE item_tipo = ? AND item_id = ? AND reporter_google_id = ?");
+    $chkRep->execute([$tipo, $itemId, $reporterGoogleId]);
+    if ($chkRep->fetchColumn()) {
+        echo json_encode(["status" => "ok", "message" => "Ya registraste un reporte para esta publicación previamente.", "alreadyReported" => true]);
+        exit;
+    }
+
+    // Insertar reporte
+    $insRep = $pdo->prepare("INSERT INTO reportes (item_tipo, item_id, reporter_google_id, motivo) VALUES (?, ?, ?, ?)");
+    $insRep->execute([$tipo, $itemId, $reporterGoogleId, $motivo]);
+
+    // Contar reportes de usuarios únicos
+    $countStmt = $pdo->prepare("SELECT COUNT(DISTINCT reporter_google_id) FROM reportes WHERE item_tipo = ? AND item_id = ?");
+    $countStmt->execute([$tipo, $itemId]);
+    $totalRep = (int)$countStmt->fetchColumn();
+
+    $pdo->prepare("UPDATE {$table} SET reportes = ? WHERE id = ?")->execute([$totalRep, $itemId]);
+    if ($totalRep >= 3) {
+        $pdo->prepare("UPDATE {$table} SET oculto = 1 WHERE id = ?")->execute([$itemId]);
+    }
+
+    echo json_encode(["status" => "ok", "message" => "Reporte registrado. Nuestro equipo lo revisará.", "reportes" => $totalRep]);
     exit;
 }
 

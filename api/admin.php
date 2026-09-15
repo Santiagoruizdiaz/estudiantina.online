@@ -619,6 +619,9 @@ if ($method === "POST") {
             echo json_encode(["status" => "error", "message" => "ID de hilo requerido"]);
             exit;
         }
+        $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$hiloId]);
+        $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$hiloId]);
+        $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$hiloId]);
         $pdo->prepare("DELETE FROM comentarios WHERE hilo_id = ?")->execute([$hiloId]);
         $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$hiloId]);
         $pdo->prepare("DELETE FROM hilos WHERE id = ?")->execute([$hiloId]);
@@ -637,6 +640,8 @@ if ($method === "POST") {
         $stmtC->execute([$comentarioId]);
         $c = $stmtC->fetch();
         if ($c) {
+            $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$comentarioId]);
+            $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$comentarioId]);
             $pdo->prepare("DELETE FROM comentarios WHERE id = ?")->execute([$comentarioId]);
             $pdo->prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?")->execute([$c["hilo_id"]]);
         }
@@ -668,12 +673,16 @@ if ($method === "POST") {
         if ($resolucion === "descartar" || $resolucion === "aprobar") {
             $table = ($tipo === "hilo") ? "hilos" : "comentarios";
             $pdo->prepare("UPDATE {$table} SET reportes = 0, oculto = 0 WHERE id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM reportes WHERE item_tipo = ? AND item_id = ?")->execute([$tipo, $id]);
             echo json_encode(["status" => "ok", "message" => "Denuncia descartada"]);
             exit;
         }
 
         if ($resolucion === "eliminar" || $resolucion === "borrar") {
             if ($tipo === "hilo") {
+                $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$id]);
+                $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$id]);
+                $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$id]);
                 $pdo->prepare("DELETE FROM comentarios WHERE hilo_id = ?")->execute([$id]);
                 $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$id]);
                 $pdo->prepare("DELETE FROM hilos WHERE id = ?")->execute([$id]);
@@ -682,6 +691,8 @@ if ($method === "POST") {
                 $stmtC->execute([$id]);
                 $c = $stmtC->fetch();
                 if ($c) {
+                    $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$id]);
+                    $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$id]);
                     $pdo->prepare("DELETE FROM comentarios WHERE id = ?")->execute([$id]);
                     $pdo->prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?")->execute([$c["hilo_id"]]);
                 }

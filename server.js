@@ -95,6 +95,7 @@ function getForoDb() {
           autor_nombre TEXT NOT NULL,
           autor_avatar TEXT,
           colegio_id TEXT DEFAULT 'janssen',
+          parent_id INTEGER DEFAULT NULL,
           votos INTEGER DEFAULT 0,
           reportes INTEGER DEFAULT 0,
           oculto INTEGER DEFAULT 0,
@@ -107,10 +108,19 @@ function getForoDb() {
           creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY(item_tipo, item_id, google_id)
       );
+      CREATE TABLE IF NOT EXISTS reportes (
+          item_tipo TEXT NOT NULL,
+          item_id INTEGER NOT NULL,
+          reporter_google_id TEXT NOT NULL,
+          motivo TEXT DEFAULT '',
+          creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY(item_tipo, item_id, reporter_google_id)
+      );
     `);
 
     try { foroDb.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE hilos ADD COLUMN noticia_id TEXT"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE comentarios ADD COLUMN parent_id INTEGER DEFAULT NULL"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN estado TEXT DEFAULT 'activo'"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN motivo_sancion TEXT"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN sancionado_hasta DATETIME"); } catch (e) {}
@@ -129,7 +139,9 @@ function getForoDb() {
       CREATE INDEX IF NOT EXISTS idx_hilos_creado ON hilos(creado_en);
       CREATE INDEX IF NOT EXISTS idx_hilos_votos ON hilos(votos);
       CREATE INDEX IF NOT EXISTS idx_comentarios_hilo ON comentarios(hilo_id);
+      CREATE INDEX IF NOT EXISTS idx_comentarios_parent ON comentarios(parent_id);
       CREATE INDEX IF NOT EXISTS idx_votos_item ON votos(item_tipo, item_id, google_id);
+      CREATE INDEX IF NOT EXISTS idx_reportes_item ON reportes(item_tipo, item_id);
     `);
     try { foroDb.exec("CREATE INDEX IF NOT EXISTS idx_hilos_noticia ON hilos(noticia_id)"); } catch (e) {}
     try { foroDb.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(LOWER(username)) WHERE username != '' AND username IS NOT NULL;"); } catch (e) {}
@@ -255,6 +267,7 @@ function getForoDb() {
       ins.run("hinchadas", "Tribunas & Hinchadas", "Cantos, banderas, color y aliento de cada colegio.", "📢", "#22c55e");
       ins.run("simulador", "Sugerencias del Juego", "Ideas, reportes de eventos y mejoras para el Simulador.", "🎮", "#a855f7");
       ins.run("noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8");
+      ins.run("offtopic", "Off Topic", "Charlas libres, memes, debates abiertos y anécdotas fuera de competencia.", "☕", "#f43f5e");
     } else {
       try {
         const hasNoticiasCanal = foroDb.prepare("SELECT 1 FROM canales WHERE id = 'noticias'").get();
@@ -263,14 +276,84 @@ function getForoDb() {
             "noticias", "Noticias & Cobertura", "Debates oficiales sobre las crónicas, coberturas y novedades de estudiantina.online.", "📰", "#38bdf8"
           );
         }
+        const hasOfftopicCanal = foroDb.prepare("SELECT 1 FROM canales WHERE id = 'offtopic'").get();
+        if (!hasOfftopicCanal) {
+          foroDb.prepare("INSERT INTO canales (id, titulo, descripcion, icono, color) VALUES (?, ?, ?, ?, ?)").run(
+            "offtopic", "Off Topic", "Charlas libres, memes, debates abiertos y anécdotas fuera de competencia.", "☕", "#f43f5e"
+          );
+        }
       } catch (e) {}
     }
 
-    // Sembrar usuarios demo si no existen
+    // Sembrar usuarios demo y autores del sistema con nombres de usuario únicos
     const insU = foroDb.prepare("INSERT OR IGNORE INTO usuarios (google_id, email, nombre, username, avatar_url, colegio_id, rol_estudiantil, ano_escolar, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    insU.run("admin-redaccion", "redaccion@estudiantina.online", "Redacción Oficial", "redaccion", "assets/avatar-redaccion.webp", "posadas", "Redacción Oficial", "Equipo Editorial", "Cobertura oficial y crónica minuto a minuto de la Estudiantina.");
     insU.run("demo-user-1", "lucas@example.com", "Lucas Percusión", "lucas_percusion", "assets/avatar-default.webp", "janssen", "Redoblante", "5° Año (Promo)", "Apasionado del ritmo y los cortes de batería del Janssen.");
     insU.run("demo-user-2", "valentina@example.com", "Valentina Pasista", "valen_pasista", "assets/avatar-default.webp", "santa_maria", "Pasista de Escuadra", "4° Año", "Bailando en la costanera con el corazón azul y blanco.");
     insU.run("demo-user-3", "agustin@example.com", "Agustín Gamer", "agustin_gamer", "assets/avatar-default.webp", "industrial", "Director/a de Banda", "6° Año Técnico", "Simulador y tambores en la previa de la fiesta.");
+    insU.run("seed-roque-1", "bautista@example.com", "Bautista Roque", "bauti_roque", "assets/avatar-default.webp", "roque", "Chanchero Mayor", "5° Año (Promo)", "Dejando la piel en cada golpe de chancha por el Roque.");
+    insU.run("seed-roque-2", "camila@example.com", "Camila Pasista", "camila_pasista", "assets/avatar-default.webp", "roque", "Pasista Principal", "4° Año", "Brillo y sincronización en la Costanera.");
+    insU.run("seed-santa-1", "valen_sm@example.com", "Valentina Pasista", "valentina_sm", "assets/avatar-default.webp", "santa_maria", "Bastonera", "5° Año (Promo)", "Orgullo y pasión albiazul en cada pasada.");
+    insU.run("seed-santa-2", "sofi@example.com", "Sofi Santa", "sofi_santa", "assets/avatar-default.webp", "santa_maria", "Hincha de Tribuna", "3° Año", "La tribuna del Santa copando el cuarto tramo.");
+    insU.run("seed-sanba-1", "mateo@example.com", "Mateo Sanba", "mateo_sanba", "assets/avatar-default.webp", "san_basilio", "Redoblante", "4° Año", "El compás dinámico del San Basilio.");
+    insU.run("seed-madre-1", "lucia@example.com", "Lucía Pasista", "lucia_madre", "assets/avatar-default.webp", "madre_misericordia", "Cuerpo de Baile", "5° Año (Promo)", "Coreografía y elegancia en la pista.");
+    insU.run("seed-indu-2", "franco@example.com", "Franco Indu", "franco_indu", "assets/avatar-default.webp", "industrial", "Banda de Música", "6° Año Técnico", "Potencia pesada de la EPET 1.");
+    insU.run("seed-janssen-1", "lucas_j@example.com", "Lucas Percusión", "lucas_janssen", "assets/avatar-default.webp", "janssen", "Caja / Redoble", "5° Año", "Tradición y cortes precisos en los palcos.");
+    insU.run("seed-34-1", "santy@example.com", "Santy Ruiz Diaz", "sonta", "assets/avatar-default.webp", "epet_34", "Director/a de Banda", "6° Año Técnico", "Liderando los parches y el simulador.");
+    insU.run("seed-goyena-1", "julieta@example.com", "Julieta Goyena", "juli_goyena", "assets/avatar-default.webp", "goyena", "Cuerpo de Baile", "4° Año", "Alegría y ritmo del Goyena.");
+    insU.run("seed-nacional-1", "rodrigo@example.com", "Rodrigo Nacional", "rodrigo_nacional", "assets/avatar-default.webp", "nacional", "Banda de Música", "5° Año", "Aliento sin pausa del Martín de Moussy.");
+    insU.run("seed-normal-1", "nahuel@example.com", "Nahuel Normal", "nahuel_normal", "assets/avatar-default.webp", "normal_estados_unidos", "Banda de Música", "5° Año", "Fuerza histórica de la Normal.");
+    insU.run("seed-c6-1", "joaquin@example.com", "Joaquín C6", "joaquin_c6", "assets/avatar-default.webp", "comercio_6", "Banda de Música", "5° Año", "Los cortes del Comercio 6 en el anfiteatro.");
+    insU.run("seed-c18-1", "belen@example.com", "Belén C18", "belen_c18", "assets/avatar-default.webp", "comercio_18", "Cuerpo de Baile", "4° Año", "La magia y color del Comercio 18.");
+    insU.run("seed-bachi-1", "clara@example.com", "Clara Bachi", "clara_bachi", "assets/avatar-default.webp", "humanista", "Estandarte Alegórico", "5° Año (Promo)", "Fineza conceptual del Bachillerato Humanista.");
+
+    // Auto-reparación: Asegurar que TODO autor en hilos o comentarios tenga su usuario único
+    try {
+      const autoresSinUsuario = foroDb.prepare(`
+        SELECT DISTINCT autor_google_id, autor_nombre, autor_avatar, colegio_id
+        FROM (
+          SELECT autor_google_id, autor_nombre, autor_avatar, colegio_id FROM hilos
+          UNION
+          SELECT autor_google_id, autor_nombre, autor_avatar, colegio_id FROM comentarios
+        ) a
+        WHERE a.autor_google_id NOT IN (SELECT google_id FROM usuarios)
+      `).all();
+
+      for (const a of autoresSinUsuario) {
+        if (!a.autor_google_id) continue;
+        const cleanName = (a.autor_nombre || "Hincha").trim();
+        let baseUser = cleanName.toLowerCase().replace(/[^a-z0-9_]/g, "");
+        if (!baseUser || baseUser.length < 3) baseUser = "hincha_" + a.autor_google_id.slice(-4);
+        baseUser = baseUser.slice(0, 16);
+
+        // Verificar unicidad
+        const existU = foroDb.prepare("SELECT 1 FROM usuarios WHERE LOWER(username) = LOWER(?)").get(baseUser);
+        const finalUser = existU ? `${baseUser}_${a.autor_google_id.slice(-4)}` : baseUser;
+
+        insU.run(
+          a.autor_google_id,
+          `${finalUser}@estudiantina.online`,
+          cleanName,
+          finalUser,
+          a.autor_avatar || "assets/avatar-default.webp",
+          a.colegio_id || "janssen",
+          "Hincha de Tribuna",
+          "Secundaria",
+          "Hincha posadeño de la fiesta estudiantil."
+        );
+      }
+
+      // Auto-reparación: usuarios con username vacío o nulo
+      const sinUsername = foroDb.prepare("SELECT google_id, nombre FROM usuarios WHERE username IS NULL OR username = ''").all();
+      for (const u of sinUsername) {
+        let base = (u.nombre || "hincha").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 12);
+        if (!base || base.length < 3) base = "hincha";
+        const unique = `${base}_${u.google_id.slice(-4)}`;
+        foroDb.prepare("UPDATE usuarios SET username = ? WHERE google_id = ?").run(unique, u.google_id);
+      }
+    } catch (e) {
+      console.warn("Auto-reparación de usuarios:", e.message);
+    }
 
     // Sembrar hilos si está vacía
     const rowHilos = foroDb.prepare("SELECT COUNT(*) as count FROM hilos").get();
@@ -301,13 +384,38 @@ function escapeHtml(str) {
     .replace(/'/g, "&#x27;");
 }
 
-// Rate-limiting en memoria: previene spam de creación de hilos (1 por 30s por google_id)
+// Rate-limiting en memoria: previene spam con TTL y poda de memoria
 const _rateLimitMap = new Map();
+const _rateLimitComentarioMap = new Map();
+
+function pruneRateLimitMap(map, windowMs) {
+  if (map.size > 500) {
+    const now = Date.now();
+    for (const [key, timestamp] of map.entries()) {
+      if (now - timestamp > windowMs) {
+        map.delete(key);
+      }
+    }
+  }
+}
+
 function checkRateLimit(googleId, windowMs = 30000) {
+  if (!googleId) return false;
+  pruneRateLimitMap(_rateLimitMap, windowMs);
   const now = Date.now();
   const last = _rateLimitMap.get(googleId) || 0;
   if (now - last < windowMs) return false; // bloqueado
   _rateLimitMap.set(googleId, now);
+  return true; // permitido
+}
+
+function checkCommentRateLimit(googleId, windowMs = 5000) {
+  if (!googleId) return false;
+  pruneRateLimitMap(_rateLimitComentarioMap, windowMs);
+  const now = Date.now();
+  const last = _rateLimitComentarioMap.get(googleId) || 0;
+  if (now - last < windowMs) return false; // bloqueado
+  _rateLimitComentarioMap.set(googleId, now);
   return true; // permitido
 }
 
@@ -843,30 +951,59 @@ const server = http.createServer((req, res) => {
 
       if (action === "canales") {
         const canales = db.prepare(`
-          SELECT c.*, COUNT(h.id) as hilos_count 
-          FROM canales c 
+          SELECT c.*, COUNT(h.id) as hilos_count
+          FROM canales c
           LEFT JOIN hilos h ON c.id = h.canal_id AND h.oculto = 0
           GROUP BY c.id
         `).all();
+
+        const colegiosCountsRaw = db.prepare(`
+          SELECT colegio_id, COUNT(id) as count
+          FROM hilos
+          WHERE oculto = 0
+          GROUP BY colegio_id
+        `).all();
+        const colegiosCounts = {};
+        colegiosCountsRaw.forEach(r => {
+          if (r.colegio_id) colegiosCounts[r.colegio_id] = r.count;
+        });
+
         res.writeHead(200);
-        res.end(JSON.stringify({ status: "ok", canales }));
+        res.end(JSON.stringify({ status: "ok", canales, colegiosCounts }));
         return;
       }
 
       if (action === "hilos") {
         const canal = reqUrl.searchParams.get("canal") || "todos";
+        const colegio = (reqUrl.searchParams.get("colegio") || "").trim();
         const sort = reqUrl.searchParams.get("sort") || "top";
         const limit = Math.min(50, Math.max(1, parseInt(reqUrl.searchParams.get("limit") || "10", 10)));
         const offset = Math.max(0, parseInt(reqUrl.searchParams.get("offset") || "0", 10));
         const q = (reqUrl.searchParams.get("q") || "").trim();
         const viewerGoogleId = reqUrl.searchParams.get("googleId") || "";
 
-        let sql = "SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0";
+        let sql = `
+          SELECT
+            h.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+          FROM hilos h
+          LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+          WHERE h.oculto = 0
+        `;
         const params = [];
 
         if (canal !== "todos" && canal !== "") {
           sql += " AND h.canal_id = ?";
           params.push(canal);
+        }
+
+        if (colegio !== "" && colegio !== "todos") {
+          sql += " AND h.colegio_id = ?";
+          params.push(colegio);
         }
 
         // Búsqueda full-text sobre título, contenido y nombre de autor
@@ -878,6 +1015,8 @@ const server = http.createServer((req, res) => {
 
         if (sort === "recientes") {
           sql += ` ORDER BY h.fijado DESC, h.creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
+        } else if (sort === "comentados") {
+          sql += ` ORDER BY h.fijado DESC, h.respuestas_count DESC, h.votos DESC, h.creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
         } else {
           sql += ` ORDER BY h.fijado DESC, h.votos DESC, h.creado_en DESC LIMIT ${limit} OFFSET ${offset}`;
         }
@@ -893,15 +1032,45 @@ const server = http.createServer((req, res) => {
           return h;
         });
 
+        // Conteo total para métricas y paginación en frontend
+        let countSql = "SELECT COUNT(*) as total FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0";
+        const countParams = [];
+        if (canal !== "todos" && canal !== "") {
+          countSql += " AND h.canal_id = ?";
+          countParams.push(canal);
+        }
+        if (colegio !== "" && colegio !== "todos") {
+          countSql += " AND h.colegio_id = ?";
+          countParams.push(colegio);
+        }
+        if (q) {
+          countSql += " AND (h.titulo LIKE ? OR h.contenido LIKE ? OR h.autor_nombre LIKE ? OR u.username LIKE ?)";
+          const like = `%${q}%`;
+          countParams.push(like, like, like, like);
+        }
+        const countRow = db.prepare(countSql).get(...countParams);
+        const totalCount = countRow ? countRow.total : hilosRaw.length;
+
         res.writeHead(200);
-        res.end(JSON.stringify({ status: "ok", hilos }));
+        res.end(JSON.stringify({ status: "ok", total_count: totalCount, hilos }));
         return;
       }
 
       if (action === "hilo") {
         const id = parseInt(reqUrl.searchParams.get("id") || "0", 10);
         const viewerGoogleId = reqUrl.searchParams.get("googleId") || "";
-        const hilo = db.prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.id = ? AND h.oculto = 0").get(id);
+        const hilo = db.prepare(`
+          SELECT
+            h.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+          FROM hilos h
+          LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+          WHERE h.id = ? AND h.oculto = 0
+        `).get(id);
 
         if (!hilo) {
           res.writeHead(404);
@@ -917,7 +1086,19 @@ const server = http.createServer((req, res) => {
           hilo.user_voted = 0;
         }
 
-        const comentariosRaw = db.prepare("SELECT c.*, u.username as autor_username FROM comentarios c LEFT JOIN usuarios u ON c.autor_google_id = u.google_id WHERE c.hilo_id = ? AND c.oculto = 0 ORDER BY c.creado_en ASC").all(id);
+        const comentariosRaw = db.prepare(`
+          SELECT
+            c.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), c.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), c.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), c.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+          FROM comentarios c
+          LEFT JOIN usuarios u ON c.autor_google_id = u.google_id
+          WHERE c.hilo_id = ? AND c.oculto = 0
+          ORDER BY c.creado_en ASC
+        `).all(id);
 
         // Enriquecer cada comentario con user_voted
         const comentarios = comentariosRaw.map(c => {
@@ -946,7 +1127,18 @@ const server = http.createServer((req, res) => {
         }
 
         // Buscar hilo asociado a la noticia
-        let hilo = db.prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.noticia_id = ? AND h.oculto = 0").get(noticiaId);
+        let hilo = db.prepare(`
+          SELECT
+            h.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+          FROM hilos h
+          LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+          WHERE h.noticia_id = ? AND h.oculto = 0
+        `).get(noticiaId);
 
         // Si no existe, crearlo on-demand buscando los datos de la noticia
         if (!hilo) {
@@ -959,7 +1151,18 @@ const server = http.createServer((req, res) => {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
           `).run("noticias", titulo, contenido, "admin-redaccion", "Redacción Oficial", "assets/avatar-redaccion.webp", "posadas", noticiaId);
 
-          hilo = db.prepare("SELECT h.*, u.username as autor_username FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.id = ?").get(ins.lastInsertRowid);
+          hilo = db.prepare(`
+            SELECT
+              h.*,
+              COALESCE(NULLIF(u.username, ''), '') as autor_username,
+              COALESCE(NULLIF(u.nombre, ''), h.autor_nombre) as autor_nombre,
+              COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), h.autor_avatar) as autor_avatar,
+              COALESCE(NULLIF(u.colegio_id, ''), h.colegio_id) as colegio_id,
+              COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+            FROM hilos h
+            LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
+            WHERE h.id = ?
+          `).get(ins.lastInsertRowid);
         }
 
         if (viewerGoogleId) {
@@ -969,7 +1172,19 @@ const server = http.createServer((req, res) => {
           hilo.user_voted = 0;
         }
 
-        const comentariosRaw = db.prepare("SELECT c.*, u.username as autor_username FROM comentarios c LEFT JOIN usuarios u ON c.autor_google_id = u.google_id WHERE c.hilo_id = ? AND c.oculto = 0 ORDER BY c.creado_en ASC").all(hilo.id);
+        const comentariosRaw = db.prepare(`
+          SELECT
+            c.*,
+            COALESCE(NULLIF(u.username, ''), '') as autor_username,
+            COALESCE(NULLIF(u.nombre, ''), c.autor_nombre) as autor_nombre,
+            COALESCE(NULLIF(u.avatar_personalizado, ''), NULLIF(u.avatar_url, ''), c.autor_avatar) as autor_avatar,
+            COALESCE(NULLIF(u.colegio_id, ''), c.colegio_id) as colegio_id,
+            COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
+          FROM comentarios c
+          LEFT JOIN usuarios u ON c.autor_google_id = u.google_id
+          WHERE c.hilo_id = ? AND c.oculto = 0
+          ORDER BY c.creado_en ASC
+        `).all(hilo.id);
 
         const comentarios = comentariosRaw.map(c => {
           if (viewerGoogleId) {
@@ -1037,7 +1252,9 @@ const server = http.createServer((req, res) => {
 
         const totalHilos = countHilosRow ? countHilosRow.count : 0;
         const totalComentarios = countComentariosRow ? countComentariosRow.count : 0;
-        const karmaTotal = (karmaHilosRow ? karmaHilosRow.karma : 0) + (karmaComentariosRow ? karmaComentariosRow.karma : 0);
+        const karmaHilos = karmaHilosRow ? karmaHilosRow.karma : 0;
+        const karmaComentarios = karmaComentariosRow ? karmaComentariosRow.karma : 0;
+        const karmaTotal = karmaHilos + karmaComentarios;
         const maxVotes = karmaHilosRow ? karmaHilosRow.max_votos : 0;
 
         // Insignias
@@ -1083,7 +1300,9 @@ const server = http.createServer((req, res) => {
           metricas: {
             totalHilos,
             totalComentarios,
-            karmaTotal
+            karmaTotal,
+            karmaHilos,
+            karmaComentarios
           },
           insignias,
           hilosRecientes,
@@ -1402,6 +1621,13 @@ const server = http.createServer((req, res) => {
               return;
             }
 
+            // Rate-limiting de comentarios: máximo 1 comentario cada 5s por usuario
+            if (!checkCommentRateLimit(googleId)) {
+              res.writeHead(429);
+              res.end(JSON.stringify({ status: "error", message: "Esperá unos segundos entre comentarios. ¡No hagas spam!" }));
+              return;
+            }
+
             // Verificar si el usuario está suspendido o baneado
             const sanctionComentario = checkUserSanction(db, googleId);
             if (sanctionComentario && sanctionComentario.bloqueado) {
@@ -1410,10 +1636,20 @@ const server = http.createServer((req, res) => {
               return;
             }
 
+            // Validar que el hilo exista y no esté oculto
+            const hiloExist = db.prepare("SELECT id FROM hilos WHERE id = ? AND oculto = 0").get(hiloId);
+            if (!hiloExist) {
+              res.writeHead(404);
+              res.end(JSON.stringify({ status: "error", message: "El debate no existe o fue eliminado" }));
+              return;
+            }
+
+            const parentId = body.parentId ? parseInt(body.parentId, 10) : null;
+
             db.prepare(`
-              INSERT INTO comentarios (hilo_id, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id)
-              VALUES (?, ?, ?, ?, ?, ?)
-            `).run(hiloId, contenido, googleId, autorNombre, autorAvatar, colegioId);
+              INSERT INTO comentarios (hilo_id, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id, parent_id)
+              VALUES (?, ?, ?, ?, ?, ?, ?)
+            `).run(hiloId, contenido, googleId, autorNombre, autorAvatar, colegioId, parentId);
 
             db.prepare("UPDATE hilos SET respuestas_count = respuestas_count + 1 WHERE id = ?").run(hiloId);
 
@@ -1456,16 +1692,57 @@ const server = http.createServer((req, res) => {
           if (action === "reportar") {
             const tipo = body.tipo === "comentario" ? "comentario" : "hilo";
             const itemId = parseInt(body.itemId || body.id || 0, 10);
+            const reporterGoogleId = String(body.googleId || "").trim();
+            const motivo = escapeHtml(String(body.motivo || "").trim().slice(0, 200));
+
             if (itemId <= 0) {
               res.writeHead(400);
               res.end(JSON.stringify({ status: "error", message: "Item inválido" }));
               return;
             }
+
+            if (!reporterGoogleId) {
+              res.writeHead(401);
+              res.end(JSON.stringify({ status: "error", message: "Debés identificarte para reportar contenido." }));
+              return;
+            }
+
             const table = tipo === "hilo" ? "hilos" : "comentarios";
-            db.prepare(`UPDATE ${table} SET reportes = reportes + 1 WHERE id = ?`).run(itemId);
-            db.prepare(`UPDATE ${table} SET oculto = 1 WHERE id = ? AND reportes >= 3`).run(itemId);
+            const item = db.prepare(`SELECT id, autor_google_id FROM ${table} WHERE id = ?`).get(itemId);
+            if (!item) {
+              res.writeHead(404);
+              res.end(JSON.stringify({ status: "error", message: "Publicación no encontrada" }));
+              return;
+            }
+
+            if (item.autor_google_id === reporterGoogleId) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "No podés reportar tu propia publicación." }));
+              return;
+            }
+
+            // Validar si este usuario ya reportó previamente este ítem
+            const alreadyReported = db.prepare("SELECT 1 FROM reportes WHERE item_tipo = ? AND item_id = ? AND reporter_google_id = ?").get(tipo, itemId, reporterGoogleId);
+            if (alreadyReported) {
+              res.writeHead(200);
+              res.end(JSON.stringify({ status: "ok", message: "Ya registraste un reporte para esta publicación previamente.", alreadyReported: true }));
+              return;
+            }
+
+            // Insertar reporte en tabla segura
+            db.prepare("INSERT INTO reportes (item_tipo, item_id, reporter_google_id, motivo) VALUES (?, ?, ?, ?)").run(tipo, itemId, reporterGoogleId, motivo);
+
+            // Contar total de reportes de usuarios únicos
+            const countRepRow = db.prepare("SELECT COUNT(DISTINCT reporter_google_id) as count FROM reportes WHERE item_tipo = ? AND item_id = ?").get(tipo, itemId);
+            const totalRep = countRepRow ? countRepRow.count : 1;
+
+            db.prepare(`UPDATE ${table} SET reportes = ? WHERE id = ?`).run(totalRep, itemId);
+            if (totalRep >= 3) {
+              db.prepare(`UPDATE ${table} SET oculto = 1 WHERE id = ?`).run(itemId);
+            }
+
             res.writeHead(200);
-            res.end(JSON.stringify({ status: "ok", message: "Reporte registrado" }));
+            res.end(JSON.stringify({ status: "ok", message: "Reporte registrado. Nuestro equipo lo revisará.", reportes: totalRep }));
             return;
           }
 
@@ -1798,7 +2075,7 @@ const server = http.createServer((req, res) => {
             try { db.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch(e) {}
 
             db.prepare(`
-              UPDATE noticias 
+              UPDATE noticias
               SET titulo = ?, categoria = ?, categoria_slug = ?, badge = ?, autor = ?, tiempo_lectura = ?, resumen = ?, contenido = ?, bloques = ?, tags = ?, imagen_url = ?, fijada = ?
               WHERE id = ?
             `).run(
@@ -1847,6 +2124,9 @@ const server = http.createServer((req, res) => {
               return;
             }
 
+            db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(hiloId);
+            db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(hiloId);
+            db.prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?").run(hiloId);
             db.prepare("DELETE FROM comentarios WHERE hilo_id = ?").run(hiloId);
             db.prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?").run(hiloId);
             db.prepare("DELETE FROM hilos WHERE id = ?").run(hiloId);
@@ -1867,6 +2147,8 @@ const server = http.createServer((req, res) => {
 
             const c = db.prepare("SELECT hilo_id FROM comentarios WHERE id = ?").get(comentarioId);
             if (c) {
+              db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?").run(comentarioId);
+              db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?").run(comentarioId);
               db.prepare("DELETE FROM comentarios WHERE id = ?").run(comentarioId);
               db.prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?").run(c.hilo_id);
             }
@@ -1905,6 +2187,7 @@ const server = http.createServer((req, res) => {
               } else {
                 db.prepare("UPDATE comentarios SET reportes = 0, oculto = 0 WHERE id = ?").run(id);
               }
+              db.prepare("DELETE FROM reportes WHERE item_tipo = ? AND item_id = ?").run(tipo, id);
               res.writeHead(200);
               res.end(JSON.stringify({ status: "ok", message: "Denuncias descartadas. Contenido aprobado." }));
               return;
@@ -1912,12 +2195,17 @@ const server = http.createServer((req, res) => {
 
             if (resolucion === "eliminar" || resolucion === "borrar") {
               if (tipo === "hilo") {
+                db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(id);
+                db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(id);
+                db.prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?").run(id);
                 db.prepare("DELETE FROM comentarios WHERE hilo_id = ?").run(id);
                 db.prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?").run(id);
                 db.prepare("DELETE FROM hilos WHERE id = ?").run(id);
               } else {
                 const c = db.prepare("SELECT hilo_id FROM comentarios WHERE id = ?").get(id);
                 if (c) {
+                  db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?").run(id);
+                  db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?").run(id);
                   db.prepare("DELETE FROM comentarios WHERE id = ?").run(id);
                   db.prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?").run(c.hilo_id);
                 }
@@ -2065,12 +2353,12 @@ const server = http.createServer((req, res) => {
   }
 
   // Archivos estáticos y rutas amigables
-  let relativePath = pathname === "/" 
-    ? "index.html" 
-    : (pathname === "/comunidad" 
-        ? "comunidad.html" 
-        : (pathname === "/noticia" 
-            ? "noticia.html" 
+  let relativePath = pathname === "/"
+    ? "index.html"
+    : (pathname === "/comunidad"
+        ? "comunidad.html"
+        : (pathname === "/noticia"
+            ? "noticia.html"
             : (pathname === "/foro"
                 ? "foro.html"
                 : pathname.replace(/^\//, ""))));
