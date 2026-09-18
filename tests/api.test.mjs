@@ -1,12 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const serverPath = path.resolve(__dirname, "../server.js");
+const testDbFile = path.resolve(__dirname, "../data/foro.api.test.db");
 
 const TEST_PORT = 3899;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
@@ -14,10 +16,15 @@ const BASE_URL = `http://localhost:${TEST_PORT}`;
 test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t) => {
   let serverProcess;
 
-  // Iniciar servidor de pruebas en puerto aislado
+  // Limpiar base de datos de prueba previa
+  for (const ext of ["", "-shm", "-wal"]) {
+    try { fs.unlinkSync(testDbFile + ext); } catch {}
+  }
+
+  // Iniciar servidor de pruebas en puerto aislado con base de datos temporal
   await new Promise((resolve, reject) => {
     serverProcess = spawn(process.execPath, [serverPath], {
-      env: { ...process.env, PORT: String(TEST_PORT) },
+      env: { ...process.env, PORT: String(TEST_PORT), DATABASE_PATH: testDbFile },
       stdio: ["ignore", "pipe", "pipe"]
     });
 
@@ -46,6 +53,9 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   t.after(() => {
     if (serverProcess) {
       serverProcess.kill();
+    }
+    for (const ext of ["", "-shm", "-wal"]) {
+      try { fs.unlinkSync(testDbFile + ext); } catch {}
     }
   });
 
@@ -269,5 +279,33 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
     assert.equal(resBorrar.status, 200);
     const dataBorrar = await resBorrar.json();
     assert.equal(dataBorrar.status, "ok");
+  });
+
+  await t.test("Páginas Dual-Runtime: GET / sirve index.html como hub principal", async () => {
+    const res = await fetch(`${BASE_URL}/`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("content-type"), /text\/html/);
+    const html = await res.text();
+    assert.ok(html.includes("Estudiantina"));
+    assert.ok(html.includes("simulador.html"));
+    assert.ok(html.includes("comunidad.html"));
+    assert.ok(html.includes("foro.html"));
+  });
+
+  await t.test("Páginas Dual-Runtime: GET /simulador sirve simulador.html con status 200", async () => {
+    const res = await fetch(`${BASE_URL}/simulador`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("content-type"), /text\/html/);
+    const html = await res.text();
+    assert.ok(html.includes("Simulador de Carrera"));
+    assert.ok(html.includes("confetti-canvas"));
+  });
+
+  await t.test("Páginas Dual-Runtime: GET /comunidad alias sirve portal con status 200", async () => {
+    const res = await fetch(`${BASE_URL}/comunidad`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get("content-type"), /text\/html/);
+    const html = await res.text();
+    assert.ok(html.includes("hero-article"));
   });
 });

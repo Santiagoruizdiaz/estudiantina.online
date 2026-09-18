@@ -2,18 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Simulador de Carrera: Estudiantina | estudiantina.online</title>
-  <meta name="description" content="Tomá decisiones, sentí el ritmo en el 4to tramo de la Costanera y convertite en leyenda de la Estudiantina con los 33 colegios participantes.">
-  <meta name="theme-color" content="#090d16">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Estudiantina Posadas Oficial &mdash; Simulador, Comunidad &amp; Foro (estudiantina.online)</title>
+  <meta name="description" content="Portal oficial de la Estudiantina de Posadas. Simulador de carrera, coberturas de noticias en vivo y foro de debate estudiantil.">
+  <meta name="theme-color" content="#090a0f">
 
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://estudiantina.online/">
-
-  <!-- Favicons e Iconos Oficiales para Navegadores y Google -->
+  <!-- Favicons e Iconos Oficiales -->
   <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48x48.png">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
@@ -21,1333 +15,188 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
-  <!-- Open Graph / Redes Sociales / Google Search -->
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://estudiantina.online/">
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Estudiantina Posadas Online">
   <meta property="og:url" content="https://estudiantina.online/">
-  <meta property="og:title" content="Simulador de Carrera: estudiantina.online">
-  <meta property="og:description" content="Viví la emoción de la Estudiantina en la Costanera con los 33 colegios oficiales. Desfilá, competí en los palcos y levantá la Copa de Oro de la Estudiantina.">
+  <meta property="og:title" content="Estudiantina de Posadas &mdash; Simulador, Comunidad &amp; Foro">
+  <meta property="og:description" content="Plataforma de la fiesta estudiantil de Posadas: Simulador de carrera RPG, noticias y cobertura en vivo, y foro de debate.">
   <meta property="og:image" content="https://estudiantina.online/assets/logo.png">
-  <meta property="og:image:secure_url" content="https://estudiantina.online/assets/logo.png">
-  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1024">
   <meta property="og:image:height" content="1024">
-  <meta property="og:image:alt" content="Logo oficial de Estudiantina.online">
   <meta property="og:locale" content="es_AR">
 
   <!-- Twitter Cards -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Simulador de Carrera: estudiantina.online">
-  <meta name="twitter:description" content="Simulá tu carrera en la Estudiantina. 33 colegios, eventos reales y mercado de pases.">
+  <meta name="twitter:title" content="Estudiantina de Posadas &mdash; Simulador, Comunidad &amp; Foro">
+  <meta name="twitter:description" content="Plataforma de la fiesta estudiantil de Posadas: Simulador de carrera RPG, noticias y cobertura en vivo, y foro de debate.">
   <meta name="twitter:image" content="https://estudiantina.online/assets/logo.png">
 
-  <!-- Schema.org / Logo oficial para Google Search y Knowledge Graph -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Estudiantina Posadas Online",
-    "url": "https://estudiantina.online/",
-    "logo": "https://estudiantina.online/assets/logo.png",
-    "image": "https://estudiantina.online/assets/logo.png"
-  }
-  </script>
-
-  <!-- Fuentes Oficiales: Outfit (Moderna, deportiva, elegante e impactante) & Inter -->
+  <!-- Tipografía Oficial: Outfit & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- html2canvas para descargar la Ficha de Egresado en alta calidad -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <link rel="stylesheet" href="styles.css?v=20260909_17">
+  <!-- Estilos de Producción -->
+  <link rel="stylesheet" href="css/hub.css?v=20260917_2">
 </head>
-<body>
+<body class="hub-body">
 
-  <!-- Confetti Canvas -->
-  <canvas id="confetti-canvas"></canvas>
+  <div class="hub-wrapper">
 
-  <div id="app">
-    <!-- Main Top Navbar (Webapp Style) -->
-    <header class="app-header">
-      <div class="brand-badge">
-        <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
-      </div>
-      <div class="header-actions">
-        <div id="global-nav-user" class="global-nav-user-container"></div>
-        <a href="foro.html" class="btn-nav-comunidad" title="Foro de Debate Estudiantil">
-          <span>💬</span>
-          <span class="nav-comunidad-text">Foro</span>
+    <!-- HEADER -->
+    <header class="hub-header">
+      <a href="index.html" class="hub-brand" aria-label="Estudiantina Online Inicio">
+        <span class="hub-brand-logo">estudiantina<span class="hub-brand-domain">.online</span></span>
+      </a>
+
+      <div class="hub-header-actions">
+        <div class="hub-badge-meta">
+          <span class="hub-badge-indicator" aria-hidden="true"></span>
+          <span>Temporada 2026</span>
+        </div>
+        <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="hub-nav-link" title="Instagram Oficial">
+          <svg class="hub-svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          <span>Instagram</span>
         </a>
-        <a href="comunidad.html" class="btn-nav-comunidad" title="Comunidad y Noticias">
-          <span>📰</span>
-          <span class="nav-comunidad-text">Comunidad</span>
-        </a>
-        <button id="btn-menu-toggle" class="btn-hamburger" title="Menú de opciones" aria-label="Abrir menú">
-          <span class="hamburger-bar"></span>
-          <span class="hamburger-bar"></span>
-          <span class="hamburger-bar"></span>
-        </button>
       </div>
     </header>
 
-    <!-- Menú Desplegable / Drawer de Opciones -->
-    <div id="nav-dropdown-menu" class="nav-dropdown-menu">
-      <div class="dropdown-header">
-        <span class="dropdown-title">Menú Principal</span>
-        <button id="btn-close-dropdown" class="btn-close-dropdown" aria-label="Cerrar menú">✕</button>
-      </div>
-      <div class="dropdown-items">
-        <a id="menu-item-foro" class="dropdown-item" href="foro.html">
-          <span class="dropdown-item-icon">💬</span>
-          <div class="dropdown-item-text">
-            <strong>Foro de Debate</strong>
-            <small>Discusiones, percusión y baile</small>
-          </div>
-          <span class="dropdown-item-external">↗</span>
-        </a>
-        <a id="menu-item-comunidad" class="dropdown-item" href="comunidad.html">
-          <span class="dropdown-item-icon">📰</span>
-          <div class="dropdown-item-text">
-            <strong>Comunidad & Noticias</strong>
-            <small>Novedades, crónicas y guías</small>
-          </div>
-          <span class="dropdown-item-external">↗</span>
-        </a>
-        <button id="menu-item-rankings" class="dropdown-item">
-          <span class="dropdown-item-icon">🏆</span>
-          <div class="dropdown-item-text">
-            <strong>Salón de la Fama</strong>
-            <small>Top 10 y Colegios</small>
-          </div>
-        </button>
-        <a id="menu-item-instagram" class="dropdown-item dropdown-item-instagram" href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" title="Seguinos en Instagram @estudiantina.online">
-          <span class="dropdown-item-icon instagram-icon-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-            </svg>
-          </span>
-          <div class="dropdown-item-text">
-            <strong>Instagram</strong>
-            <small>@estudiantina.online</small>
-          </div>
-          <span class="dropdown-item-external">↗</span>
-        </a>
-        <a id="menu-item-creator" class="dropdown-item dropdown-item-creator" href="https://santiagoruizdiaz.vercel.app/" target="_blank" rel="noopener noreferrer" title="Portfolio de Santiago Ruiz Diaz - Creador del juego">
-          <span class="dropdown-item-icon creator-icon-box">
-            💻
-          </span>
-          <div class="dropdown-item-text">
-            <strong>Creador del Juego</strong>
-            <small>Santiago Ruiz Diaz</small>
-          </div>
-          <span class="dropdown-item-external">↗</span>
-        </a>
-        <button id="menu-item-sound" class="dropdown-item">
-          <span id="menu-sound-icon" class="dropdown-item-icon">🔊</span>
-          <div class="dropdown-item-text">
-            <strong id="menu-sound-title">Sonido</strong>
-            <small id="menu-sound-status">Activado</small>
-          </div>
-        </button>
-                <button id="menu-item-terms" class="dropdown-item">
-          <span class="dropdown-item-icon">⚖️</span>
-          <div class="dropdown-item-text">
-            <strong>Términos & Condiciones</strong>
-            <small>Aviso legal y descargo</small>
-          </div>
-        </button>
-        <button id="menu-item-restart" class="dropdown-item">
-          <span class="dropdown-item-icon">🔄</span>
-          <div class="dropdown-item-text">
-            <strong>Reiniciar Carrera</strong>
-            <small>Volver al inicio</small>
-          </div>
-        </button>
-      </div>
-    </div>
-    <div id="dropdown-backdrop" class="dropdown-backdrop"></div>
-
-    <!-- ====================================================================
-         PANTALLA 1: BIENVENIDA / MODO NORMAL (Estilo Copero)
-         ==================================================================== -->
-    <section id="screen-intro" class="screen active">
-      <div class="hero-container">
-
-        <!-- Illustration panel (left) -->
-        <div class="hero-illustration">
-          <span style="position:relative;z-index:1">🥁</span>
+    <!-- HERO -->
+    <main>
+      <section class="hub-hero">
+        <div class="hub-sponsor-wrap">
+          <a href="https://radioup.com.ar/" target="_blank" rel="noopener noreferrer" class="hub-sponsor-card" title="Radio UP &bull; Rivadavia en Posadas (radioup.com.ar)">
+            <img src="assets/banner-radioup.png" alt="Radio UP - Rivadavia en Posadas" class="hub-sponsor-img" width="970" height="251" loading="eager">
+          </a>
         </div>
 
-        <!-- Content (right) -->
-        <div class="hero-content">
-          <p class="hero-breadcrumb">Minijuegos • Estudiantina</p>
+        <h1 class="hub-hero-title">
+          Viví la fiesta en la <em>Costanera</em>
+        </h1>
+      </section>
 
-          <h1 class="hero-title">
-            Construí tu carrera<br>en la <span>Costanera</span>
-          </h1>
+      <!-- SECCIONES PRINCIPALES (3 OPCIONES) -->
+      <section class="hub-cards-grid" aria-label="Módulos principales">
 
-          <p class="hero-subtitle">
-            Elegí tu colegio, tu instrumento o tu escuadra, tomá decisiones clave y dejá que el destino te lleve a una trayectoria única de títulos, estadísticas y momentos decisivos.
+        <!-- OPCIÓN 1: JUGAR -->
+        <article class="hub-card" id="card-jugar">
+          <div class="hub-card-header">
+            <div class="hub-card-icon-wrap" aria-hidden="true">
+              <!-- SVG Lucide Gamepad2 -->
+              <svg class="hub-svg-icon" viewBox="0 0 24 24">
+                <line x1="6" x2="10" y1="12" y2="12"/>
+                <line x1="8" x2="8" y1="10" y2="14"/>
+                <line x1="15" x2="15.01" y1="13" y2="13"/>
+                <line x1="18" x2="18.01" y1="11" y2="11"/>
+                <rect width="20" height="12" x="2" y="6" rx="6"/>
+              </svg>
+            </div>
+            <span class="hub-card-category">Simulador</span>
+          </div>
+
+          <h2 class="hub-card-title">Jugar</h2>
+          <p class="hub-card-subtitle">El juego de la Estudiantina</p>
+
+          <p class="hub-card-desc">
+            El videojuego interactivo de la Estudiantina posadeña. Un espacio para revivir la pasión de las noches de calle, la música, el baile y la historia de los colegios de nuestra ciudad.
           </p>
 
-          <div class="hero-actions">
-            <button id="btn-go-identity" class="btn-start-primary">
-              Comenzar carrera
-            </button>
-            <button id="btn-intro-rankings" class="btn-start-secondary">
-              🏆 Salón de la Fama
-            </button>
-          </div>
-
-          <!-- Botón de Patrocinadores (mismo tamaño que Comenzar carrera) con desplegable -->
-          <div class="hero-sponsors-section">
-            <button id="btn-toggle-sponsors" class="btn-start-sponsors" type="button" aria-expanded="false" aria-controls="sponsors-dropdown-panel">
-              <span>Patrocinadores</span>
-              <span id="sponsors-dropdown-arrow" class="sponsors-chevron">▼</span>
-            </button>
-
-            <!-- Desplegable con los patrocinadores -->
-            <div id="sponsors-dropdown-panel" class="sponsors-dropdown-panel" aria-hidden="true">
-              <div class="sponsors-dropdown-inner">
-                <article class="sponsor-card">
-                  <div class="sponsor-card-left">
-                    <div class="sponsor-logo-box">
-                      <img src="assets/iannavajas.png" alt="Ian Navajas Barbería" class="sponsor-logo-img">
-                    </div>
-                    <div class="sponsor-text-group">
-                      <div class="sponsor-name-row">
-                        <strong class="sponsor-name">Ian Navajas</strong>
-                        <span class="sponsor-category-badge">Barbería</span>
-                      </div>
-                      <p class="sponsor-desc">Los mejores cortes de Posadas. Código <strong class="sponsor-promo-code">estuonline</strong>: 20% de descuento en tu corte.</p>
-                    </div>
-                  </div>
-                  <a href="https://www.instagram.com/iannavajas_/" target="_blank" rel="noopener noreferrer" class="sponsor-ig-btn" title="Seguir a Ian Navajas en Instagram @iannavajas_">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                    <span>@iannavajas_</span>
-                    <span class="external-arrow">↗</span>
-                  </a>
-                </article>
-              </div>
-            </div>
-          </div>
-                            <!-- Desplegable interactivo de Términos y Condiciones -->
-          <div class="terms-desplegable-container">
-            <button id="btn-toggle-terms-desplegable" class="btn-terms-desplegable-trigger" type="button" aria-expanded="false" aria-controls="terms-desplegable-panel">
-              <span class="terms-trigger-left">
-                <span class="terms-trigger-icon">⚖️</span>
-                <span class="terms-trigger-title">Términos y Condiciones de Uso y Descargo de Responsabilidad</span>
-              </span>
-              <span class="terms-trigger-arrow" id="terms-trigger-arrow">▾ Desplegar</span>
-            </button>
-
-            <div id="terms-desplegable-panel" class="terms-desplegable-panel" style="display: none;">
-
-          <div class="terms-doc-wrapper">
-            <div class="terms-doc-header">
-              <div class="terms-badge-legal">DOCUMENTO LEGAL OFICIAL</div>
-              <h3 class="terms-doc-title">TÉRMINOS Y CONDICIONES DE USO Y DESCARGO DE RESPONSABILIDAD</h3>
-              <div class="terms-doc-meta">
-                <span class="terms-meta-item">📅 Última actualización: <strong>07/09/2026</strong></span>
-                <span class="terms-meta-item">📍 Jurisdicción: <strong>Posadas, Misiones, Argentina</strong></span>
-              </div>
-            </div>
-
-            <div class="terms-clauses-container">
-              <!-- Cláusula 1 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">1</span>
-                  <h4 class="clause-title">NATURALEZA DEL PROYECTO Y MODELO DE FINANCIAMIENTO</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El presente videojuego (en adelante, <strong>"el Juego"</strong>) es una obra de ficción, lúdica y cultural, desarrollada como un homenaje interactivo a la tradición de la Estudiantina y la cultura estudiantil de Posadas, Misiones.</p>
-                  <p>El acceso al Juego puede ser gratuito o bajo la modalidad que el Desarrollador determine. Para solventar los costos técnicos, operativos, de infraestructura y desarrollo, el Juego cuenta con espacios publicitarios y acuerdos de patrocinio comercial (in-game advertising, cartelería virtual, pantallas de carga o menciones de marca).</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 2 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">2</span>
-                  <h4 class="clause-title">INDEPENDENCIA INSTITUCIONAL Y USO DE NOMBRES POPULARES</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El Juego utiliza de forma exclusiva <strong>apodos populares, gentilicios estudiantiles, denominaciones coloquiales y términos de dominio público</strong> (tales como <em>"La Indu"</em>, <em>"El Nacio"</em>, <em>"La Comer"</em>, <em>"El Santa"</em>, <em>"El Janssen"</em>, <em>"El Roque"</em>, <em>"El Sanba"</em>, <em>"La Madre"</em>, entre otros), representativos del acervo cultural y las celebraciones locales.</p>
-                  <div class="clause-callout-box">
-                    <strong>🛡️ Deslinde de afiliación:</strong> La inclusión de estos apodos y colores se efectúa con fines estrictamente lúdicos y de ambientación ficcional. No implica, ni debe interpretarse como, existencia de patrocinio, aval, asociación, vínculo contractual o representación oficial de ninguna institución educativa, pública o privada, ni de entidades organizadoras (como la Asociación Posadeña de Estudiantes Secundarios - APES o entes gubernamentales).
-                  </div>
-                  <div class="clause-callout-box" style="margin-top: 0.6rem;">
-                    <strong>🎨 Activos visuales:</strong> Todos los escudos, emblemas, texturas, trajes y logotipos presentes en el Juego son diseños originales y ficticios, creados expresamente para la obra sin utilizar marcas ni signos registrados por terceros.
-                  </div>
-                </div>
-              </article>
-
-              <!-- Cláusula 3 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">3</span>
-                  <h4 class="clause-title">PUBLICIDAD, MARCAS COMERCIALES Y SPONSORS</h4>
-                </div>
-                <div class="clause-body">
-                  <p>Las marcas, logotipos, nombres comerciales y avisos de patrocinadores que aparecen dentro del entorno del Juego pertenecen a sus respectivos titulares y se exhiben bajo contratos o permisos específicos de publicidad digital.</p>
-                  <p>Los patrocinadores y marcas comerciales no intervienen en el desarrollo artístico, temático, ni argumental del Juego, limitando su rol exclusivamente al auspicio publicitario.</p>
-                  <p>Los patrocinadores no asumen responsabilidad civil, comercial ni legal alguna por el contenido del Juego, sus mecánicas, los apodos estudiantiles empleados o cualquier eventual disputa entre el Desarrollador y terceros.</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 4 -->
-              <article class="terms-clause-item clause-highlighted">
-                <div class="clause-header">
-                  <span class="clause-badge clause-badge-gold">4</span>
-                  <h4 class="clause-title">PROCEDIMIENTO DE RETIRO A PEDIDO (NOTICE AND TAKEDOWN)</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El Desarrollador actúa de estricta buena fe y reconoce el derecho de las instituciones educativas y de la comunidad a salvaguardar su imagen y denominación.</p>
-                  <p>Cualquier colegio, representante directivo o institución que considere que la inclusión de un apodo o elemento alusivo vulnera sus derechos o afecta su reputación institucional, podrá solicitar formalmente su modificación o eliminación.</p>
-                  <p>Para iniciar el trámite, deberá remitir un correo electrónico a <a href="mailto:contacto@estudiantina.online" class="terms-email-anchor"><strong>contacto@estudiantina.online</strong></a> detallando:</p>
-                  <ul class="clause-bullet-list">
-                    <li><strong>Nombre oficial</strong> de la institución educativa u organismo.</li>
-                    <li><strong>Identificación y acreditación</strong> del cargo o personería del solicitante.</li>
-                    <li><strong>Indicación precisa</strong> del elemento o apodo objeto de la solicitud.</li>
-                    <li><strong>Motivo fundado</strong> del reclamo.</li>
-                  </ul>
-                  <div class="clause-callout-box" style="margin-top: 0.75rem;">
-                    <strong>⏱️ Plazo de resolución:</strong> Tras constatar la legitimidad del solicitante, el Desarrollador procederá a modificar, anonimizar o retirar el contenido aludido en una actualización técnica en un plazo no mayor a <strong>48 horas hábiles</strong>, sin que ello implique reconocimiento de falta, daño o infracción legal alguna.
-                  </div>
-                </div>
-              </article>
-
-              <!-- Cláusula 5 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">5</span>
-                  <h4 class="clause-title">TONO, RESPETO Y CONDUCTA DEPORTIVA</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El argumento y mecánicas del Juego celebran el esfuerzo de los cuerpos de baile, bandas de música y directores, en un marco de sana competencia artística y deportiva. El Juego prohíbe y prescinde de cualquier contenido discriminatorio, violento, denigratorio o que incite al hostigamiento entre comunidades escolares.</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 6 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">6</span>
-                  <h4 class="clause-title">LIMITACIÓN DE RESPONSABILIDAD</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El Juego se provee <em>"tal cual"</em> y <em>"según disponibilidad"</em>, sin garantías de funcionamiento ininterrumpido en todos los dispositivos del mercado. El Desarrollador no responderá por daños indirectos, fallas de conectividad ni por opiniones vertidas por los usuarios en comunidades o foros externos al Juego.</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 7 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">7</span>
-                  <h4 class="clause-title">LEY APLICABLE Y JURISDICCIÓN</h4>
-                </div>
-                <div class="clause-body">
-                  <p>Los presentes Términos y Condiciones se rigen e interpretan conforme a las leyes de la República Argentina. Ante cualquier controversia que no pueda resolverse de común acuerdo, las partes se someten a la jurisdicción de los <strong>Tribunales Ordinarios de la Primera Circunscripción Judicial de la Provincia de Misiones</strong>, con asiento en la ciudad de Posadas, renunciando a cualquier otro fuero o jurisdicción que pudiera corresponderles.</p>
-                </div>
-              </article>
-            </div>
-          </div>
-
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- ====================================================================
-         PANTALLA 2: IDENTIDAD / CREACIÓN DE PERSONAJE
-         ==================================================================== -->
-    <section id="screen-identity" class="screen">
-      <div class="identity-layout">
-        <!-- Step Indicators -->
-        <div class="step-indicator">
-          <div id="step-dot-1" class="step-dot active">1</div>
-          <div id="step-line-1" class="step-line"></div>
-          <div id="step-dot-2" class="step-dot">2</div>
-          <div id="step-line-2" class="step-line"></div>
-          <div id="step-dot-3" class="step-dot">3</div>
-        </div>
-
-        <!-- Sub-Paso 1: Rubro y Rol -->
-        <div id="substep-rubro" class="form-card">
-          <h2 class="form-title">Elegí tu Rubro & Posición</h2>
-          <p class="form-subtitle">¿En qué disciplina y puesto vas a defender la camiseta escolar?</p>
-
-          <div class="rubros-tabs">
-            <div class="rubro-tab active" data-rubro="banda">
-              <h3>🥁 Banda de Música</h3>
-            </div>
-            <div class="rubro-tab" data-rubro="baile">
-              <h3>💃 Cuerpo de Baile</h3>
-            </div>
-          </div>
-
-          <div id="roles-grid-container" class="roles-grid">
-            <!-- Rendered dynamically by JS -->
-          </div>
-
-          <div class="step-actions">
-            <button id="btn-back-to-intro" class="btn-secondary">Volver</button>
-            <button id="btn-to-colegio" class="btn-primary">Siguiente: Elegí tu Colegio ➔</button>
-          </div>
-        </div>
-
-        <!-- Sub-Paso 2: Colegio -->
-        <div id="substep-colegio" class="form-card" style="display: none;">
-          <h2 class="form-title" id="colegio-step-title">Elegí tu Colegio</h2>
-          <p class="form-subtitle" id="colegio-subtitle">Seleccioná entre las 33 instituciones oficiales de Posadas según la jerarquía de tu disciplina.</p>
-
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="input-search-colegio" class="search-input" placeholder="Buscar colegio por apodo o especialidad (ej. El Janssen, El Roque, La Indu, El Santa)...">
-          </div>
-
-          <!-- Píldoras de filtrado rápido por categoría escolar -->
-          <div id="colegios-filter-bar" class="colegios-filter-bar">
-            <!-- Rendered dynamically by JS depending on rubro -->
-          </div>
-
-          <div id="colegios-grid-container" class="colegios-grid">
-            <!-- Rendered dynamically by JS -->
-          </div>
-
-          <div class="step-actions">
-            <button id="btn-back-to-rubro" class="btn-secondary">Atrás</button>
-            <button id="btn-to-personalizacion" class="btn-primary" disabled>Siguiente: Tu Nombre ➔</button>
-          </div>
-        </div>
-
-        <!-- Sub-Paso 3: Nombre y Personalización -->
-        <div id="substep-personalizacion" class="form-card" style="display: none;">
-          <h2 class="form-title">Tu Identidad Estudiantil</h2>
-          <p class="form-subtitle">¿Cómo te van a llamar en la Costanera y en las planillas oficiales de la Estudiantina?</p>
-
-          <div class="input-group">
-            <label class="input-label" for="input-player-name">Nombre o Apodo:</label>
-            <input type="text" id="input-player-name" class="text-input" placeholder="Ej: Facu, Cande, Tomi, Lu..." maxlength="20">
-          </div>
-
-          <div id="identity-summary-preview" style="margin-top: 1rem;">
-            <!-- Rendered by JS -->
-          </div>
-
-          <div class="step-actions">
-            <button id="btn-back-to-colegio" class="btn-secondary">Atrás</button>
-            <button id="btn-start-simulation" class="btn-primary">¡Comenzar 1º Año! 🚀</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ====================================================================
-         PANTALLA 3: SIMULADOR DE CARRERA (Tablero Principal)
-         ==================================================================== -->
-    <section id="screen-career" class="screen">
-      <div class="career-dashboard">
-
-        <!-- Player Card: OVR + Info (fiel a Copero) -->
-        <header class="status-banner">
-          <!-- OVR Badge grande -->
-          <div class="player-ovr-badge">
-            <span class="player-ovr-label">OVR</span>
-            <span id="status-overall-ovr" class="player-ovr-number">54</span>
-          </div>
-
-          <div class="player-info">
-            <div id="status-avatar" class="player-avatar-badge">🥁</div>
-            <div class="player-text">
-              <div class="player-name-row">
-                <span id="status-player-name" class="player-name">Estudiante</span>
-                <span id="status-director-badge" class="director-badge" style="display: none;">Director/a</span>
-              </div>
-              <span id="status-colegio-rol" class="player-colegio-rol">Colegio • Rol</span>
-            </div>
-          </div>
-
-          <div class="year-progress-box">
-            <div class="year-badge-big">
-              <span class="year-label">Temporada</span>
-              <span id="status-year-number" class="year-number">1º Año</span>
-            </div>
-          </div>
-        </header>
-
-        <!-- Counters row: quick stats (visible en el player card) -->
-        <div class="player-counters-row" style="grid-column:1; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-xl); padding:0.85rem 1.25rem; margin-top:-0.35rem; margin-bottom:0;">
-          <div class="player-counter">
-            <span class="player-counter-label">Ritmo</span>
-            <span id="stat-ritmo-val" class="player-counter-val">55</span>
-          </div>
-          <div class="player-counter">
-            <span class="player-counter-label">Hinchada</span>
-            <span id="stat-hinchada-val" class="player-counter-val">50</span>
-          </div>
-          <div class="player-counter">
-            <span class="player-counter-label">Físico</span>
-            <span id="stat-resistencia-val" class="player-counter-val">60</span>
-          </div>
-          <div class="player-counter" style="margin-left:auto;">
-            <span class="player-counter-label" style="color:var(--ovr-orange)">Overall</span>
-            <span id="stat-overall-val" class="player-counter-val" style="color:var(--ovr-orange)">54</span>
-          </div>
-        </div>
-
-        <!-- Central Interactive Decision Section -->
-        <main class="decision-section">
-          <!-- Active Decision Card -->
-          <article id="card-decision" class="decision-card">
-            <span id="decision-category" class="decision-category-tag">⚡ ENSAYO EN EL PLAYÓN</span>
-            <h2 id="decision-title" class="decision-title">El Bautismo del Playón</h2>
-            <p id="decision-narrative" class="decision-narrative">
-              Es tu primera semana de ensayos en el playón de la escuela con 32 grados de calor. Los de 5to año te miran de reojo para ver si tenés aguante o si tirás la toalla.
-            </p>
-
-            <div id="options-container" class="options-container">
-              <!-- Options rendered by JS -->
-            </div>
-          </article>
-
-          <!-- Outcome Feedback Card (after choosing) -->
-          <article id="card-outcome-feedback" class="outcome-feedback-card">
-            <div id="outcome-icon" class="outcome-icon">🎉</div>
-            <h3 id="outcome-title" class="outcome-title">¡Gran Éxito!</h3>
-            <p id="outcome-message" class="outcome-message">
-              Te ganaste el respeto instantáneo de los directores.
-            </p>
-
-            <div id="outcome-deltas-container" class="stat-deltas-row">
-              <!-- Stat deltas rendered by JS -->
-            </div>
-
-            <button id="btn-continue-after-outcome" class="btn-primary" style="margin: 0 auto;">
-              Continuar ➔
-            </button>
-          </article>
-
-          <!-- ================================================================
-               TABLA HISTÓRICA DE TEMPORADAS (Estilo Copero)
-               ================================================================ -->
-          <div class="career-table-card">
-            <div class="table-header-row">
-              <h3 class="table-title">
-                <span>📊</span>
-                <span>Estadísticas de Carrera por Año</span>
-              </h3>
-              <span class="table-badge">Historial Oficial de Desfiles</span>
-            </div>
-
-            <div class="table-responsive-wrapper">
-              <table id="career-stats-table" class="copero-stats-table">
-                <thead>
-                  <tr>
-                    <th>Año</th>
-                    <th>Colegio</th>
-                    <th>Rol / Rango</th>
-                    <th>Palco 1</th>
-                    <th>Palco 2</th>
-                    <th>Anfi</th>
-                    <th>Promedio</th>
-                    <th>Ritmo</th>
-                    <th>Hinchada</th>
-                    <th>Aguante</th>
-                    <th>Overall</th>
-                    <th>Copas</th>
-                  </tr>
-                </thead>
-                <tbody id="career-table-body">
-                  <!-- Rows injected dynamically by JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </main>
-
-        <!-- Sidebar Derecha: Timeline + Trofeos (fiel a Copero) -->
-        <aside class="career-sidebar">
-
-          <!-- Stats bars mini (sidebar) -->
-          <div class="sidebar-card">
-            <h3 class="sidebar-title"><span>📊</span><span>Atributos</span></h3>
-            <div class="stat-box-mini">
-              <div class="stat-box-mini-row">
-                <span class="stat-box-mini-name">Ritmo</span>
-                <span id="sidebar-ritmo-val" class="stat-box-mini-val">55</span>
-              </div>
-              <div class="stat-bar-track"><div id="stat-ritmo-bar" class="stat-bar-fill stat-fill-ritmo" style="width:55%"></div></div>
-            </div>
-            <div class="stat-box-mini">
-              <div class="stat-box-mini-row">
-                <span class="stat-box-mini-name">Hinchada</span>
-                <span id="sidebar-hinchada-val" class="stat-box-mini-val">50</span>
-              </div>
-              <div class="stat-bar-track"><div id="stat-hinchada-bar" class="stat-bar-fill stat-fill-hinchada" style="width:50%"></div></div>
-            </div>
-            <div class="stat-box-mini">
-              <div class="stat-box-mini-row">
-                <span class="stat-box-mini-name">Físico</span>
-                <span id="sidebar-resistencia-val" class="stat-box-mini-val">60</span>
-              </div>
-              <div class="stat-bar-track"><div id="stat-resistencia-bar" class="stat-bar-fill stat-fill-resistencia" style="width:60%"></div></div>
-            </div>
-            <div class="stat-box-mini" style="border-bottom:none">
-              <div class="stat-box-mini-row">
-                <span class="stat-box-mini-name" style="color:var(--ovr-orange)">Overall</span>
-                <span id="sidebar-overall-val" class="stat-box-mini-val" style="color:var(--ovr-orange)">54</span>
-              </div>
-              <div class="stat-bar-track"><div id="stat-overall-bar" class="stat-bar-fill stat-fill-overall" style="width:54%"></div></div>
-            </div>
-          </div>
-
-          <!-- Trophies -->
-          <div class="sidebar-card">
-            <h3 class="sidebar-title"><span>🏆</span><span>Vitrina</span></h3>
-            <div id="trophies-list-container" class="trophies-list">
-              <p class="empty-state-text">Aún sin copas.</p>
-            </div>
-          </div>
-
-          <!-- School info -->
-          <div class="sidebar-card">
-            <h3 class="sidebar-title"><span>🏫</span><span>Colegio</span></h3>
-            <div id="school-info-card-sidebar">
-              <!-- Dynamic -->
-            </div>
-          </div>
-
-        </aside>
-      </div>
-    </section>
-
-    <!-- ====================================================================
-         MODAL 1: DESFILE EN LA COSTANERA Y ANFITEATRO
-         ==================================================================== -->
-    <div id="modal-parade" class="modal-overlay">
-      <div class="modal-content">
-        <div class="parade-animation-box">
-          <span>🥁</span>
-          <span>💃</span>
-          <span>✨</span>
-          <span>🎺</span>
-          <span>👑</span>
-        </div>
-        <h2 id="parade-title" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem;">
-          ¡Fin de las Noches de Calle!
-        </h2>
-        <p id="parade-subtitle" style="color: var(--text-secondary); font-size: 0.95rem;">
-          El Jurado Oficial ha computado las planillas del 4to tramo y el Show del Anfiteatro.
-        </p>
-
-        <div class="parade-scores-grid">
-          <div class="score-box">
-            <div class="score-label">Palco 1</div>
-            <div id="parade-score-palco1" class="score-val">9.5</div>
-          </div>
-          <div class="score-box">
-            <div class="score-label">Palco 2</div>
-            <div id="parade-score-palco2" class="score-val">9.7</div>
-          </div>
-          <div class="score-box">
-            <div class="score-label">Anfiteatro</div>
-            <div id="parade-score-anfi" class="score-val">9.8</div>
-          </div>
-        </div>
-
-        <div id="podium-announcement-box" class="podium-announcement">
-          <div id="podium-title" class="podium-text">🥇 ¡1º Puesto - Campeones de Oro!</div>
-          <div id="podium-desc" style="font-size: 0.9rem; color: var(--text-primary);">
-            Copa de Oro en Banda de Música
-          </div>
-        </div>
-
-        <!-- ================================================================
-             TABLA GENERAL DE POSICIONES (TOP 5 + TU COLEGIO)
-             ================================================================ -->
-        <div class="season-leaderboard-container" style="text-align: left !important; display: block !important;">
-          <div class="season-leaderboard-header">
-            <div class="leaderboard-title-col">
-              <span class="leaderboard-badge">Planilla Oficial del Jurado</span>
-              <h3 class="leaderboard-title">Tabla General de Posiciones</h3>
-            </div>
-            <span id="leaderboard-season-tag" class="leaderboard-season-tag">1º Año</span>
-          </div>
-
-          <div id="season-leaderboard-list" class="season-leaderboard-list">
-            <!-- Rendered dynamically by app.js -->
-          </div>
-        </div>
-
-        <button id="btn-show-transfers-or-finish" class="btn-primary" style="width: 100%; padding: 0.9rem 2rem; margin-top: 1.25rem;">
-          Continuar al Mercado de Pases ➔
-        </button>
-      </div>
-    </div>
-
-    <!-- ====================================================================
-         MODAL 2: MERCADO DE PASES / CONTINUIDAD O EXPULSIÓN (Fiel a Copero)
-         ==================================================================== -->
-    <div id="modal-transfers" class="modal-overlay">
-      <div class="modal-content transfer-modal-content">
-        <div id="transfer-header-banner" class="transfer-header-banner">
-          <span id="transfer-status-icon" class="transfer-status-icon">🔄</span>
-          <div>
-            <h2 id="transfer-modal-title" class="transfer-modal-title">Ofertas de la Estudiantina</h2>
-            <p id="transfer-modal-subtitle" class="transfer-modal-subtitle">
-              Otros colegios quedaron fascinados con tu pasada en la Costanera y buscan ficharte.
-            </p>
-          </div>
-        </div>
-
-        <!-- Expulsion Alert Box (shown only if expelled) -->
-        <div id="expulsion-alert-box" class="expulsion-alert-box" style="display: none;">
-          <div class="expulsion-title">⚠️ ¡EXPULSADO DE TU COLEGIO!</div>
-          <p id="expulsion-reason-text" class="expulsion-reason-text">
-            Por faltar a los ensayos clave y no cumplir la exigencia mínima, los directores te despidieron de la banda. ¡Tenés que buscar un nuevo colegio obligado!
-          </p>
-        </div>
-
-        <!-- Offers list -->
-        <div id="transfer-offers-container" class="transfer-offers-container">
-          <!-- Offer cards injected by JS -->
-        </div>
-
-        <!-- Stay / Renewal Button (hidden if expelled) -->
-        <div id="stay-option-container" class="stay-option-container">
-          <button id="btn-stay-current-school" class="btn-secondary" style="width: 100%; padding: 0.85rem; font-weight: 700;">
-            🛡️ Quedarme en mi Colegio (+4 Hinchada)
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ====================================================================
-         MODAL 3: SANCIÓN Y SUSPENSIÓN EXTRAORDINARIA DEL TRIBUNAL
-         ==================================================================== -->
-    <div id="modal-suspension" class="modal-overlay">
-      <div class="modal-content" style="max-width: 540px; border: 1px solid rgba(239, 68, 68, 0.45); box-shadow: 0 20px 50px rgba(220, 38, 38, 0.35);">
-        <div style="text-align: center; margin-bottom: 1.25rem;">
-          <div style="font-size: 3.5rem; margin-bottom: 0.25rem;">🏛️</div>
-          <span class="badge-tag" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); font-size: 0.82rem; padding: 0.25rem 0.75rem; display: inline-block;">
-            RESOLUCIÓN DISCIPLINARIA OFICIAL
-          </span>
-          <h2 id="suspension-modal-title" style="color: #ffffff; font-size: 1.45rem; margin: 0.6rem 0 0.25rem;">
-            ¡COLEGIO SUSPENDIDO!
-          </h2>
-          <p id="suspension-modal-subtitle" style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
-            Sanción extraordinaria de la Comisión Organizadora y el Tribunal
-          </p>
-        </div>
-
-        <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
-          <p id="suspension-modal-desc" style="color: #e2e8f0; font-size: 0.95rem; line-height: 1.55; margin: 0;">
-            Por los graves incidentes registrados, el colegio queda formalmente excluido de la competencia.
-          </p>
-          <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid rgba(255,255,255,0.1); display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; text-align: center;">
-            <div style="background: rgba(255,255,255,0.03); padding: 0.5rem; border-radius: 6px;">
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Sanción</div>
-              <div id="suspension-modal-duracion" style="font-size: 1rem; font-weight: 800; color: #f87171;">1 Temporada</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 0.5rem; border-radius: 6px;">
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Noches de Calle</div>
-              <div style="font-size: 1rem; font-weight: 800; color: #ef4444;">CANCELADAS</div>
-            </div>
-            <div style="background: rgba(255,255,255,0.03); padding: 0.5rem; border-radius: 6px;">
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Puntaje Oficial</div>
-              <div style="font-size: 1rem; font-weight: 800; color: #ef4444;">0 (Sin Podio)</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <button id="btn-bancar-suspension" class="btn btn-primary" style="background: linear-gradient(135deg, #1e293b, #334155); border: 1px solid rgba(255,255,255,0.2); padding: 0.95rem 1rem; text-align: left; display: flex; align-items: center; gap: 0.85rem;">
-            <span style="font-size: 1.8rem;">🛡️</span>
-            <div style="flex: 1;">
-              <div style="font-weight: 800; color: #ffffff; font-size: 0.95rem;" id="btn-bancar-title">Bancar la Sanción en tu Colegio</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Entrenar a puertas cerradas hasta volver la próxima temporada (+8 Hinchada, +4 Aguante)</div>
-            </div>
-          </button>
-
-          <button id="btn-traspaso-suspension" class="btn btn-secondary" style="padding: 0.95rem 1rem; text-align: left; display: flex; align-items: center; gap: 0.85rem; border-color: rgba(245, 158, 11, 0.4);">
-            <span style="font-size: 1.8rem;">🔄</span>
-            <div style="flex: 1;">
-              <div style="font-weight: 800; color: var(--gold-primary); font-size: 0.95rem;">Pedir Pase de Emergencia Oficial</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Tramitar traspaso exprés a otro colegio para seguir desfilando en la Costanera</div>
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ====================================================================
-         PANTALLA 4: RESUMEN FINAL / FICHA DE EGRESADO (Estilo Copero)
-         ==================================================================== -->
-    <section id="screen-summary" class="screen">
-      <div class="summary-container">
-        <div class="hero-pill">
-          🎓 FICHA OFICIAL DE EGRESADO DE LA ESTUDIANTINA
-        </div>
-
-        <!-- Banner de Salón de la Fama si entró al Top 10 -->
-        <div id="summary-ranking-banner" class="summary-ranking-banner" style="display: none;">
-          <div class="ranking-banner-icon">🌟</div>
-          <div class="ranking-banner-info">
-            <h4 id="ranking-banner-title" class="ranking-banner-title">¡HISTÓRICO! Ingresaste al Salón de la Fama de la Estudiantina</h4>
-            <p id="ranking-banner-desc" class="ranking-banner-desc">Tu desempeño te consagra entre los 10 mejores egresados de todos los tiempos.</p>
-          </div>
-        </div>
-
-        <!-- Collectible Graduate Card -->
-        <article id="graduate-card" class="graduate-card">
-          <!-- Background decorative foil sheen and watermark -->
-          <div class="card-foil-sheen" aria-hidden="true"></div>
-          <div class="card-watermark" aria-hidden="true">ESTUDIANTINA</div>
-
-          <!-- Top Header Band: Gold Official Estudiantina Seal & Ribbon -->
-          <div class="card-top-header">
-            <div class="card-top-seal">
-              <span class="seal-icon">🏅</span>
-              <div class="seal-text-group">
-                <span class="seal-text-gold">EDICIÓN CONMEMORATIVA • ESTUDIANTINA DE POSADAS</span>
-                <span class="seal-text-sub">CREDENCIAL OFICIAL DE EGRESADO</span>
-              </div>
-            </div>
-            <div class="card-year-badge">
-              <span id="card-promocion-text">PROMO FINAL</span>
-            </div>
-          </div>
-
-          <!-- Main Player Showcase -->
-          <div class="card-hero-showcase">
-            <!-- Left: Avatar with glowing collector ring -->
-            <div class="card-avatar-wrapper">
-              <div id="card-avatar-element" class="card-avatar-container">
-                🥁
-              </div>
-              <div id="card-school-badge-icon" class="card-school-badge-icon">⚙️</div>
-            </div>
-
-            <!-- Right: OVR Trophy Shield -->
-            <div class="card-overall-badge">
-              <span class="overall-label">OVR GENERAL</span>
-              <span id="card-overall-number" class="overall-number">88</span>
-              <span id="card-overall-tier-text" class="overall-tier-text">LEYENDA</span>
-            </div>
-          </div>
-
-          <!-- Student Identity -->
-          <div class="card-identity-block">
-            <h2 id="card-student-name" class="card-student-name">Facundo</h2>
-            <div id="card-nickname-badge" class="card-nickname-badge">"El Pulso de Acero"</div>
-            <div class="card-school-role-group">
-              <span id="card-school-title" class="card-school-title">El Janssen</span>
-              <span class="card-badge-dot">•</span>
-              <span id="card-role-title" class="card-role-title">Director/a de Banda</span>
-            </div>
-          </div>
-
-          <!-- Stats 3-Pillar Grid -->
-          <div class="card-stats-row">
-            <div class="card-stat-item">
-              <div class="card-stat-top">
-                <span class="stat-icon">🥁</span>
-                <span class="card-stat-label">Ritmo</span>
-              </div>
-              <span id="card-ritmo-val" class="card-stat-val">91</span>
-              <div class="card-stat-bar-bg"><div id="card-ritmo-bar" class="card-stat-bar-fill" style="width: 91%;"></div></div>
-            </div>
-            <div class="card-stat-item">
-              <div class="card-stat-top">
-                <span class="stat-icon">📣</span>
-                <span class="card-stat-label">Hinchada</span>
-              </div>
-              <span id="card-hinchada-val" class="card-stat-val">88</span>
-              <div class="card-stat-bar-bg"><div id="card-hinchada-bar" class="card-stat-bar-fill" style="width: 88%;"></div></div>
-            </div>
-            <div class="card-stat-item">
-              <div class="card-stat-top">
-                <span class="stat-icon">⚡</span>
-                <span class="card-stat-label">Aguante</span>
-              </div>
-              <span id="card-resistencia-val" class="card-stat-val">85</span>
-              <div class="card-stat-bar-bg"><div id="card-resistencia-bar" class="card-stat-bar-fill" style="width: 85%;"></div></div>
-            </div>
-          </div>
-
-          <!-- Luxury Trophies & Palmarés Showcase -->
-          <div class="card-trophies-panel">
-            <div class="card-trophies-header">
-              <span class="trophies-header-icon">🏆</span>
-              <span class="trophies-header-label">PALMARÉS DE LA COSTANERA</span>
-            </div>
-            <div id="card-trophies-summary" class="card-trophies-summary">
-              🏆 2 Títulos de Oro • 1 Subcampeonato
-            </div>
-          </div>
-
-          <!-- Card Verification Footer -->
-          <div class="card-footer-auth">
-            <span class="auth-serial">FICHA OFICIAL #EST-2026</span>
-            <span class="auth-brand">estudiantina.online</span>
-          </div>
+          <a href="simulador.html" class="hub-btn hub-btn-primary" id="btn-opt-jugar">
+            <span>Iniciar Simulador</span>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
         </article>
 
-        <!-- Final Summary Stats Table -->
-        <div class="career-table-card" style="width: 100%; max-width: 850px;">
-          <div class="table-header-row">
-            <h3 class="table-title">
-              <span>📋</span>
-              <span>Historial Completo de Temporadas</span>
-            </h3>
+        <!-- OPCIÓN 2: COMUNIDAD -->
+        <article class="hub-card" id="card-comunidad">
+          <div class="hub-card-header">
+            <div class="hub-card-icon-wrap" aria-hidden="true">
+              <!-- SVG Lucide Newspaper -->
+              <svg class="hub-svg-icon" viewBox="0 0 24 24">
+                <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                <path d="M18 14h-8"/>
+                <path d="M15 18h-5"/>
+                <path d="M10 6h8v4h-8V6Z"/>
+              </svg>
+            </div>
+            <span class="hub-card-category">Portal Oficial</span>
           </div>
-          <div class="table-responsive-wrapper">
-            <table class="copero-stats-table">
-              <thead>
-                <tr>
-                  <th>Año</th>
-                  <th>Colegio</th>
-                  <th>Rol</th>
-                  <th>Promedio</th>
-                  <th>Ritmo</th>
-                  <th>Hinchada</th>
-                  <th>Aguante</th>
-                  <th>Overall</th>
-                  <th>Copas</th>
-                </tr>
-              </thead>
-              <tbody id="summary-table-body">
-                <!-- Injected by JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
 
-        <!-- Action Buttons -->
-        <div class="summary-actions">
-          <button id="btn-share-card" class="btn-download-card" title="Ver vista previa y compartir en redes sociales">
-            <span>📲</span>
-            <span>Compartir Ficha</span>
-          </button>
-          <button id="btn-summary-rankings" class="btn-rankings-action">
-            <span>🏆</span>
-            <span>Ver Salón de la Fama</span>
-          </button>
-          <button id="btn-play-again" class="btn-restart">
-            <span>🔄</span>
-            <span>Jugar Otra Carrera</span>
-          </button>
-        </div>
+          <h2 class="hub-card-title">Comunidad</h2>
+          <p class="hub-card-subtitle">Noticias &amp; Actualidad</p>
 
-        <!-- Achievements Section -->
-        <section class="achievements-section">
-          <div class="achievements-header">
-            <h3 class="achievements-title">
-              <span>🎖️</span>
-              <span>Logros de Carrera Estudiantil</span>
-            </h3>
-            <span id="achievements-counter-badge" class="achievements-counter-badge">0 / 15 Desbloqueados</span>
-          </div>
-          <div id="achievements-grid-container" class="achievements-grid">
-            <!-- Rendered by JS -->
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <!-- ====================================================================
-         PANTALLA 5: SALÓN DE LA FAMA & RANKINGS HISTÓRICOS (PESTAÑA COMPLETA)
-         ==================================================================== -->
-    <section id="screen-rankings" class="screen">
-      <div class="rankings-screen-layout">
-        
-        <!-- Barra Superior de Navegación del Salón de la Fama -->
-        <div class="rankings-screen-topbar">
-          <button id="btn-back-from-rankings" class="btn-rankings-back" aria-label="Volver">
-            <span class="btn-back-arrow">←</span>
-            <span>Volver</span>
-          </button>
-          <div class="rankings-topbar-badge">
-            <span class="pulse-indicator"></span>
-            <span>Registro Oficial de Desfiles</span>
-          </div>
-        </div>
-
-        <!-- Encabezado Hero del Salón de la Fama -->
-        <div class="rankings-screen-header">
-          <div class="rankings-header-pill">PALMARÉS & GLORIA HISTÓRICA</div>
-          <h1 class="rankings-screen-title">
-            SALÓN DE LA <span>FAMA</span>
-          </h1>
-          <p class="rankings-screen-subtitle">
-            El cuadro de honor de la Estudiantina de Posadas. Leyendas individuales consagradas en la Costanera y el registro de campeonatos oficiales.
+          <p class="hub-card-desc">
+            El medio digital de la fiesta estudiantil. Coberturas minuto a minuto, cronogramas oficiales, crónicas fotográficas de las noches de calle y todas las novedades de la temporada 2026.
           </p>
-        </div>
 
-        <!-- Pestañas de Navegación Segmentadas (Pills Minimalistas) -->
-        <div class="ranking-tabs-nav">
-          <button id="tab-btn-ganadores" class="ranking-tab-btn active" data-tab="ganadores">
-            <span>Más Ganadores</span>
-          </button>
-          <button id="tab-btn-ovr" class="ranking-tab-btn" data-tab="ovr">
-            <span>Leyendas OVR</span>
-          </button>
-          <button id="tab-btn-colegios" class="ranking-tab-btn" data-tab="colegios">
-            <span>Populares</span>
-          </button>
-        </div>
+          <a href="comunidad.html" class="hub-btn hub-btn-secondary" id="btn-opt-comunidad">
+            <span>Acceder a Noticias</span>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </article>
 
-        <!-- Contenido de las Pestañas -->
-        <div class="ranking-tabs-content">
-          <!-- Pestaña 1: Colegios Más Ganadores (Vista Principal de Palmarés) -->
-          <div id="ranking-panel-ganadores" class="ranking-tab-panel active">
-            <div class="ranking-panel-header-intro">
-              <div class="panel-intro-text-group">
-                <h3 class="panel-intro-title">Palmarés de Copas de Oro</h3>
-                <p class="panel-intro-desc">Colegios ordenados por títulos de campeones, podios oficiales (1º a 3º) y porcentaje de efectividad en el 4to tramo.</p>
-              </div>
+        <!-- OPCIÓN 3: FORO -->
+        <article class="hub-card" id="card-foro">
+          <div class="hub-card-header">
+            <div class="hub-card-icon-wrap" aria-hidden="true">
+              <!-- SVG Lucide MessageSquare -->
+              <svg class="hub-svg-icon" viewBox="0 0 24 24">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
             </div>
-
-            <!-- Podio Olímpico Top 3 de Reyes de la Costanera -->
-            <div id="ganadores-podium-container" class="colegios-podium-grid">
-              <!-- Rendered by JS -->
-            </div>
-
-            <!-- Tabla / Leaderboard de Colegios Más Ganadores -->
-            <div class="table-responsive-wrapper ranking-table-wrap">
-              <table class="copero-stats-table ranking-table ganadores-table">
-                <thead>
-                  <tr>
-                    <th style="width: 50px; text-align: center;">Pos</th>
-                    <th>Institución</th>
-                    <th style="text-align: center;">Copas Oro</th>
-                    <th style="text-align: center;">Podios</th>
-                    <th style="text-align: center;">Temporadas</th>
-                    <th style="text-align: center;">Efectividad</th>
-                  </tr>
-                </thead>
-                <tbody id="ranking-ganadores-tbody">
-                  <!-- Rendered by JS -->
-                </tbody>
-              </table>
-            </div>
+            <span class="hub-card-category">Tribuna Digital</span>
           </div>
 
-          <!-- Pestaña 2: Top 10 OVR (Leyendas Individuales) -->
-          <div id="ranking-panel-ovr" class="ranking-tab-panel">
-            <div class="ranking-panel-header-intro">
-              <div class="panel-intro-text-group">
-                <h3 class="panel-intro-title">Top 10 Histórico de Egresados</h3>
-                <p class="panel-intro-desc">Las máximas calificaciones de carrera (OVR) registradas en los palcos de la Costanera.</p>
-              </div>
-            </div>
-            <div id="ranking-list-ovr" class="ranking-cards-list">
-              <!-- Rendered by JS -->
-            </div>
-          </div>
+          <h2 class="hub-card-title">Foro</h2>
+          <p class="hub-card-subtitle">Espacio de Encuentro</p>
 
-          <!-- Pestaña 3: Colegios Más Jugados (Populares) -->
-          <div id="ranking-panel-colegios" class="ranking-tab-panel">
-            <div class="ranking-panel-header-intro">
-              <div class="panel-intro-text-group">
-                <h3 class="panel-intro-title">Colegios Más Populares</h3>
-                <p class="panel-intro-desc">Instituciones con mayor cantidad de carreras iniciadas por los directores y participantes.</p>
-              </div>
-            </div>
-
-            <!-- Podio Top 3 de Popularidad -->
-            <div id="colegios-podium-container" class="colegios-podium-grid">
-              <!-- Rendered by JS -->
-            </div>
-
-            <!-- Tabla de Colegios Más Jugados -->
-            <div class="table-responsive-wrapper ranking-table-wrap">
-              <table class="copero-stats-table ranking-table">
-                <thead>
-                  <tr>
-                    <th style="width: 50px; text-align: center;">Pos</th>
-                    <th>Institución</th>
-                    <th style="text-align: center;">Partidas</th>
-                    <th style="text-align: center;">Años</th>
-                    <th style="text-align: center;">Copas</th>
-                    <th style="text-align: center;">Efectividad</th>
-                  </tr>
-                </thead>
-                <tbody id="ranking-colegios-tbody">
-                  <!-- Rendered by JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Compatibilidad de selector de modal -->
-    <div id="modal-rankings" style="display: none;" aria-hidden="true"></div>
-
-    <!-- ====================================================================
-         MODAL: PATROCINADORES OFICIALES
-         ==================================================================== -->
-    <div id="modal-sponsors" class="modal-overlay" aria-hidden="true">
-      <div class="modal-content modal-sponsors-content">
-        <div class="modal-sponsors-header">
-          <div class="modal-sponsors-title-group">
-            <span class="modal-sponsors-badge">💈 Apoyo Oficial</span>
-            <h2 class="modal-sponsors-title">Patrocinadores</h2>
-            <p class="modal-sponsors-subtitle">Marcas y proyectos que impulsan el simulador y la cultura de la Estudiantina de Posadas.</p>
-          </div>
-          <button id="btn-close-sponsors" class="btn-close-modal" aria-label="Cerrar patrocinadores">✕</button>
-        </div>
-
-        <div class="modal-sponsors-body">
-          <!-- Tarjeta de Patrocinador Principal: Ian Navajas -->
-          <article class="sponsor-featured-card">
-            <div class="sponsor-featured-cover">
-              <div class="sponsor-featured-logo-box">
-                <img src="assets/iannavajas.png" alt="Ian Navajas Barbería Logo" class="sponsor-featured-logo">
-              </div>
-              <div class="sponsor-badge-featured">Primer Patrocinador Oficial</div>
-            </div>
-
-            <div class="sponsor-featured-info">
-              <div class="sponsor-featured-heading">
-                <h3 class="sponsor-featured-name">Ian Navajas</h3>
-                <span class="sponsor-featured-tag">Barbería • Posadas</span>
-              </div>
-              <p class="sponsor-featured-desc">
-                Los mejores cortes de Posadas. Código <strong class="sponsor-promo-code">estuonline</strong>: 20% de descuento en tu corte.
-              </p>
-
-              <div class="sponsor-featured-actions">
-                <a href="https://www.instagram.com/iannavajas_/" target="_blank" rel="noopener noreferrer" class="btn-sponsor-instagram" title="Visitar Instagram @iannavajas_">
-                  <span class="sponsor-ig-icon-wrap">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                    </svg>
-                  </span>
-                  <span>Instagram @iannavajas_</span>
-                  <span class="sponsor-external-arrow">↗</span>
-                </a>
-              </div>
-            </div>
-          </article>
-
-          <!-- Tarjeta de Invitación a Nuevos Patrocinadores -->
-          <div class="sponsor-join-card">
-            <span class="sponsor-join-icon">🚀</span>
-            <div class="sponsor-join-texts">
-              <strong class="sponsor-join-title">¿Querés sumar tu marca a la Estudiantina?</strong>
-              <p class="sponsor-join-desc">Llegá a miles de estudiantes y familias de Posadas. Contactanos para ser patrocinador.</p>
-            </div>
-            <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="btn-sponsor-join" title="Contactar por Instagram">
-              Sumar mi marca ↗
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- =====================================================================
-         MODAL: VISTA PREVIA Y COMPARTIR FICHA DE EGRESADO EN REDES
-         ===================================================================== -->
-    <div id="modal-share-card" class="modal-overlay" aria-hidden="true">
-      <div class="modal-content modal-share-card-content">
-        <div class="modal-share-card-header">
-          <div class="share-title-group">
-            <span class="share-modal-badge">📲 Ficha Oficial de Egresado</span>
-            <h2 class="share-modal-title">Tu Ficha de Egresado</h2>
-            <p class="share-modal-subtitle">Vista previa en alta resolución. Compartila directo en tus historias de Instagram, WhatsApp y redes.</p>
-          </div>
-          <button id="btn-close-share-modal" class="btn-close-modal" aria-label="Cerrar vista previa">✕</button>
-        </div>
-
-        <div class="modal-share-card-body">
-          <!-- Vista previa de la imagen generada -->
-          <div class="share-card-preview-wrapper">
-            <div id="share-card-loading" class="share-card-loading">
-              <div class="share-spinner"></div>
-              <p>Generando ficha oficial en HD...</p>
-            </div>
-            <img id="share-card-preview-img" class="share-card-preview-img" src="" alt="Vista previa de Ficha Oficial de Egresado" style="display: none;">
-          </div>
-
-          <!-- Acciones de Compartir y Descargar -->
-          <div class="share-card-actions">
-            <button id="btn-share-native" class="btn-share-primary">
-              <span>📲</span>
-              <span>Compartir en Redes</span>
-            </button>
-            <button id="btn-share-download" class="btn-share-secondary">
-              <span>💾</span>
-              <span>Descargar PNG</span>
-            </button>
-          </div>
-          <p class="share-card-hint">
-            💡 En celular podés tocar <strong>Compartir en Redes</strong> para enviarla directo a tus Historias de Instagram o estados de WhatsApp.
+          <p class="hub-card-desc">
+            El punto de encuentro de los estudiantes y el público de la Estudiantina. Un espacio abierto para opinar, compartir anécdotas, debatir sobre las escuelas y vivir la previa de los desfiles.
           </p>
+
+          <a href="foro.html" class="hub-btn hub-btn-secondary" id="btn-opt-foro">
+            <span>Ingresar al Foro</span>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </article>
+
+      </section>
+
+      <!-- RESUMEN NUMÉRICO INSTITUCIONAL -->
+      <aside class="hub-stats-bar" aria-label="Estadísticas de la Estudiantina">
+        <div class="hub-stat-item">
+          <span class="hub-stat-val">33</span>
+          <span class="hub-stat-lbl">Colegios Participantes</span>
         </div>
-      </div>
-    </div>
+        <div class="hub-stat-item">
+          <span class="hub-stat-val">4 + 1</span>
+          <span class="hub-stat-lbl">Noches de Calle &amp; Anfiteatro</span>
+        </div>
+        <div class="hub-stat-item">
+          <span class="hub-stat-val">2026</span>
+          <span class="hub-stat-lbl">Edición en Curso</span>
+        </div>
+      </aside>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="hub-footer">
+      <nav class="hub-footer-links" aria-label="Navegación del pie">
+        <a href="simulador.html" class="hub-footer-link">Simulador</a>
+        <a href="comunidad.html" class="hub-footer-link">Portal de Noticias</a>
+        <a href="foro.html" class="hub-footer-link">Foro Estudiantil</a>
+        <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="hub-footer-link">Instagram Oficial</a>
+      </nav>
+      <p class="hub-footer-legal">
+        <strong>Estudiantina.online</strong> es un proyecto privado e independiente dedicado al registro, cobertura y desarrollo de experiencias interactivas para la fiesta estudiantil de Posadas, Misiones.
+      </p>
+    </footer>
 
   </div>
 
-  <!-- Toast Notification element -->
-  <div id="toast-notification" class="toast-notification">
-    <span id="toast-icon">✅</span>
-    <span id="toast-message">Copiado al portapapeles</span>
-  </div>
-
-  <!-- Application JS Modules -->
-  <script type="module" src="js/app.js?v=20260905_18"></script>
-
-    <!-- Modal: Términos y Condiciones & Aviso Legal -->
-    <div id="modal-terms" class="modal-overlay" aria-hidden="true">
-      <div class="modal-card terms-modal-card">
-        <div class="terms-modal-header">
-          <div class="terms-title-group">
-            <span class="terms-icon">⚖️</span>
-            <div>
-              <h3 class="terms-title">Términos y Condiciones de Uso</h3>
-              <p class="terms-subtitle">Descargo de Responsabilidad y Naturaleza del Proyecto</p>
-            </div>
-          </div>
-          <button id="btn-close-terms" class="btn-close-modal" aria-label="Cerrar términos">✕</button>
-        </div>
-
-        <div class="terms-modal-body">
-
-          <div class="terms-doc-wrapper">
-            <div class="terms-doc-header">
-              <div class="terms-badge-legal">DOCUMENTO LEGAL OFICIAL</div>
-              <h3 class="terms-doc-title">TÉRMINOS Y CONDICIONES DE USO Y DESCARGO DE RESPONSABILIDAD</h3>
-              <div class="terms-doc-meta">
-                <span class="terms-meta-item">📅 Última actualización: <strong>07/09/2026</strong></span>
-                <span class="terms-meta-item">📍 Jurisdicción: <strong>Posadas, Misiones, Argentina</strong></span>
-              </div>
-            </div>
-
-            <div class="terms-clauses-container">
-              <!-- Cláusula 1 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">1</span>
-                  <h4 class="clause-title">NATURALEZA DEL PROYECTO Y MODELO DE FINANCIAMIENTO</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El presente videojuego (en adelante, <strong>"el Juego"</strong>) es una obra de ficción, lúdica y cultural, desarrollada como un homenaje interactivo a la tradición de la Estudiantina y la cultura estudiantil de Posadas, Misiones.</p>
-                  <p>El acceso al Juego puede ser gratuito o bajo la modalidad que el Desarrollador determine. Para solventar los costos técnicos, operativos, de infraestructura y desarrollo, el Juego cuenta con espacios publicitarios y acuerdos de patrocinio comercial (in-game advertising, cartelería virtual, pantallas de carga o menciones de marca).</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 2 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">2</span>
-                  <h4 class="clause-title">INDEPENDENCIA INSTITUCIONAL Y USO DE NOMBRES POPULARES</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El Juego utiliza de forma exclusiva <strong>apodos populares, gentilicios estudiantiles, denominaciones coloquiales y términos de dominio público</strong> (tales como <em>"La Indu"</em>, <em>"El Nacio"</em>, <em>"La Comer"</em>, <em>"El Santa"</em>, <em>"El Janssen"</em>, <em>"El Roque"</em>, <em>"El Sanba"</em>, <em>"La Madre"</em>, entre otros), representativos del acervo cultural y las celebraciones locales.</p>
-                  <div class="clause-callout-box">
-                    <strong>🛡️ Deslinde de afiliación:</strong> La inclusión de estos apodos y colores se efectúa con fines estrictamente lúdicos y de ambientación ficcional. No implica, ni debe interpretarse como, existencia de patrocinio, aval, asociación, vínculo contractual o representación oficial de ninguna institución educativa, pública o privada, ni de entidades organizadoras (como la Asociación Posadeña de Estudiantes Secundarios - APES o entes gubernamentales).
-                  </div>
-                  <div class="clause-callout-box" style="margin-top: 0.6rem;">
-                    <strong>🎨 Activos visuales:</strong> Todos los escudos, emblemas, texturas, trajes y logotipos presentes en el Juego son diseños originales y ficticios, creados expresamente para la obra sin utilizar marcas ni signos registrados por terceros.
-                  </div>
-                </div>
-              </article>
-
-              <!-- Cláusula 3 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">3</span>
-                  <h4 class="clause-title">PUBLICIDAD, MARCAS COMERCIALES Y SPONSORS</h4>
-                </div>
-                <div class="clause-body">
-                  <p>Las marcas, logotipos, nombres comerciales y avisos de patrocinadores que aparecen dentro del entorno del Juego pertenecen a sus respectivos titulares y se exhiben bajo contratos o permisos específicos de publicidad digital.</p>
-                  <p>Los patrocinadores y marcas comerciales no intervienen en el desarrollo artístico, temático, ni argumental del Juego, limitando su rol exclusivamente al auspicio publicitario.</p>
-                  <p>Los patrocinadores no asumen responsabilidad civil, comercial ni legal alguna por el contenido del Juego, sus mecánicas, los apodos estudiantiles empleados o cualquier eventual disputa entre el Desarrollador y terceros.</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 4 -->
-              <article class="terms-clause-item clause-highlighted">
-                <div class="clause-header">
-                  <span class="clause-badge clause-badge-gold">4</span>
-                  <h4 class="clause-title">PROCEDIMIENTO DE RETIRO A PEDIDO (NOTICE AND TAKEDOWN)</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El Desarrollador actúa de estricta buena fe y reconoce el derecho de las instituciones educativas y de la comunidad a salvaguardar su imagen y denominación.</p>
-                  <p>Cualquier colegio, representante directivo o institución que considere que la inclusión de un apodo o elemento alusivo vulnera sus derechos o afecta su reputación institucional, podrá solicitar formalmente su modificación o eliminación.</p>
-                  <p>Para iniciar el trámite, deberá remitir un correo electrónico a <a href="mailto:contacto@estudiantina.online" class="terms-email-anchor"><strong>contacto@estudiantina.online</strong></a> detallando:</p>
-                  <ul class="clause-bullet-list">
-                    <li><strong>Nombre oficial</strong> de la institución educativa u organismo.</li>
-                    <li><strong>Identificación y acreditación</strong> del cargo o personería del solicitante.</li>
-                    <li><strong>Indicación precisa</strong> del elemento o apodo objeto de la solicitud.</li>
-                    <li><strong>Motivo fundado</strong> del reclamo.</li>
-                  </ul>
-                  <div class="clause-callout-box" style="margin-top: 0.75rem;">
-                    <strong>⏱️ Plazo de resolución:</strong> Tras constatar la legitimidad del solicitante, el Desarrollador procederá a modificar, anonimizar o retirar el contenido aludido en una actualización técnica en un plazo no mayor a <strong>48 horas hábiles</strong>, sin que ello implique reconocimiento de falta, daño o infracción legal alguna.
-                  </div>
-                </div>
-              </article>
-
-              <!-- Cláusula 5 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">5</span>
-                  <h4 class="clause-title">TONO, RESPETO Y CONDUCTA DEPORTIVA</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El argumento y mecánicas del Juego celebran el esfuerzo de los cuerpos de baile, bandas de música y directores, en un marco de sana competencia artística y deportiva. El Juego prohíbe y prescinde de cualquier contenido discriminatorio, violento, denigratorio o que incite al hostigamiento entre comunidades escolares.</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 6 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">6</span>
-                  <h4 class="clause-title">LIMITACIÓN DE RESPONSABILIDAD</h4>
-                </div>
-                <div class="clause-body">
-                  <p>El Juego se provee <em>"tal cual"</em> y <em>"según disponibilidad"</em>, sin garantías de funcionamiento ininterrumpido en todos los dispositivos del mercado. El Desarrollador no responderá por daños indirectos, fallas de conectividad ni por opiniones vertidas por los usuarios en comunidades o foros externos al Juego.</p>
-                </div>
-              </article>
-
-              <!-- Cláusula 7 -->
-              <article class="terms-clause-item">
-                <div class="clause-header">
-                  <span class="clause-badge">7</span>
-                  <h4 class="clause-title">LEY APLICABLE Y JURISDICCIÓN</h4>
-                </div>
-                <div class="clause-body">
-                  <p>Los presentes Términos y Condiciones se rigen e interpretan conforme a las leyes de la República Argentina. Ante cualquier controversia que no pueda resolverse de común acuerdo, las partes se someten a la jurisdicción de los <strong>Tribunales Ordinarios de la Primera Circunscripción Judicial de la Provincia de Misiones</strong>, con asiento en la ciudad de Posadas, renunciando a cualquier otro fuero o jurisdicción que pudiera corresponderles.</p>
-                </div>
-              </article>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="terms-modal-footer">
-          <button id="btn-accept-terms" class="btn-primary">Entendido y Aceptar</button>
-        </div>
-      </div>
-    </div>
-  
 </body>
 </html>

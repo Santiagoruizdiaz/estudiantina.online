@@ -456,7 +456,10 @@ if ($action === "canales") {
         }
     }
 
-    echo json_encode(["status" => "ok", "canales" => $canales, "colegiosCounts" => $colegiosCounts]);
+    $stmtUsers = $pdo->query("SELECT COUNT(*) as count FROM usuarios");
+    $totalUsuarios = (int)($stmtUsers->fetchColumn() ?: 0);
+
+    echo json_encode(["status" => "ok", "canales" => $canales, "colegiosCounts" => $colegiosCounts, "totalUsuarios" => $totalUsuarios]);
     exit;
 }
 
@@ -556,7 +559,10 @@ if ($action === "hilos") {
     $stmtCount->execute($countParams);
     $totalCount = (int)$stmtCount->fetchColumn();
 
-    echo json_encode(["status" => "ok", "total_count" => $totalCount, "hilos" => $hilos]);
+    $stmtUsers = $pdo->query("SELECT COUNT(*) as count FROM usuarios");
+    $totalUsuarios = (int)($stmtUsers->fetchColumn() ?: 0);
+
+    echo json_encode(["status" => "ok", "total_count" => $totalCount, "total_usuarios" => $totalUsuarios, "totalUsuarios" => $totalUsuarios, "hilos" => $hilos]);
     exit;
 }
 

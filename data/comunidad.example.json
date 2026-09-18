@@ -1,6 +1,56 @@
 {
   "noticias": [
     {
+      "id": "noticia-01",
+      "titulo": "Lanzamiento Oficial: Estudiantina.online estrena nueva plataforma con portal de noticias y foro de debate estudiantil",
+      "categoria": "Información",
+      "categoriaSlug": "informacion",
+      "fecha": "16/09/2026",
+      "autor": "Redacción Estudiantina.online",
+      "tiempoLectura": "3 min de lectura",
+      "badge": "LANZAMIENTO",
+      "fijada": true,
+      "resumen": "Presentamos la nueva plataforma de Estudiantina.online: un desarrollo privado e independiente que integra cobertura periodística en tiempo real, cronograma oficial de las noches de calle, el simulador de carrera y el nuevo foro de debate en etapa beta para los 33 colegios de Posadas.",
+      "contenido": [
+        "Con el objetivo de brindar una cobertura integral y moderna a la mayor expresión juvenil de Misiones, hoy presentamos de manera oficial la nueva plataforma web de Estudiantina.online. Este desarrollo privado e independiente nace con el propósito de centralizar la información verídica de la temporada 2026, facilitando el acceso a cronogramas de desfile, coberturas de las pasadas en la Costanera y herramientas interactivas pensadas para estudiantes, familias y aficionados.",
+        "El lanzamiento introduce el nuevo Foro de Debate Estudiantil, un espacio digital estructurado por canales temáticos para discutir con respeto y pasión sobre arreglos musicales de percusión, cuerpos de baile, trajes, scolas de samba y la actualidad de los 33 colegios participantes. La plataforma incorpora autenticación con un solo clic, sistema de votación comunitaria y un pacto de convivencia escolar contra cualquier conducta agresiva o difamatoria.",
+        "Aclaración importante: El Foro de Debate inicia formalmente su etapa beta pública. Durante este período de prueba pueden presentarse eventuales ajustes técnicos o errores menores mientras calibramos la concurrencia y la moderación comunitaria. Invitamos a todos los estudiantes e hinchadas a participar activamente, reportar cualquier inconveniente y acercarnos sus sugerencias para seguir perfeccionando el espacio.",
+        "La renovada web unifica en una sola experiencia el portal de crónicas y novedades con el aclamado Simulador de Carrera de la Estudiantina, permitiendo a los usuarios recrear su trayectoria escolar por los cuatro tramos de la Costanera y el Anfiteatro Manuel Antonio Ramírez. Ambas herramientas fueron optimizadas bajo estándares modernos de desarrollo web, garantizando velocidad de carga inmediata en dispositivos móviles durante las noches de desfile.",
+        "Estudiantina.online es una iniciativa privada e independiente, impulsada con recursos propios y vocación técnica para jerarquizar la difusión del evento más emblemático de Posadas. Los canales de contacto permanecen abiertos para recibir noticias de las escuelas, inquietudes y reportes técnicos mientras la fiesta estudiantil entra en su etapa definitoria frente al río Paraná."
+      ],
+      "bloques": [
+        {
+          "type": "text",
+          "value": "Con el objetivo de brindar una cobertura integral y moderna a la mayor expresión juvenil de Misiones, hoy presentamos de manera oficial la nueva plataforma web de Estudiantina.online. Este desarrollo privado e independiente nace con el propósito de centralizar la información verídica de la temporada 2026, facilitando el acceso a cronogramas de desfile, coberturas de las pasadas en la Costanera y herramientas interactivas pensadas para estudiantes, familias y aficionados."
+        },
+        {
+          "type": "text",
+          "value": "El lanzamiento introduce el nuevo Foro de Debate Estudiantil, un espacio digital estructurado por canales temáticos para discutir con respeto y pasión sobre arreglos musicales de percusión, cuerpos de baile, trajes, scolas de samba y la actualidad de los 33 colegios participantes. La plataforma incorpora autenticación con un solo clic, sistema de votación comunitaria y un pacto de convivencia escolar contra cualquier conducta agresiva o difamatoria."
+        },
+        {
+          "type": "quote",
+          "value": "El Foro de Debate inicia formalmente su etapa beta pública. Durante este período de prueba pueden presentarse eventuales ajustes técnicos o errores menores mientras calibramos la concurrencia y la moderación comunitaria. Invitamos a todos los estudiantes e hinchadas a participar activamente y enviarnos sus sugerencias."
+        },
+        {
+          "type": "text",
+          "value": "La renovada web unifica en una sola experiencia el portal de crónicas y novedades con el aclamado Simulador de Carrera de la Estudiantina, permitiendo a los usuarios recrear su trayectoria escolar por los cuatro tramos de la Costanera y el Anfiteatro Manuel Antonio Ramírez. Ambas herramientas fueron optimizadas bajo estándares modernos de desarrollo web, garantizando velocidad de carga inmediata en dispositivos móviles durante las noches de desfile."
+        },
+        {
+          "type": "text",
+          "value": "Estudiantina.online es una iniciativa privada e independiente, impulsada con recursos propios y vocación técnica para jerarquizar la difusión del evento más emblemático de Posadas. Los canales de contacto permanecen abiertos para recibir noticias de las escuelas, inquietudes y reportes técnicos mientras la fiesta estudiantil entra en su etapa definitoria frente al río Paraná."
+        }
+      ],
+      "tags": [
+        "Lanzamiento",
+        "Foro",
+        "Comunidad",
+        "Estudiantina 2026",
+        "Posadas"
+      ],
+      "imagen": "assets/logo.png",
+      "imagenUrl": "assets/logo.png"
+    },
+    {
       "id": "noticia-02",
       "titulo": "Cuerpo de Baile: Innovación Coreográfica y Trajes de Élite Marcan la Temporada 2026",
       "categoria": "Cuerpo de Baile",

@@ -20,12 +20,13 @@ if ($method === "OPTIONS") {
 $dbPath = __DIR__ . "/../data/foro.db";
 $comFile = __DIR__ . "/../data/comunidad.json";
 
-$baseData = ["cronograma" => [], "guia" => [], "faq" => [], "ajustes" => []];
+$baseData = ["noticias" => [], "cronograma" => [], "guia" => [], "faq" => [], "ajustes" => []];
 if (file_exists($comFile)) {
     $raw = @file_get_contents($comFile);
     if ($raw) {
         $parsed = json_decode($raw, true);
         if ($parsed) {
+            $baseData["noticias"] = $parsed["noticias"] ?? [];
             $baseData["cronograma"] = $parsed["cronograma"] ?? [];
             $baseData["guia"] = $parsed["guia"] ?? $parsed["faq"] ?? [];
             $baseData["faq"] = $parsed["faq"] ?? $parsed["guia"] ?? [];
@@ -43,7 +44,10 @@ try {
         $stmt = $pdo->query("SELECT * FROM noticias ORDER BY fijada DESC, creada_en DESC");
         $rows = $stmt->fetchAll();
 
-        $noticias = array_map(function($r) {
+        if (empty($rows) && !empty($baseData["noticias"])) {
+            $noticias = $baseData["noticias"];
+        } else {
+            $noticias = array_map(function($r) {
             $contenido = json_decode($r["contenido"] ?: "[]", true);
             $bloques = !empty($r["bloques"]) ? json_decode($r["bloques"], true) : null;
             if (!$bloques || !is_array($bloques) || count($bloques) === 0) {
@@ -72,6 +76,7 @@ try {
                 "fijada" => (int)$r["fijada"] === 1
             ];
         }, $rows);
+        }
 
         echo json_encode([
             "status" => "ok",

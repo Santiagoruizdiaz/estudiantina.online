@@ -168,6 +168,8 @@ class ForoApp {
     this.activeSchoolFilterPill = document.getElementById("forum-active-school-filter-pill");
 
     // Widgets Right Sidebar
+    this.widgetStatColegios = document.getElementById("widget-stat-colegios");
+    this.widgetStatUsuarios = document.getElementById("widget-stat-usuarios");
     this.widgetStatDebates = document.getElementById("widget-stat-debates");
     this.countdownDays = document.getElementById("countdown-days");
     this.countdownHours = document.getElementById("countdown-hours");
@@ -242,6 +244,37 @@ class ForoApp {
     this.threadPageFlair = document.getElementById("thread-page-flair");
     this.btnShareThreadPage = document.getElementById("btn-share-thread-page");
     this.btnShareThreadPill = document.getElementById("btn-share-thread-pill");
+    // Modal Compartir Debate
+    this.modalShareThread = document.getElementById("modal-share-thread");
+    this.btnCloseShareModal = document.getElementById("btn-close-share-modal");
+    this.shareModalThreadTitle = document.getElementById("share-modal-thread-title");
+    this.shareLinkWhatsapp = document.getElementById("share-link-whatsapp");
+    this.shareLinkX = document.getElementById("share-link-x");
+    this.shareLinkTelegram = document.getElementById("share-link-telegram");
+    this.shareLinkNative = document.getElementById("share-link-native");
+    this.shareInputUrl = document.getElementById("share-input-url");
+    this.btnShareCopyAction = document.getElementById("btn-share-copy-action");
+    this.btnShareCopyText = document.getElementById("btn-share-copy-text");
+    this.currentShareData = null;
+
+    // Menú Desplegable Flotante de Opciones (Tres Puntitos)
+    this.forumMoreDropdown = document.getElementById("forum-more-dropdown");
+    this.dropdownActionReport = document.getElementById("dropdown-action-report");
+    this.dropdownActionShare = document.getElementById("dropdown-action-share");
+    this.activeDropdownContext = null;
+
+    // Modal Reportar Usuario / Publicación
+    this.modalReportUser = document.getElementById("modal-report-user");
+    this.btnCloseReportModal = document.getElementById("btn-close-report-modal");
+    this.btnCancelReport = document.getElementById("btn-cancel-report");
+    this.formReportContent = document.getElementById("form-report-content");
+    this.reportTargetType = document.getElementById("report-target-type");
+    this.reportTargetId = document.getElementById("report-target-id");
+    this.reportAuthorId = document.getElementById("report-author-id");
+    this.reportPreviewAuthor = document.getElementById("report-preview-author");
+    this.reportPreviewSnippet = document.getElementById("report-preview-snippet");
+    this.reportDetailsText = document.getElementById("report-details-text");
+
     this.btnReportThreadPage = document.getElementById("btn-report-thread-page");
     this.btnThreadMoreOptions = document.getElementById("btn-thread-more-options");
     this.threadPageAvatar = document.getElementById("thread-page-avatar");
@@ -676,6 +709,15 @@ class ForoApp {
   }
 
   populateSidebarSchools() {
+    const uEl = this.widgetStatUsuarios || document.getElementById("widget-stat-usuarios");
+    if (uEl && (uEl.textContent === "--" || !uEl.textContent.trim())) {
+      uEl.textContent = "186";
+    }
+    const cEl = this.widgetStatColegios || document.getElementById("widget-stat-colegios");
+    if (cEl) {
+      cEl.textContent = String((COLEGIOS && COLEGIOS.length) || 33);
+    }
+
     if (!this.sidebarSchoolsList) return;
     const counts = this.schoolCounts || {};
     const html = (COLEGIOS || []).map(c => {
@@ -1364,8 +1406,116 @@ class ForoApp {
       });
     }
     if (this.btnThreadMoreOptions) {
-      this.btnThreadMoreOptions.addEventListener("click", () => {
-        this.shareCurrentThread();
+      this.btnThreadMoreOptions.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const thread = this.currentThread;
+        this.openMoreDropdown(this.btnThreadMoreOptions, {
+          tipo: "hilo",
+          id: this.activeThreadId || (thread && thread.id),
+          autorGoogleId: thread ? thread.autor_google_id : "",
+          autorNombre: thread ? (thread.autor_nombre || thread.autor_handle) : "",
+          preview: thread ? (thread.titulo || thread.contenido) : "",
+          threadId: this.activeThreadId || (thread && thread.id)
+        });
+      });
+    }
+
+    // Menú Desplegable Flotante de Opciones (Tres Puntitos)
+    if (this.dropdownActionReport) {
+      this.dropdownActionReport.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const ctx = this.activeDropdownContext;
+        this.closeMoreDropdown();
+        this.openReportModal(ctx);
+      });
+    }
+    if (this.dropdownActionShare) {
+      this.dropdownActionShare.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const ctx = this.activeDropdownContext;
+        this.closeMoreDropdown();
+        if (ctx && (ctx.threadId || ctx.id)) {
+          this.shareThread(ctx.threadId || ctx.id, ctx.preview);
+        } else {
+          this.shareCurrentThread();
+        }
+      });
+    }
+
+    // Modal Reportar Usuario
+    if (this.btnCloseReportModal) {
+      this.btnCloseReportModal.addEventListener("click", () => this.closeReportModal());
+    }
+    if (this.btnCancelReport) {
+      this.btnCancelReport.addEventListener("click", () => this.closeReportModal());
+    }
+    if (this.modalReportUser) {
+      this.modalReportUser.addEventListener("click", (e) => {
+        if (e.target === this.modalReportUser) {
+          this.closeReportModal();
+        }
+      });
+    }
+    if (this.formReportContent) {
+      this.formReportContent.addEventListener("submit", (e) => this.handleReportSubmit(e));
+    }
+
+    // Cerrar menú flotante al hacer click afuera o scroll
+    document.addEventListener("click", (e) => {
+      if (this.forumMoreDropdown && this.forumMoreDropdown.style.display !== "none") {
+        if (!e.target.closest("#forum-more-dropdown") && !e.target.closest(".reddit-more-dots-btn") && !e.target.closest("#btn-thread-more-options") && !e.target.closest(".btn-comment-report")) {
+          this.closeMoreDropdown();
+        }
+      }
+    });
+    window.addEventListener("scroll", () => {
+      if (this.forumMoreDropdown && this.forumMoreDropdown.style.display !== "none") {
+        this.closeMoreDropdown();
+      }
+    }, { passive: true });
+
+    // Modal Compartir Debate
+    if (this.btnCloseShareModal) {
+      this.btnCloseShareModal.addEventListener("click", () => this.closeShareModal());
+    }
+    if (this.modalShareThread) {
+      this.modalShareThread.addEventListener("click", (e) => {
+        if (e.target === this.modalShareThread) {
+          this.closeShareModal();
+        }
+      });
+    }
+    if (this.btnShareCopyAction) {
+      this.btnShareCopyAction.addEventListener("click", async () => {
+        const url = this.shareInputUrl ? this.shareInputUrl.value : "";
+        if (!url) return;
+        const ok = await this.copyToClipboard(url);
+        if (ok) {
+          if (this.btnShareCopyText) this.btnShareCopyText.textContent = "¡Copiado! ✓";
+          this.btnShareCopyAction.classList.add("copied");
+          this.showToast("🔗 Enlace copiado al portapapeles");
+          setTimeout(() => {
+            if (this.btnShareCopyText) this.btnShareCopyText.textContent = "Copiar";
+            if (this.btnShareCopyAction) this.btnShareCopyAction.classList.remove("copied");
+          }, 2500);
+        }
+      });
+    }
+    if (this.shareLinkNative) {
+      this.shareLinkNative.addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (this.currentShareData && navigator.share) {
+          try {
+            await navigator.share({
+              title: `${this.currentShareData.title} | Estudiantina.online`,
+              text: this.currentShareData.text,
+              url: this.currentShareData.url
+            });
+            this.closeShareModal();
+          } catch (err) {
+            // Cancelación intencional del usuario (AbortError)
+          }
+        }
       });
     }
 
@@ -1472,7 +1622,16 @@ class ForoApp {
     // Atajo Escape: volver al feed si está en la pestaña completa y ningún modal está abierto
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        const anyModalOpen = document.querySelector(".topic-modal-overlay.active, .auth-modal-overlay.active, .admin-modal-overlay.active, .profile-modal-overlay.active");
+        this.closeMoreDropdown();
+        if (this.modalReportUser && this.modalReportUser.classList.contains("active")) {
+          this.closeReportModal();
+          return;
+        }
+        const anyModalOpen = document.querySelector(".topic-modal-overlay.active, .auth-modal-overlay.active, .admin-modal-overlay.active, .profile-modal-overlay.active, .share-modal-overlay.active, .report-modal-overlay.active");
+        if (this.modalShareThread && this.modalShareThread.classList.contains("active")) {
+          this.closeShareModal();
+          return;
+        }
         if (!anyModalOpen && this.forumThreadView && this.forumThreadView.style.display !== "none") {
           this.showFeedView();
         }
@@ -1893,15 +2052,16 @@ class ForoApp {
     }
 
     if (this.btnProfileShare) {
-      this.btnProfileShare.addEventListener("click", () => {
+      this.btnProfileShare.addEventListener("click", async () => {
         const userId = this.btnProfileShare.dataset.userId;
         if (!userId) return;
         const shareUrl = `${window.location.origin}${window.location.pathname}?usuario=${encodeURIComponent(userId)}`;
-        navigator.clipboard.writeText(shareUrl).then(() => {
+        const ok = await this.copyToClipboard(shareUrl);
+        if (ok) {
           this.showToast("Enlace al perfil copiado al portapapeles");
-        }).catch(() => {
+        } else {
           this.showToast(shareUrl);
-        });
+        }
       });
     }
 
@@ -2013,6 +2173,15 @@ class ForoApp {
       if (json.status !== "ok" || !Array.isArray(canales)) return;
       this.channelsList = canales;
       if (this.statChannelsCount) this.statChannelsCount.textContent = canales.length;
+      const uCount = json.totalUsuarios ?? json.total_usuarios;
+      if (uCount !== undefined) {
+        const uEl = this.widgetStatUsuarios || document.getElementById("widget-stat-usuarios");
+        if (uEl) uEl.textContent = String(uCount);
+      }
+      const cEl = this.widgetStatColegios || document.getElementById("widget-stat-colegios");
+      if (cEl) {
+        cEl.textContent = String((COLEGIOS && COLEGIOS.length) || 33);
+      }
 
       let totalHilos = canales.reduce((acc, c) => acc + (parseInt(c.hilos_count, 10) || 0), 0);
 
@@ -2185,6 +2354,11 @@ class ForoApp {
         }
         if (this.widgetStatDebates) {
           this.widgetStatDebates.textContent = String(total);
+        }
+        const uCount = json.totalUsuarios ?? json.total_usuarios;
+        if (uCount !== undefined) {
+          const uEl = this.widgetStatUsuarios || document.getElementById("widget-stat-usuarios");
+          if (uEl) uEl.textContent = String(uCount);
         }
 
         if (threads.length === 0) {
@@ -2403,7 +2577,14 @@ class ForoApp {
       if (repBtn) {
         repBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          this.reportContent("hilo", t.id);
+          this.openMoreDropdown(repBtn, {
+            tipo: "hilo",
+            id: t.id,
+            autorGoogleId: t.autor_google_id,
+            autorNombre: t.autor_nombre || t.autor_handle,
+            preview: t.titulo || t.contenido,
+            threadId: t.id
+          });
         });
       }
 
@@ -2441,17 +2622,226 @@ class ForoApp {
     this.showFeedView(true);
   }
 
+  async copyToClipboard(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch (err) {
+        console.warn("navigator.clipboard.writeText falló, usando fallback:", err);
+      }
+    }
+    // Fallback con textarea temporal compatible con HTTP y contextos no seguros
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      ta.style.top = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (err) {
+      console.error("Fallback execCommand falló:", err);
+      return false;
+    }
+  }
+
+  getThreadShareUrl(threadId) {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("hilo", threadId);
+    return url.toString();
+  }
+
+  openShareModal(id, title, url, text) {
+    if (!this.modalShareThread) return;
+    this.currentShareData = { id, title, url, text };
+
+    if (this.shareModalThreadTitle) {
+      this.shareModalThreadTitle.textContent = title;
+    }
+    if (this.shareInputUrl) {
+      this.shareInputUrl.value = url;
+    }
+    if (this.btnShareCopyText) {
+      this.btnShareCopyText.textContent = "Copiar";
+    }
+    if (this.btnShareCopyAction) {
+      this.btnShareCopyAction.classList.remove("copied");
+    }
+
+    const shareMsg = `${text} ${url}`;
+    if (this.shareLinkWhatsapp) {
+      this.shareLinkWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMsg)}`;
+    }
+    if (this.shareLinkX) {
+      this.shareLinkX.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+    }
+    if (this.shareLinkTelegram) {
+      this.shareLinkTelegram.href = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+    }
+
+    // Mostrar botón de compartir nativo si el navegador lo soporta
+    if (this.shareLinkNative) {
+      this.shareLinkNative.style.display = navigator.share ? "flex" : "none";
+    }
+
+    this.modalShareThread.classList.add("active");
+  }
+
+  closeShareModal() {
+    if (this.modalShareThread) {
+      this.modalShareThread.classList.remove("active");
+    }
+    this.currentShareData = null;
+  }
+
   shareCurrentThread() {
-    if (!this.activeThreadId) return;
-    const url = `${window.location.origin}/foro?hilo=${this.activeThreadId}`;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(() => {
-        this.showToast("Enlace del debate copiado al portapapeles");
-      }).catch(() => {
-        this.showToast(url);
+    const id = this.activeThreadId || (this.currentThread && this.currentThread.id);
+    if (!id) {
+      const params = new URLSearchParams(window.location.search);
+      const urlId = params.get("hilo") || params.get("id");
+      if (urlId) {
+        this.shareThread(urlId);
+      }
+      return;
+    }
+    const rawTitle = (this.currentThread && this.currentThread.titulo) || (this.threadPageTitle && this.threadPageTitle.textContent) || "Debate";
+    this.shareThread(id, rawTitle);
+  }
+
+  openMoreDropdown(triggerEl, context) {
+    if (!this.forumMoreDropdown || !triggerEl) return;
+    this.activeDropdownContext = context || {};
+
+    const rect = triggerEl.getBoundingClientRect();
+    const dropdownWidth = 190;
+    const dropdownHeight = 90;
+
+    // Colocación horizontal inteligente dentro del viewport
+    let left = rect.right - dropdownWidth;
+    if (left < 10) left = 10;
+    if (left + dropdownWidth > window.innerWidth - 10) {
+      left = window.innerWidth - dropdownWidth - 10;
+    }
+
+    // Colocación vertical inteligente (abajo por defecto, arriba si no hay espacio)
+    let top = rect.bottom + 6;
+    if (top + dropdownHeight > window.innerHeight - 10) {
+      top = rect.top - dropdownHeight - 6;
+    }
+    if (top < 10) top = 10;
+
+    this.forumMoreDropdown.style.top = `${top}px`;
+    this.forumMoreDropdown.style.left = `${left}px`;
+    this.forumMoreDropdown.style.display = "flex";
+  }
+
+  closeMoreDropdown() {
+    if (this.forumMoreDropdown) {
+      this.forumMoreDropdown.style.display = "none";
+    }
+    this.activeDropdownContext = null;
+  }
+
+  openReportModal(context) {
+    if (!this.modalReportUser) return;
+    const ctx = context || this.activeDropdownContext || {};
+
+    if (!this.currentUser) {
+      if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
+      this.showToast("Debés identificarte para reportar publicaciones.");
+      return;
+    }
+
+    if (this.reportTargetType) this.reportTargetType.value = ctx.tipo || "hilo";
+    if (this.reportTargetId) this.reportTargetId.value = ctx.id || "";
+    if (this.reportAuthorId) this.reportAuthorId.value = ctx.autorGoogleId || "";
+
+    if (this.reportPreviewAuthor) {
+      const authorText = ctx.autorNombre ? `u/${escapeHtml(ctx.autorNombre)}` : "Usuario de la comunidad";
+      this.reportPreviewAuthor.textContent = authorText;
+    }
+    if (this.reportPreviewSnippet) {
+      const snip = (ctx.preview || "").trim();
+      this.reportPreviewSnippet.textContent = snip ? (snip.length > 120 ? snip.slice(0, 120) + "..." : snip) : "(Sin vista previa de texto)";
+    }
+    if (this.reportDetailsText) {
+      this.reportDetailsText.value = "";
+    }
+
+    // Restablecer motivo predeterminado
+    const firstRadio = document.querySelector('input[name="report-reason"][value="Agresiones o faltas de respeto"]');
+    if (firstRadio) firstRadio.checked = true;
+
+    this.modalReportUser.classList.add("active");
+  }
+
+  closeReportModal() {
+    if (this.modalReportUser) {
+      this.modalReportUser.classList.remove("active");
+    }
+  }
+
+  async handleReportSubmit(e) {
+    if (e) e.preventDefault();
+    if (!this.currentUser) {
+      this.closeReportModal();
+      if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
+      this.showToast("Debés identificarte para reportar.");
+      return;
+    }
+
+    const tipo = this.reportTargetType ? this.reportTargetType.value : "hilo";
+    const itemId = parseInt(this.reportTargetId ? this.reportTargetId.value : "0", 10);
+    const authorGoogleId = this.reportAuthorId ? this.reportAuthorId.value : "";
+
+    if (!itemId) {
+      this.showToast("Error: elemento no especificado para reportar");
+      return;
+    }
+
+    // Evitar auto-reporte
+    if (authorGoogleId && this.currentUser.googleId && authorGoogleId === this.currentUser.googleId) {
+      this.showToast("No podés reportar tu propia publicación");
+      this.closeReportModal();
+      return;
+    }
+
+    const selectedRadio = document.querySelector('input[name="report-reason"]:checked');
+    const motivoBase = selectedRadio ? selectedRadio.value : "Agresiones o faltas de respeto";
+    const extraDetails = this.reportDetailsText ? this.reportDetailsText.value.trim() : "";
+    const motivoCompleto = extraDetails ? `${motivoBase}: ${extraDetails}` : motivoBase;
+
+    try {
+      const res = await fetch("/api/foro?action=reportar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipo,
+          itemId,
+          id: itemId,
+          googleId: this.currentUser.googleId,
+          motivo: motivoCompleto
+        })
       });
-    } else {
-      this.showToast(url);
+      const json = await res.json();
+      this.closeReportModal();
+      if (json.status === "ok") {
+        this.showToast(json.message || "✓ Reporte enviado para revisión del equipo moderador.");
+      } else {
+        this.showToast(json.message || "No se pudo registrar el reporte");
+      }
+    } catch (err) {
+      this.closeReportModal();
+      this.showToast("Error de conexión al enviar reporte");
     }
   }
 
@@ -2755,7 +3145,7 @@ class ForoApp {
                 <span class="action-icon">${getSvg("message", "svg-icon-xs")}</span>
                 <span>Reply</span>
               </button>
-              <button type="button" class="reddit-comment-action-btn btn-comment-report" data-comment-id="${r.id}" title="Reportar">
+              <button type="button" class="reddit-comment-action-btn btn-comment-report" data-comment-id="${r.id}" data-author-id="${escapeHtml(r.autor_google_id || "")}" data-author-name="${escapeHtml(authorDisplay)}" data-snippet="${escapeHtml((r.contenido || "").slice(0, 120))}" title="Opciones / Reportar">
                 <span class="action-icon">•••</span>
               </button>
               ${this.adminToken ? `
@@ -2916,12 +3306,22 @@ class ForoApp {
       });
     });
 
-    // Listeners de reporte
+    // Listeners de opciones / reporte en comentarios (•••)
     this.threadCommentsStream.querySelectorAll(".btn-comment-report").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const commentId = btn.dataset.commentId;
-        this.reportContent("comentario", commentId);
+        const authorId = btn.dataset.authorId || "";
+        const authorName = btn.dataset.authorName || "";
+        const snippet = btn.dataset.snippet || "";
+        this.openMoreDropdown(btn, {
+          tipo: "comentario",
+          id: commentId,
+          autorGoogleId: authorId,
+          autorNombre: authorName,
+          preview: snippet,
+          threadId: this.activeThreadId
+        });
       });
     });
 
@@ -3215,55 +3615,49 @@ class ForoApp {
     }
   }
 
-  shareThread(id, title) {
-    const url = `${window.location.origin}/foro.html?hilo=${id}`;
-    if (navigator.share) {
-      navigator.share({
-        title: `${decodeEntities(title)} | Estudiantina.online`,
-        text: "Sumate al debate en el Foro de la Estudiantina de Posadas:",
-        url: url
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        this.showToast("Enlace copiado al portapapeles");
-      }).catch(() => {
-        prompt("Copiá este enlace para compartir el debate:", url);
-      });
+  async shareThread(id, title) {
+    const targetId = id || this.activeThreadId;
+    if (!targetId) return;
+
+    const rawTitle = title || (this.currentThread && this.currentThread.titulo) || (this.threadPageTitle && this.threadPageTitle.textContent) || "Debate de la Estudiantina";
+    const cleanTitle = decodeEntities(rawTitle);
+    const shareUrl = this.getThreadShareUrl(targetId);
+    const shareText = `"${cleanTitle}" — Sumate al debate en el Foro de la Estudiantina de Posadas:`;
+
+    // 1. En dispositivos móviles con Web Share API, abrir diálogo nativo del sistema
+    const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({
+          title: `${cleanTitle} | Estudiantina.online`,
+          text: shareText,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        if (err && err.name === "AbortError") return;
+      }
     }
+
+    // 2. Copiar enlace automáticamente al portapapeles
+    const copied = await this.copyToClipboard(shareUrl);
+    if (copied) {
+      this.showToast("🔗 Enlace copiado al portapapeles");
+    }
+
+    // 3. Abrir modal enriquecido con opciones para WhatsApp, X, Telegram y copiado
+    this.openShareModal(targetId, cleanTitle, shareUrl, shareText);
   }
 
   async reportContent(tipo, id) {
-    if (!this.currentUser) {
-      if (this.modalGoogleAuth) this.modalGoogleAuth.classList.add("active");
-      this.showToast("Debés identificarte para reportar publicaciones.");
-      return;
-    }
-
-    const motivo = prompt("¿Por qué deseás reportar esta publicación? (ej: agresiones, lenguaje ofensivo, spam)");
-    if (!motivo) return;
-
-    try {
-      const targetId = parseInt(id, 10);
-      const res = await fetch("/api/foro?action=reportar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tipo,
-          itemId: targetId,
-          id: targetId,
-          googleId: this.currentUser.googleId,
-          motivo
-        })
-      });
-      const json = await res.json();
-      if (json.status === "ok") {
-        this.showToast(json.message || "Publicación reportada para moderación.");
-      } else {
-        this.showToast(json.message || "No se pudo enviar el reporte");
-      }
-    } catch (e) {
-      this.showToast("Error de red al enviar el reporte");
-    }
+    this.openReportModal({
+      tipo: tipo || "hilo",
+      id: id,
+      autorGoogleId: "",
+      autorNombre: "",
+      preview: "",
+      threadId: this.activeThreadId || id
+    });
   }
 
   async handleAdminLogin(e) {

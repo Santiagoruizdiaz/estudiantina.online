@@ -7,48 +7,76 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
 :root {
-  /* Paleta principal */
-  --bg-base:      #0a0b0f;
-  --bg-surface:   #111218;
-  --bg-card:      #181920;
-  --bg-card-2:    #1e1f2b;
-  --bg-elevated:  #232432;
+  /* Paleta neutral profunda y sobria — Nivel producción */
+  --bg-base:      #0c0d12;
+  --bg-surface:   #12141c;
+  --bg-card:      #171923;
+  --bg-card-2:    #1c1f2b;
+  --bg-elevated:  #212534;
+  --bg-input:     #10121a;
 
-  /* Acentos */
-  --red-hot:      #e63946;
-  --red-soft:     rgba(230, 57, 70, 0.15);
-  --gold-primary: #f59e0b;
-  --gold-bright:  #fbbf24;
-  --gold-soft:    rgba(245, 158, 11, 0.15);
-  --cyan-acc:     #22d3ee;
-  --green-live:   #22c55e;
+  /* Acento editorial sobrio (Rose / Crimson 600) */
+  --accent:       #e11d48;
+  --accent-hover: #be123c;
+  --accent-subtle: rgba(225, 29, 72, 0.12);
+  --accent-border: rgba(225, 29, 72, 0.32);
 
-  /* Texto */
+  /* Compatibilidad canónica con nombres previos */
+  --red-hot:      var(--accent);
+  --red-soft:     var(--accent-subtle);
+  --gold-primary: #d97706;
+  --gold-bright:  #f59e0b;
+  --gold-soft:    rgba(217, 119, 6, 0.12);
+  --cyan-acc:     var(--accent);
+  --green-live:   #10b981;
+
+  /* Texto accesible con contraste certificado (WCAG AA) */
   --text-white:   #f8fafc;
   --text-light:   #e2e8f0;
   --text-mid:     #94a3b8;
-  --text-muted:   #475569;
+  --text-muted:   #64748b;
 
-  /* Bordes */
-  --border-dim:    rgba(255,255,255,0.06);
-  --border-soft:   rgba(255,255,255,0.10);
-  --border-medium: rgba(255,255,255,0.18);
-  --border-red:    rgba(230,57,70,0.40);
-  --border-gold:   rgba(245,158,11,0.35);
+  /* Bordes nítidos de 1px sólidos y estructurados */
+  --border-dim:    #242836;
+  --border-soft:   #2e3345;
+  --border-medium: #3c435a;
+  --border-red:    rgba(225, 29, 72, 0.45);
+  --border-gold:   rgba(217, 119, 6, 0.35);
 
-  /* Radio */
-  --r-xs: 4px;
-  --r-sm: 6px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-xl: 20px;
+  /* Geometría contenida (sin redondeos exagerados de IA) */
+  --r-xs: 3px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 10px;
   --r-pill: 9999px;
+
+  /* Sombras sobrias de profundidad real */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.55);
 
   /* Tipografia */
   --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-title:   'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body:    'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* Iconografía SVG neutra y consistente (1.75px stroke) */
+.svg-icon {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: -0.15em;
+  stroke-width: 1.75;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+.svg-icon-xs { width: 0.75rem; height: 0.75rem; stroke-width: 2; }
+.svg-icon-sm { width: 0.875rem; height: 0.875rem; }
+.svg-icon-md { width: 1.125rem; height: 1.125rem; }
+.svg-icon-lg { width: 1.35rem; height: 1.35rem; }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -159,10 +187,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 150;
-  background: rgba(10,11,15,0.97);
-  backdrop-filter: blur(16px);
-  border-bottom: 2px solid var(--red-hot);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dim);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Top Bar: fecha, redes, boton simulador */
@@ -283,11 +310,8 @@ body {
 }
 
 .brand-domain {
-  font-weight: 900;
-  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 800;
+  color: var(--accent);
 }
 
 .masthead-tagline {
@@ -361,12 +385,10 @@ body {
    BARRA DE FILTROS Y BUSQUEDA
    ========================================================================== */
 .filter-strip {
-  background: rgba(10, 11, 15, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: var(--bg-base);
   border-bottom: 1px solid var(--border-dim);
   position: sticky;
-  top: 140px; /* debajo del header en desktop */
+  top: 140px;
   z-index: 100;
   transition: all 0.2s ease;
 }
@@ -521,8 +543,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   z-index: 500;
   opacity: 0;
   visibility: hidden;
@@ -541,7 +561,7 @@ body {
   background: #12141e;
   border: 1px solid var(--border-medium);
   border-bottom: none;
-  border-radius: 20px 20px 0 0;
+  border-radius: 10px 10px 0 0;
   width: 100%;
   max-width: 520px;
   max-height: 85vh;
@@ -1145,8 +1165,9 @@ body {
 
 /* Promo del Simulador */
 .sidebar-game-promo {
-  background: linear-gradient(145deg, #1a1226 0%, #0f1020 100%) !important;
-  border-color: rgba(245,158,11,0.3) !important;
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-dim) !important;
+  border-radius: var(--r-md) !important;
   padding: 1.25rem 1rem;
   text-align: center;
 }
@@ -1169,20 +1190,20 @@ body {
 
 .sidebar-game-btn {
   display: inline-block;
-  padding: 9px 20px;
-  background: linear-gradient(135deg, var(--gold-primary) 0%, #ea580c 100%);
+  padding: 8px 18px;
+  background: var(--accent);
   color: #fff;
   border-radius: var(--r-md);
   font-family: var(--font-title);
   font-size: 0.84rem;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: none;
-  transition: all 0.25s;
-  box-shadow: 0 4px 16px rgba(245,158,11,0.3);
+  transition: background 0.2s ease, transform 0.15s ease;
+  box-shadow: var(--shadow-sm);
 }
 .sidebar-game-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(245,158,11,0.5);
+  background: var(--accent-hover);
+  transform: translateY(-1px);
 }
 
 /* ==========================================================================
@@ -1978,8 +1999,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   z-index: 520;
   align-items: center;
   justify-content: center;
@@ -2383,8 +2402,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   z-index: 550;
   align-items: center;
   justify-content: center;
@@ -2546,8 +2563,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   z-index: 520;
   align-items: center;
   justify-content: center;
@@ -2680,8 +2695,6 @@ body {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   z-index: 530;
   align-items: center;
   justify-content: center;
@@ -2798,8 +2811,6 @@ body.has-admin-bar {
   right: 0;
   z-index: 1100;
   background: rgba(14, 15, 23, 0.94);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border-bottom: 2px solid var(--gold-primary);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
   animation: slideDownBar 0.25s ease-out;
@@ -3017,8 +3028,6 @@ body.has-admin-bar {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.88);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   z-index: 1200;
   align-items: center;
   justify-content: center;
@@ -3387,22 +3396,15 @@ body.has-admin-bar {
    PIE DE PÁGINA (PORTAL FOOTER)
    ========================================================================== */
 .portal-footer {
-  background: linear-gradient(180deg, var(--bg-surface) 0%, #07080b 100%);
-  border-top: 1px solid var(--border-soft);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-dim);
   position: relative;
   overflow: hidden;
   margin-top: 3rem;
 }
 
 .portal-footer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--red-hot) 25%, var(--gold-primary) 75%, transparent 100%);
-  opacity: 0.85;
+  display: none;
 }
 
 .footer-inner {
@@ -4196,7 +4198,6 @@ body.has-admin-bar {
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(4px);
   transition: all 0.2s;
 }
 .btn-remove-news-img:hover {
@@ -4658,7 +4659,7 @@ body.has-admin-bar {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-medium);
   transition: .25s;
-  border-radius: 24px;
+  border-radius: var(--r-md);
 }
 .toggle-slider:before {
   position: absolute;
@@ -5026,7 +5027,6 @@ body.has-admin-bar {
   opacity: 1;
   pointer-events: all;
   background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(4px);
 }
 
 .article-modal-card {
@@ -5085,7 +5085,6 @@ body.has-admin-bar {
   gap: 0.75rem;
   padding: 0.65rem 1rem;
   background: rgba(17, 18, 24, 0.95);
-  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-dim);
   flex-shrink: 0;
 }
@@ -5916,7 +5915,6 @@ body.has-admin-bar {
   padding: 0.75rem 1.25rem;
   background: rgba(17, 18, 24, 0.97);
   border-top: 1px solid var(--border-soft);
-  backdrop-filter: blur(8px);
   z-index: 10;
   gap: 0.75rem;
   flex-shrink: 0;
@@ -5987,7 +5985,6 @@ body.has-admin-bar {
   font-size: 0.68rem;
   font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(4px);
   transition: all 0.2s;
   white-space: nowrap;
 }
@@ -6000,38 +5997,30 @@ body.has-admin-bar {
 }
 
 .foro-cta-card {
-  background: linear-gradient(135deg, rgba(20, 24, 38, 0.95), rgba(12, 14, 22, 0.98));
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  border-radius: 24px;
-  padding: 3rem 2rem;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(56, 189, 248, 0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--r-md);
+  padding: 2.75rem 2rem;
+  box-shadow: var(--shadow-md);
   position: relative;
   overflow: hidden;
   text-align: center;
 }
 
 .foro-cta-card::before {
-  content: "";
-  position: absolute;
-  top: -40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 400px;
-  height: 250px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.18) 0%, transparent 70%);
-  pointer-events: none;
+  display: none;
 }
 
 .foro-cta-badge {
   display: inline-block;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
-  font-size: 0.76rem;
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
-  padding: 4px 14px;
-  border-radius: 9999px;
+  padding: 4px 12px;
+  border-radius: var(--r-sm);
   margin-bottom: 1.25rem;
 }
 
@@ -6061,28 +6050,35 @@ body.has-admin-bar {
 }
 
 .foro-cta-feature-pill {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-secondary);
-  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  color: var(--text-mid);
+  font-size: 0.8rem;
   font-weight: 600;
   padding: 6px 14px;
-  border-radius: 9999px;
+  border-radius: var(--r-sm);
 }
 
 .btn-cta-enter-foro {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #0284c7, #06b6d4);
+  gap: 8px;
+  background: var(--accent);
   color: #fff;
   text-decoration: none;
   font-weight: 700;
-  font-size: 1rem;
-  padding: 13px 32px;
-  border-radius: 9999px;
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
-  transition: all 0.25s ease;
+  font-size: 0.92rem;
+  padding: 10px 24px;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.btn-cta-enter-foro:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
 }
 
 .btn-cta-enter-foro:hover {
@@ -6097,7 +6093,7 @@ body.has-admin-bar {
   }
   .foro-cta-card {
     padding: 2rem 1.25rem;
-    border-radius: 18px;
+    border-radius: var(--r-md);
   }
   .btn-cta-enter-foro {
     width: 100%;

@@ -1,0 +1,494 @@
+/* ==========================================================================
+   ESTUDIANTINA.ONLINE — HUB PRINCIPAL
+   Diseño de Producto & Frontend de Nivel Producción
+   Paleta Neutral Profunda con Acento Funcional Ámbar Institucional
+   ========================================================================== */
+
+:root {
+  /* Escala de neutrales profundos */
+  --hub-bg: #090a0f;
+  --hub-surface-1: #11131a;
+  --hub-surface-2: #161822;
+  --hub-surface-hover: #1c1f2c;
+  
+  /* Bordes estructurados de alta precisión */
+  --hub-border-subtle: #1e2230;
+  --hub-border-default: #262b3d;
+  --hub-border-hover: #3b4259;
+
+  /* Acento institucional sobrio (Misiones / Estudiantina) */
+  --hub-accent: #f59e0b;
+  --hub-accent-hover: #d97706;
+  --hub-accent-subtle: rgba(245, 158, 11, 0.08);
+  --hub-accent-border: rgba(245, 158, 11, 0.28);
+
+  /* Jerarquía de texto WCAG AA */
+  --hub-text-1: #f8fafc;
+  --hub-text-2: #cbd5e1;
+  --hub-text-3: #8492a6;
+  --hub-text-muted: #566175;
+
+  /* Geometría controlada */
+  --hub-radius-sm: 4px;
+  --hub-radius-md: 8px;
+  --hub-radius-lg: 12px;
+
+  /* Sombras sobrias de profundidad física */
+  --hub-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --hub-shadow-hover: 0 8px 24px -6px rgba(0, 0, 0, 0.65), 0 2px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+/* Reset técnico */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.hub-body {
+  min-height: 100vh;
+  background-color: var(--hub-bg);
+  color: var(--hub-text-1);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contenedor centralizado */
+.hub-wrapper {
+  max-width: 1140px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.5rem 2.5rem;
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+.hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--hub-border-subtle);
+}
+
+.hub-brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.hub-brand-logo {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.6px;
+  text-transform: lowercase;
+}
+
+.hub-brand-domain {
+  color: var(--hub-accent);
+  font-weight: 800;
+}
+
+.hub-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hub-badge-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.65rem;
+  background: var(--hub-surface-1);
+  border: 1px solid var(--hub-border-default);
+  border-radius: var(--hub-radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--hub-text-2);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.hub-badge-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--hub-accent);
+}
+
+.hub-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--hub-border-default);
+  border-radius: var(--hub-radius-md);
+  color: var(--hub-text-2);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.hub-nav-link:hover {
+  background-color: var(--hub-surface-1);
+  border-color: var(--hub-border-hover);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   HERO / INTRODUCCIÓN
+   ========================================================================== */
+.hub-hero {
+  padding: 2.75rem 0 3rem;
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* Banner publicitario sponsor oficial (Radio UP) */
+.hub-sponsor-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.hub-sponsor-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 320px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: var(--hub-radius-md);
+  border: 1px solid var(--hub-border-default);
+  overflow: hidden;
+  text-decoration: none;
+  box-shadow: var(--hub-shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hub-sponsor-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--hub-accent);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 16px -4px var(--hub-accent-border);
+}
+
+.hub-sponsor-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 970 / 251;
+  object-fit: contain;
+  background: #ffffff;
+  padding: 0.3rem 0.85rem;
+}
+
+.hub-hero-title {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: clamp(2.4rem, 5.2vw, 3.6rem);
+  font-weight: 850;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  color: var(--hub-text-1);
+  margin-bottom: 0;
+}
+
+.hub-hero-title em {
+  font-style: normal;
+  color: var(--hub-accent);
+}
+
+.hub-hero-desc {
+  font-size: 1.05rem;
+  color: var(--hub-text-3);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   GRILLA DE 3 OPCIONES
+   ========================================================================== */
+.hub-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+}
+
+.hub-card {
+  position: relative;
+  background: var(--hub-surface-1);
+  border: 1px solid var(--hub-border-default);
+  border-radius: var(--hub-radius-lg);
+  padding: 1.75rem 1.65rem;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--hub-shadow-card);
+}
+
+.hub-card:hover {
+  background-color: var(--hub-surface-2);
+  border-color: var(--hub-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--hub-shadow-hover);
+}
+
+/* Encabezado de la tarjeta */
+.hub-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.hub-card-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--hub-radius-md);
+  background: var(--hub-surface-2);
+  border: 1px solid var(--hub-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--hub-text-2);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.hub-card:hover .hub-card-icon-wrap {
+  color: var(--hub-accent);
+  border-color: var(--hub-accent-border);
+}
+
+.hub-svg-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 1.75px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.hub-card-category {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--hub-text-3);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--hub-radius-sm);
+  background: var(--hub-bg);
+  border: 1px solid var(--hub-border-subtle);
+}
+
+/* Tipografía de la tarjeta */
+.hub-card-title {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--hub-text-1);
+  letter-spacing: -0.4px;
+  margin-bottom: 0.2rem;
+}
+
+.hub-card-subtitle {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--hub-text-3);
+  margin-bottom: 0.9rem;
+}
+
+.hub-card-desc {
+  font-size: 0.88rem;
+  color: var(--hub-text-2);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  flex-grow: 1;
+}
+
+/* Botones de acción */
+.hub-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--hub-radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.18s ease;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Botón primario: Jugar */
+.hub-btn-primary {
+  background-color: var(--hub-text-1);
+  color: #000000;
+  border: 1px solid var(--hub-text-1);
+}
+
+.hub-btn-primary:hover {
+  background-color: #e2e8f0;
+  border-color: #e2e8f0;
+}
+
+/* Botones secundarios: Comunidad & Foro */
+.hub-btn-secondary {
+  background-color: var(--hub-surface-2);
+  color: var(--hub-text-1);
+  border: 1px solid var(--hub-border-default);
+}
+
+.hub-btn-secondary:hover {
+  background-color: var(--hub-surface-hover);
+  border-color: var(--hub-border-hover);
+  color: #ffffff;
+}
+
+.hub-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2px;
+  transition: transform 0.15s ease;
+}
+
+.hub-btn:hover svg {
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   BARRA DE ESTADÍSTICAS DEL PROYECTO
+   ========================================================================== */
+.hub-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  background: var(--hub-surface-1);
+  border: 1px solid var(--hub-border-default);
+  border-radius: var(--hub-radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.hub-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hub-stat-val {
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--hub-text-1);
+  letter-spacing: -0.5px;
+}
+
+.hub-stat-lbl {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--hub-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-top: 0.15rem;
+}
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+.hub-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--hub-border-subtle);
+  padding-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: center;
+}
+
+.hub-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.hub-footer-link {
+  color: var(--hub-text-3);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: color 0.18s ease;
+}
+
+.hub-footer-link:hover {
+  color: var(--hub-text-1);
+}
+
+.hub-footer-legal {
+  font-size: 0.75rem;
+  color: var(--hub-text-muted);
+  max-width: 580px;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+  .hub-cards-grid {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hub-stats-bar {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .hub-wrapper {
+    padding: 1rem 1rem 2rem;
+  }
+
+  .hub-header {
+    flex-direction: column;
+    gap: 0.85rem;
+    text-align: center;
+  }
+
+  .hub-hero {
+    padding: 2.5rem 0.5rem 2rem;
+  }
+
+  .hub-hero-title {
+    font-size: 2rem;
+  }
+
+  .hub-card {
+    padding: 1.5rem 1.25rem;
+  }
+}

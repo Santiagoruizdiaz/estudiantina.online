@@ -14,10 +14,13 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://estudiantina.online/">
+
   <!-- Open Graph / Redes Sociales / Google Search -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Estudiantina Posadas Online">
-  <meta property="og:url" content="https://estudiantina.online/comunidad">
+  <meta property="og:url" content="https://estudiantina.online/">
   <meta property="og:title" content="Comunidad &amp; Noticias | Estudiantina de Posadas">
   <meta property="og:description" content="Portal oficial de la comunidad de la Estudiantina de Posadas. Noticias, cronograma, debates y guía.">
   <meta property="og:image" content="https://estudiantina.online/assets/logo.png">
@@ -57,34 +60,33 @@
   <aside id="admin-bar" class="admin-bar" style="display:none;" aria-label="Barra de Administración">
     <div class="admin-bar-inner">
       <div class="admin-bar-left">
-        <span class="admin-badge-crown">&#x1F451;</span>
+        <span class="admin-badge-crown"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
         <strong class="admin-title">MODO ADMINISTRADOR</strong>
         <span class="admin-sep">|</span>
         <span id="admin-bar-user" class="admin-user-tag">admin</span>
       </div>
       <div class="admin-bar-actions">
         <button type="button" id="btn-admin-open-composer" class="btn-admin-bar-action" title="Redactar nueva noticia">
-          <span>✍️</span><span>Noticia</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Noticia</span>
         </button>
         <button type="button" id="btn-admin-open-threads" class="btn-admin-bar-action" title="Gestionar debates del foro">
-          <span>💬</span><span>Debates</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span>Debates</span>
         </button>
         <button type="button" id="btn-admin-open-cronograma" class="btn-admin-bar-action" title="Editar cronograma de la temporada">
-          <span>📅</span><span>Cronograma</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg><span>Cronograma</span>
         </button>
         <button type="button" id="btn-admin-open-guia" class="btn-admin-bar-action" title="Editar guías y preguntas frecuentes">
-          <span>💡</span><span>Guías</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg><span>Guías</span>
         </button>
         <button type="button" id="btn-admin-open-settings" class="btn-admin-bar-action" title="Ajustes del sitio y marquesina">
-          <span>⚙️</span><span>Ajustes</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Ajustes</span>
         </button>
         <button type="button" id="btn-admin-open-panel" class="btn-admin-bar-action" title="Panel de control completo y moderación">
-          <span>🛡️</span><span>Panel Completo</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="3" y2="3"/><line x1="4" x2="20" y1="12" y2="12"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="3" r="2"/><circle cx="12" cy="21" r="2"/></svg><span>Panel Completo</span>
           <span id="admin-reports-badge" class="admin-badge-reports" style="display:none;">0</span>
         </button>
         <button type="button" id="btn-admin-logout" class="btn-admin-bar-logout" title="Cerrar sesión de administrador">
-          <span>Salir</span>
-          <span>✕</span>
+          <span>Salir</span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
         </button>
       </div>
     </div>
@@ -95,11 +97,14 @@
     <div class="ticker-label"><span class="ticker-dot"></span>EN VIVO</div>
     <div class="ticker-track-wrap">
       <div class="ticker-track" id="ticker-track">
-        <span>&#x1F941; Temporada 2026 en marcha &mdash; Pruebas Piloto iniciadas en la Costanera de Posadas</span>
-        <span>&#x1F483; Cuerpos de Baile: Novedades coreograficas y nuevas tematicas para las Noches de Calle</span>
-        <span>&#x1F3AE; Simulador v2026 ya disponible &mdash; Modo Cuerpo de Baile con eventos exclusivos</span>
-        <span>&#x1F4C5; Noches de Calle oficiales: Septiembre - Octubre 2026</span>
-        <span>&#x1F451; Gran Cierre en el Anfiteatro Manuel Antonio Ramirez &mdash; Octubre 2026</span>
+        <span>&#127881; ¡Bienvenidos a la nueva <strong>estudiantina.online</strong>! &mdash; El portal oficial de la fiesta estudiantil misionera ya está en línea</span>
+        <span>&#127995; Estrenamos el Foro de Debate Estudiantil &mdash; Entrá, elegí tu colegio y sumate a la conversación</span>
+        <span>Temporada 2026 en marcha &mdash; Primera Noche de Calle: <strong>18 de Septiembre</strong> en la Costanera de Posadas</span>
+        <span>&#9889; El Foro está en etapa beta &mdash; Reportá cualquier error y ayudanos a mejorar la plataforma</span>
+        <span>33 colegios, una sola comunidad &mdash; Seguí toda la temporada 2026 en tiempo real</span>
+        <span>Simulador de Carrera disponible &mdash; Viví tu trayectoria escolar en Banda de Música o Cuerpo de Baile</span>
+        <span>&#128227; Gran Cierre en el Anfiteatro Manuel Antonio Ramírez &mdash; Octubre 2026 &mdash; No te lo perdás</span>
+        <span>Gracias por ser parte de <strong>estudiantina.online</strong> &mdash; Hecho con pasión posadeña &#128150;</span>
       </div>
     </div>
     <button class="ticker-close" id="ticker-close" title="Cerrar">&#x2715;</button>
@@ -112,24 +117,24 @@
         <div class="header-top-left">
           <span class="header-date" id="header-date">Cargando fecha...</span>
           <span class="header-separator">|</span>
-          <span class="header-location">&#x1F4CD; Posadas, Misiones</span>
+          <span class="header-location"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Posadas, Misiones</span>
         </div>
         <div class="header-top-right">
-          <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="header-social">&#x1F4F7; @estudiantina.online</a>
-          <a href="index.html" class="header-btn-game"><span>&#x1F3AE;</span><span>Ir al Simulador</span></a>
+          <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="header-social"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg> @estudiantina.online</a>
+          <a href="simulador.html" class="header-btn-game"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/></svg><span>Ir al Simulador</span></a>
         </div>
       </div>
     </div>
 
     <div class="header-masthead">
       <div class="header-masthead-inner">
-        <a href="comunidad.html" class="masthead-brand" aria-label="Estudiantina Online Comunidad">
+        <a href="index.html" class="masthead-brand" aria-label="Estudiantina Online Comunidad">
           <div class="masthead-text-group">
             <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
           </div>
         </a>
-        <a href="index.html" class="header-btn-game-mobile" title="Ir al Simulador de Carrera">
-          <span>&#x1F3AE;</span><span>Simulador</span>
+        <a href="simulador.html" class="header-btn-game-mobile" title="Ir al Simulador de Carrera">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/></svg><span>Simulador</span>
         </a>
       </div>
     </div>
@@ -139,7 +144,7 @@
         <a href="#noticias" class="section-nav-link active">Noticias</a>
         <a href="#cronograma" class="section-nav-link">Cronograma</a>
         <a href="#guia" class="section-nav-link">Guia del Espectador</a>
-        <a href="foro.html" class="section-nav-link">💬 Foro</a>
+        <a href="foro.html" class="section-nav-link">Foro</a>
       </div>
     </nav>
   </header>
@@ -148,7 +153,7 @@
   <div class="filter-strip" id="filter-strip">
     <div class="filter-strip-inner">
       <div class="filter-search-box">
-        <span class="filter-search-icon">&#x1F50D;</span>
+        <span class="filter-search-icon"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
         <input type="text" id="search-input" class="filter-search-input" placeholder="Buscar noticias..." aria-label="Buscar noticias">
       </div>
 
@@ -166,11 +171,11 @@
       <!-- CHIPS DESKTOP -->
       <div class="filter-chips" role="tablist" id="category-pills">
         <button class="filter-chip active" data-category="todas" role="tab" aria-selected="true">Todas</button>
-        <button class="filter-chip" data-category="noches-de-calle" role="tab" aria-selected="false">&#x1F389; Noches de Calle</button>
-        <button class="filter-chip" data-category="baile" role="tab" aria-selected="false">&#x1F483; Cuerpo de Baile</button>
-        <button class="filter-chip" data-category="banda" role="tab" aria-selected="false">&#x1F941; Banda de Musica</button>
-        <button class="filter-chip" data-category="simulador" role="tab" aria-selected="false">&#x1F3AE; Simulador</button>
-        <button class="filter-chip" data-category="informacion" role="tab" aria-selected="false">&#x1F4A1; Guias e Info</button>
+        <button class="filter-chip" data-category="noches-de-calle" role="tab" aria-selected="false">Noches de Calle</button>
+        <button class="filter-chip" data-category="baile" role="tab" aria-selected="false">Cuerpo de Baile</button>
+        <button class="filter-chip" data-category="banda" role="tab" aria-selected="false">Banda de Música</button>
+        <button class="filter-chip" data-category="simulador" role="tab" aria-selected="false">Simulador</button>
+        <button class="filter-chip" data-category="informacion" role="tab" aria-selected="false">Guías e Info</button>
       </div>
       <span id="news-count" class="filter-count">Cargando...</span>
     </div>
@@ -182,7 +187,7 @@
       <div class="filter-drawer-handle" aria-hidden="true"></div>
       <div class="filter-drawer-header">
         <div class="drawer-header-title-wrap">
-          <span class="drawer-header-icon">&#x2699;&#xFE0F;</span>
+          <span class="drawer-header-icon"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <h3 id="drawer-title" class="drawer-title">Filtrar Noticias</h3>
         </div>
         <button type="button" id="btn-close-filter-drawer" class="btn-close-drawer" aria-label="Cerrar filtros">&#x2715;</button>
@@ -191,32 +196,32 @@
         <p class="drawer-subtitle">Seleccioná una categoría para explorar las publicaciones:</p>
         <div class="filter-drawer-options" id="drawer-category-options">
           <button type="button" class="drawer-chip active" data-category="todas">
-            <span class="drawer-chip-icon">&#x1F4F0;</span>
+
             <span class="drawer-chip-label">Todas las noticias</span>
             <span class="drawer-chip-check">&#x2713;</span>
           </button>
           <button type="button" class="drawer-chip" data-category="noches-de-calle">
-            <span class="drawer-chip-icon">&#x1F389;</span>
+
             <span class="drawer-chip-label">Noches de Calle</span>
             <span class="drawer-chip-check">&#x2713;</span>
           </button>
           <button type="button" class="drawer-chip" data-category="baile">
-            <span class="drawer-chip-icon">&#x1F483;</span>
+
             <span class="drawer-chip-label">Cuerpo de Baile</span>
             <span class="drawer-chip-check">&#x2713;</span>
           </button>
           <button type="button" class="drawer-chip" data-category="banda">
-            <span class="drawer-chip-icon">&#x1F941;</span>
+
             <span class="drawer-chip-label">Banda de Musica</span>
             <span class="drawer-chip-check">&#x2713;</span>
           </button>
           <button type="button" class="drawer-chip" data-category="simulador">
-            <span class="drawer-chip-icon">&#x1F3AE;</span>
+
             <span class="drawer-chip-label">Simulador</span>
             <span class="drawer-chip-check">&#x2713;</span>
           </button>
           <button type="button" class="drawer-chip" data-category="informacion">
-            <span class="drawer-chip-icon">&#x1F4A1;</span>
+
             <span class="drawer-chip-label">Guias e Info</span>
             <span class="drawer-chip-check">&#x2713;</span>
           </button>
@@ -239,7 +244,7 @@
           <!-- Barra Editorial para Administrador -->
           <div id="admin-news-toolbar" class="admin-news-toolbar" style="display:none;">
             <button type="button" id="btn-admin-compose-news-inline" class="btn-admin-compose-inline">
-              <span>&#x270D;&#xFE0F;</span><span>Redactar Nueva Noticia en el Portal</span>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Redactar Nueva Noticia en el Portal</span>
             </button>
           </div>
           <div class="subsection-label">
@@ -252,7 +257,7 @@
         <aside class="editorial-sidebar">
           <div class="sidebar-block">
             <div class="sidebar-block-header">
-              <span class="sidebar-block-icon">&#x1F525;</span>
+              <span class="sidebar-block-icon"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>
               <h3 class="sidebar-block-title">Trending</h3>
             </div>
             <div id="trending-list" class="trending-list"></div>
@@ -260,7 +265,7 @@
 
           <div class="sidebar-block">
             <div class="sidebar-block-header">
-              <span class="sidebar-block-icon">&#x1F4C5;</span>
+              <span class="sidebar-block-icon"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></span>
               <h3 class="sidebar-block-title">Proximas Fechas</h3>
             </div>
             <div id="schedule-compact-list" class="schedule-compact-list" aria-live="polite">
@@ -269,10 +274,10 @@
           </div>
 
           <div class="sidebar-block sidebar-game-promo">
-            <span class="sidebar-game-emoji">&#x1F3AE;</span>
+            <div class="sidebar-game-badge"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/></svg></div>
             <h4 class="sidebar-game-title">Juga el Simulador</h4>
             <p class="sidebar-game-desc">Crea tu carrera en la Estudiantina. Banda de Musica o Cuerpo de Baile.</p>
-            <a href="index.html" class="sidebar-game-btn">Jugar ahora &rarr;</a>
+            <a href="simulador.html" class="sidebar-game-btn">Jugar ahora &rarr;</a>
           </div>
         </aside>
       </div>
@@ -283,12 +288,12 @@
       <div class="section-inner">
         <div class="section-header-row">
           <div class="section-header-left">
-            <div class="section-header-label">📍 Cronograma</div>
+            <div class="section-header-label">Cronograma Oficial</div>
             <h2 class="section-heading">Temporada 2026</h2>
           </div>
           <div class="section-header-right-actions">
             <button type="button" id="btn-admin-manage-cronograma" class="btn-admin-section-edit" style="display:none;" title="Editar fechas y eventos">
-              <span>✏️</span><span>Editar Cronograma</span>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Editar Cronograma</span>
             </button>
             <span class="section-badge-tag">Costanera de Posadas</span>
           </div>
@@ -296,36 +301,36 @@
         <div class="cronograma-grid" id="cronograma-grid">
           <article class="cronograma-card featured">
             <div class="cronograma-card-number">01</div>
-            <div class="cronograma-card-icon">&#x23F1;</div>
+            <div class="cronograma-card-icon"><svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg></div>
             <h3>Pruebas Piloto</h3>
             <div class="cronograma-meta">
-              <span>&#x1F4C5; Septiembre 2026</span>
-              <span>&#x1F4CD; Costanera &mdash; 4to Tramo</span>
-              <span>&#x23F0; 14:00 a 23:00 hs</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Septiembre 2026</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Costanera &mdash; 4to Tramo</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 14:00 a 23:00 hs</span>
             </div>
             <p>Ensayos generales con cronometro oficial y ajuste de desplazamientos frente a los palcos de fiscalizacion.</p>
             <div class="cronograma-card-status status-live">En desarrollo</div>
           </article>
           <article class="cronograma-card">
             <div class="cronograma-card-number">02</div>
-            <div class="cronograma-card-icon">&#x1F941;</div>
+            <div class="cronograma-card-icon"><svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
             <h3>Noches de Calle</h3>
             <div class="cronograma-meta">
-              <span>&#x1F4C5; Sep &ndash; Oct 2026</span>
-              <span>&#x1F4CD; 4 Tramos de la Costanera</span>
-              <span>&#x23F0; 18:00 a 04:30 hs</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Sep &ndash; Oct 2026</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> 4 Tramos de la Costanera</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 18:00 a 04:30 hs</span>
             </div>
             <p>Desfile oficial competitivo con mas de 30 colegios posadenos y evaluacion por jurados fiscales.</p>
             <div class="cronograma-card-status status-upcoming">Proximamente</div>
           </article>
           <article class="cronograma-card">
             <div class="cronograma-card-number">03</div>
-            <div class="cronograma-card-icon">&#x1F451;</div>
+            <div class="cronograma-card-icon"><svg class="svg-icon svg-icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
             <h3>Show en Anfiteatro</h3>
             <div class="cronograma-meta">
-              <span>&#x1F4C5; Octubre 2026</span>
-              <span>&#x1F4CD; Anfiteatro Manuel A. Ramirez</span>
-              <span>&#x23F0; 17:00 a 05:00 hs</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> Octubre 2026</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Anfiteatro Manuel A. Ramirez</span>
+              <span><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 17:00 a 05:00 hs</span>
             </div>
             <p>El gran cierre de gala sobre el escenario de piedra con vista al Rio Parana.</p>
             <div class="cronograma-card-status">Cierre de Temporada</div>
@@ -339,12 +344,12 @@
       <div class="section-inner">
         <div class="section-header-row">
           <div class="section-header-left">
-            <div class="section-header-label">💡 FAQ</div>
+            <div class="section-header-label">Preguntas Frecuentes</div>
             <h2 class="section-heading">Guia del Espectador</h2>
           </div>
           <div class="section-header-right-actions">
             <button type="button" id="btn-admin-manage-guia" class="btn-admin-section-edit" style="display:none;" title="Editar preguntas y respuestas de la guía">
-              <span>✏️</span><span>Editar Guía & FAQ</span>
+              <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Editar Guía & FAQ</span>
             </button>
           </div>
         </div>
@@ -368,7 +373,7 @@
             </div>
           </div>
           <div class="faq-side-card">
-            <span class="faq-side-emoji">&#x1F3DF;</span>
+            <div class="faq-side-icon"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg></div>
             <h4>Primera vez en la Estudiantina?</h4>
             <p>La Costanera de Posadas se convierte en el escenario mas vibrante de Misiones cada ano. Mas de 30 colegios, miles de estudiantes y una ciudad entera detras de sus jovenes.</p>
             <div class="faq-side-stats">
@@ -386,20 +391,20 @@
       <div class="section-inner">
         <div class="foro-cta-card">
           <div class="foro-cta-content">
-            <span class="foro-cta-badge">&#x1F4AC; COMUNIDAD &amp; HINCHADAS</span>
+            <span class="foro-cta-badge">COMUNIDAD &amp; HINCHADAS</span>
             <h2 class="foro-cta-title">Foro Oficial de Debate Estudiantil</h2>
             <p class="foro-cta-desc">
               El espacio de intercambio oficial para estudiantes, egresados y familias de los 33 colegios de Posadas.
               Debat&iacute; sobre arreglos de percusi&oacute;n, scolas de samba, trajes, coreograf&iacute;as y vot&aacute; los mejores debates en una pesta&ntilde;a dedicada.
             </p>
             <div class="foro-cta-features">
-              <span class="foro-cta-feature-pill">&#x26A1; 5 Canales Oficiales</span>
-              <span class="foro-cta-feature-pill">&#x1F941; 33 Colegios</span>
-              <span class="foro-cta-feature-pill">&#x1F525; Votaci&oacute;n en Tiempo Real</span>
+              <span class="foro-cta-feature-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg> <span>5 Canales Oficiales</span></span>
+              <span class="foro-cta-feature-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> <span>33 Colegios</span></span>
+              <span class="foro-cta-feature-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> <span>Votación en Tiempo Real</span></span>
             </div>
             <div class="foro-cta-actions">
               <a href="foro.html" class="btn-cta-enter-foro">
-                <span>&#x1F4AC; Entrar al Foro de Debate</span>
+                <span>Entrar al Foro de Debate</span>
                 <span>&rarr;</span>
               </a>
             </div>
@@ -415,8 +420,8 @@
       <div class="footer-main-grid">
         <!-- Columna Marca -->
         <div class="footer-col-brand">
-          <a href="comunidad.html" class="footer-brand-link">
-            <span class="footer-brand-icon">&#x1F941;</span>
+          <a href="index.html" class="footer-brand-link">
+
             <div class="footer-brand-title">
               <span class="footer-brand-name">estudiantina<span class="footer-brand-domain">.online</span></span>
               <span class="footer-brand-sub">Portal de Comunidad &amp; Noticias</span>
@@ -426,8 +431,8 @@
             El espacio digital oficial de la fiesta de la juventud misionera. Noticias exclusivas, debates de hinchadas, cronograma de las Noches de Calle y el Simulador 2026.
           </p>
           <div class="footer-pills-row">
-            <span class="footer-pill">&#x1F4CD; Costanera de Posadas</span>
-            <span class="footer-pill">&#x1F941; 33 Colegios Oficiales</span>
+            <span class="footer-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Costanera de Posadas</span>
+            <span class="footer-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> 33 Colegios Oficiales</span>
           </div>
         </div>
 
@@ -435,10 +440,10 @@
         <div class="footer-col-nav">
           <h4 class="footer-col-title">Secciones</h4>
           <ul class="footer-nav-list">
-            <li><a href="#noticias" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F0;</span> Noticias &amp; Cronicas</a></li>
-            <li><a href="#cronograma" class="footer-nav-link"><span class="footer-link-icon">&#x1F4C5;</span> Cronograma de Calle</a></li>
-            <li><a href="#guia" class="footer-nav-link"><span class="footer-link-icon">&#x2753;</span> Guia &amp; Preguntas</a></li>
-            <li><a href="foro.html" class="footer-nav-link"><span class="footer-link-icon">&#x1F4AC;</span> Foro de Debate</a></li>
+            <li><a href="#noticias" class="footer-nav-link">Noticias &amp; Cronicas</a></li>
+            <li><a href="#cronograma" class="footer-nav-link">Cronograma de Calle</a></li>
+            <li><a href="#guia" class="footer-nav-link">Guia &amp; Preguntas</a></li>
+            <li><a href="foro.html" class="footer-nav-link">Foro de Debate</a></li>
           </ul>
         </div>
 
@@ -446,10 +451,10 @@
         <div class="footer-col-nav">
           <h4 class="footer-col-title">Ecosistema</h4>
           <ul class="footer-nav-list">
-            <li><a href="index.html" class="footer-nav-link"><span class="footer-link-icon">&#x1F3AE;</span> Ir al Simulador</a></li>
-            <li><a href="index.html#ranking" class="footer-nav-link"><span class="footer-link-icon">&#x1F3C6;</span> Salon de la Fama</a></li>
-            <li><a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F7;</span> Instagram Oficial</a></li>
-            <li><a href="index.html#terms" class="footer-nav-link"><span class="footer-link-icon">&#x2696;&#xFE0F;</span> Terminos &amp; Condiciones</a></li>
+            <li><a href="simulador.html" class="footer-nav-link">Ir al Simulador</a></li>
+            <li><a href="simulador.html#ranking" class="footer-nav-link">Salon de la Fama</a></li>
+            <li><a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="footer-nav-link">Instagram Oficial</a></li>
+            <li><a href="simulador.html#terms" class="footer-nav-link">Terminos &amp; Condiciones</a></li>
           </ul>
         </div>
       </div>
@@ -457,7 +462,7 @@
       <!-- Barra inferior / Copyright -->
       <div class="footer-bottom-bar">
         <p class="footer-copy" id="footer-copy-text">
-          &copy; 2026 <strong>estudiantina.online</strong> &mdash; Obra cultural independiente sin fines de lucro. Desarrollado con pasi&oacute;n posade&ntilde;a.
+          &copy; 2026 <strong>estudiantina.online</strong> &mdash; Proyecto privado e independiente. Desarrollado con pasi&oacute;n posade&ntilde;a.
         </p>
         <button type="button" id="btn-footer-back-to-top" class="footer-back-to-top" aria-label="Volver arriba">
           <span>Subir</span>
@@ -482,9 +487,9 @@
         <span id="reader-category-top" class="reader-topbar-cat"></span>
         <div class="reader-topbar-actions">
           <a id="btn-reader-open-tab" class="reader-topbar-btn reader-open-tab-btn" href="#" target="_blank" title="Abrir en pestaña completa">↗ Pestaña completa</a>
-          <button type="button" id="btn-reader-admin-edit" class="reader-topbar-btn reader-admin-btn" style="display:none;" title="Editar esta noticia">✏️ Editar</button>
-          <button type="button" id="btn-reader-admin-del" class="reader-topbar-btn reader-admin-del-btn" style="display:none;" title="Eliminar esta noticia">🗑️</button>
-          <button id="btn-share-article" class="reader-topbar-btn" title="Compartir">📱 Compartir</button>
+          <button type="button" id="btn-reader-admin-edit" class="reader-topbar-btn reader-admin-btn" style="display:none;" title="Editar esta noticia">Editar</button>
+          <button type="button" id="btn-reader-admin-del" class="reader-topbar-btn reader-admin-del-btn" style="display:none;" title="Eliminar esta noticia"></button>
+          <button id="btn-share-article" class="reader-topbar-btn" title="Compartir">Compartir</button>
         </div>
       </div>
 
@@ -504,7 +509,7 @@
         <p id="reader-resumen-lead" class="reader-lead-text"></p>
         <div class="reader-byline">
           <div class="reader-byline-left">
-            <div class="reader-author-avatar" id="reader-author-avatar">📰</div>
+            <div class="reader-author-avatar" id="reader-author-avatar"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></div>
             <div class="reader-author-info">
               <span id="reader-author-name" class="reader-author-name"></span>
               <span id="reader-meta" class="reader-meta-text">Fecha y autor</span>
@@ -518,9 +523,9 @@
 
       <!-- Tabs del reader -->
       <div class="reader-tabs-bar" id="reader-tabs-bar">
-        <button type="button" class="reader-tab active" data-reader-tab="articulo">📰 Artículo</button>
-        <button type="button" class="reader-tab" data-reader-tab="galeria">🖼️ Galería</button>
-        <button type="button" class="reader-tab" data-reader-tab="relacionadas">🔗 Relacionadas</button>
+        <button type="button" class="reader-tab active" data-reader-tab="articulo">Artículo</button>
+        <button type="button" class="reader-tab" data-reader-tab="galeria">Galería</button>
+        <button type="button" class="reader-tab" data-reader-tab="relacionadas">Relacionadas</button>
       </div>
 
       <!-- Tab: Artículo -->
@@ -557,7 +562,7 @@
   <div id="modal-admin-login" class="admin-modal-overlay" aria-hidden="true" role="dialog" aria-labelledby="admin-login-title">
     <div class="admin-modal-card">
       <div class="admin-modal-header">
-        <span class="admin-modal-icon">&#x1F510;</span>
+        <span class="admin-modal-icon"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
         <h3 id="admin-login-title" class="admin-modal-title">Acceso Privado</h3>
         <p class="admin-modal-desc">Ingresá tu Token de Administración Maestro para acceder al panel de gestión.</p>
         <button id="btn-close-admin-login" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
@@ -567,7 +572,7 @@
           <label for="admin-login-token" class="topic-form-label">Token de Acceso Maestro</label>
           <div class="password-input-wrap">
             <input type="password" id="admin-login-token" class="topic-form-input" placeholder="Pegá tu token secreto..." required autocomplete="off">
-            <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar">&#x1F441;&#xFE0F;</button>
+            <button type="button" id="btn-toggle-admin-password" class="btn-toggle-password" title="Ver / Ocultar"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
           </div>
         </div>
         <div id="admin-login-error" class="admin-login-error" style="display:none;"></div>
@@ -584,7 +589,7 @@
       <!-- Cabecera del editor -->
       <div class="admin-modal-header editor-modal-header">
         <div class="modal-title-wrap">
-          <span class="modal-icon">📰</span>
+          <span class="modal-icon"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></span>
           <h3 id="admin-editor-title">Publicar Nueva Noticia</h3>
         </div>
         <div class="editor-header-actions">
@@ -596,13 +601,13 @@
       <!-- Tabs del editor -->
       <div class="editor-tabs-bar">
         <button type="button" class="editor-tab active" data-editor-tab="contenido">
-          <span>✍️</span><span>Contenido</span>
+          <span>Contenido</span>
         </button>
         <button type="button" class="editor-tab" data-editor-tab="portada">
-          <span>🖼️</span><span>Portada &amp; Datos</span>
+          <span>Portada &amp; Datos</span>
         </button>
         <button type="button" class="editor-tab" data-editor-tab="preview">
-          <span>👁️</span><span>Previsualizar</span>
+          <span>Previsualizar</span>
         </button>
       </div>
 
@@ -614,11 +619,11 @@
             <!-- Columna Izquierda: Titulo y bajada -->
             <div class="editor-meta-quick">
               <div class="topic-form-group">
-                <label for="news-input-title" class="topic-form-label">📝 Título Periodístico</label>
+                <label for="news-input-title" class="topic-form-label">Título Periodístico</label>
                 <input type="text" id="news-input-title" class="topic-form-input editor-title-input" placeholder="Ej: Récord de sincronización en el cuarto tramo de la Costanera" required minlength="8" maxlength="160">
               </div>
               <div class="topic-form-group">
-                <label for="news-input-resumen" class="topic-form-label">🗞️ Bajada / Lead (aparece en portada)</label>
+                <label for="news-input-resumen" class="topic-form-label">Bajada / Lead (aparece en portada)</label>
                 <textarea id="news-input-resumen" class="topic-form-textarea" rows="3" placeholder="Resumen conciso que aparecerá en la portada y como lead del artículo..." required minlength="15" maxlength="350"></textarea>
               </div>
             </div>
@@ -626,16 +631,16 @@
             <!-- Bloque Editor -->
             <div class="editor-blocks-section">
               <div class="editor-blocks-header">
-                <span class="editor-blocks-label">📄 Cuerpo del artículo por bloques</span>
+                <span class="editor-blocks-label">Cuerpo del artículo por bloques</span>
                 <div class="editor-blocks-add-btns">
                   <button type="button" class="btn-add-block" id="btn-add-text-block" title="Agregar párrafo de texto">
                     <span>¶</span> Párrafo
                   </button>
                   <button type="button" class="btn-add-block btn-add-block-img" id="btn-add-image-block" title="Insertar imagen inline">
-                    <span>🖼️</span> Imagen
+                    <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> Imagen
                   </button>
                   <button type="button" class="btn-add-block btn-add-block-quote" id="btn-add-quote-block" title="Agregar cita destacada">
-                    <span>💬</span> Cita
+                    <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg> Cita
                   </button>
                 </div>
               </div>
@@ -652,21 +657,20 @@
         <div id="editor-tab-portada" class="editor-tab-panel" style="display:none;">
           <!-- Imagen de Portada -->
           <div class="editor-cover-section">
-            <h4 class="editor-section-title">📷 Imagen de Portada</h4>
+            <h4 class="editor-section-title">Imagen de Portada</h4>
             <div class="editor-cover-preview-wrap">
               <div id="news-image-preview-wrap" class="news-image-preview-wrap-new" style="display:none;">
                 <img id="news-image-preview" src="" alt="Vista previa de portada">
                 <button type="button" id="btn-remove-news-img" class="btn-remove-news-img-new">✕ Quitar</button>
               </div>
               <div class="editor-cover-no-img" id="editor-cover-no-img">
-                <span>🖼️</span>
                 <span>Sin imagen de portada</span>
               </div>
             </div>
             <div class="news-image-input-row">
               <input type="url" id="news-input-image" class="topic-form-input" placeholder="https://ejemplo.com/foto.jpg">
               <label class="btn-news-upload-label" title="Subir foto desde tu dispositivo">
-                <span>📁 Subir</span>
+                <span>Subir archivo</span>
                 <input type="file" id="news-input-file" accept="image/*" style="display:none;">
               </label>
             </div>
@@ -674,56 +678,56 @@
             <div class="news-presets-wrap">
               <span class="news-presets-title">Fotos rápidas:</span>
               <div class="news-presets-buttons">
-                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80">🥁 Banda</button>
-                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80">💃 Baile</button>
-                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80">🎆 Costanera</button>
-                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80">📢 Tribuna</button>
-                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80">🎮 Juego</button>
-                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80">🎉 Fiesta</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80">Banda</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&w=1200&q=80">Baile</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80">Costanera</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80">Tribuna</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80">Simulador</button>
+                <button type="button" class="btn-preset-img" data-img="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80">Evento</button>
               </div>
             </div>
           </div>
 
           <!-- Metadatos -->
           <div class="editor-meta-section">
-            <h4 class="editor-section-title">🗂️ Categoría y Clasificación</h4>
+            <h4 class="editor-section-title">Categoría y Clasificación</h4>
             <div class="form-row-2col">
               <div class="topic-form-group">
                 <label for="news-input-rubro" class="topic-form-label">Rubro / Sección</label>
                 <select id="news-input-rubro" class="topic-form-select" required>
-                  <option value="Noches de Calle" data-slug="noches-de-calle">&#x1F3DF;&#xFE0F; Noches de Calle</option>
-                  <option value="Banda de Música" data-slug="banda">&#x1F941; Banda de Música</option>
-                  <option value="Cuerpo de Baile" data-slug="baile">&#x1F483; Cuerpo de Baile</option>
-                  <option value="Simulador" data-slug="simulador">&#x1F3AE; Simulador Oficial</option>
-                  <option value="Información" data-slug="informacion">&#x1F4A1; Guías &amp; Información</option>
+                  <option value="Noches de Calle" data-slug="noches-de-calle">Noches de Calle</option>
+                  <option value="Banda de Música" data-slug="banda">Banda de Música</option>
+                  <option value="Cuerpo de Baile" data-slug="baile">Cuerpo de Baile</option>
+                  <option value="Simulador" data-slug="simulador">Simulador Oficial</option>
+                  <option value="Información" data-slug="informacion">Guías &amp; Información</option>
                 </select>
               </div>
               <div class="topic-form-group">
                 <label for="news-input-badge" class="topic-form-label">Badge de Urgencia</label>
                 <select id="news-input-badge" class="topic-form-select">
-                  <option value="ÚLTIMO MOMENTO">&#x1F525; ÚLTIMO MOMENTO</option>
-                  <option value="DESTACADO">&#x2B50; DESTACADO</option>
-                  <option value="OFICIAL">&#x1F3DB;&#xFE0F; OFICIAL</option>
-                  <option value="CRÓNICA">&#x1F4DD; CRÓNICA</option>
-                  <option value="UPDATE">&#x1F680; ACTUALIZACIÓN</option>
-                  <option value="NOTICIA">📰 NOTICIA</option>
+                  <option value="ÚLTIMO MOMENTO">ÚLTIMO MOMENTO</option>
+                  <option value="DESTACADO">DESTACADO</option>
+                  <option value="OFICIAL">OFICIAL</option>
+                  <option value="CRÓNICA">CRÓNICA</option>
+                  <option value="UPDATE">ACTUALIZACIÓN</option>
+                  <option value="NOTICIA">NOTICIA</option>
                 </select>
               </div>
             </div>
             <div class="form-row-2col">
               <div class="topic-form-group">
-                <label for="news-input-autor" class="topic-form-label">✍️ Firma / Autor</label>
+                <label for="news-input-autor" class="topic-form-label">Firma / Autor</label>
                 <input type="text" id="news-input-autor" class="topic-form-input" placeholder="Ej: Redacción Comunidad" value="Redacción Oficial">
               </div>
               <div class="topic-form-group">
-                <label for="news-input-tags" class="topic-form-label">🏷️ Tags (separados por coma)</label>
+                <label for="news-input-tags" class="topic-form-label">Tags (separados por coma)</label>
                 <input type="text" id="news-input-tags" class="topic-form-input" placeholder="Ej: Costanera, Palco 1, Posadas" value="Costanera, Posadas">
               </div>
             </div>
             <div class="topic-form-group" style="margin-top:0.75rem; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:var(--r-sm); border:1px solid var(--border-dim);">
               <label class="topic-form-label" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0; cursor:pointer;">
                 <span style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:1.1rem;">📌</span>
+
                   <span style="font-weight:700; color:#fff;">Noticia Principal / Fijada en Portada</span>
                 </span>
                 <label class="admin-toggle-switch">
@@ -740,7 +744,7 @@
         <div id="editor-tab-preview" class="editor-tab-panel" style="display:none;">
           <div class="editor-preview-container">
             <div class="editor-preview-notice">
-              <span>👁️</span> Vista previa del artículo tal como se verá en el lector
+              Vista previa del artículo tal como se verá en el lector
             </div>
             <div id="editor-preview-content" class="editor-preview-content"></div>
           </div>
@@ -753,10 +757,10 @@
           </div>
           <div class="editor-footer-right">
             <button type="button" id="btn-editor-preview-quick" class="btn-editor-preview-toggle">
-              👁️ Vista Previa
+              Vista Previa
             </button>
             <button type="submit" id="btn-submit-create-news" class="btn-admin-primary btn-editor-publish">
-              <span>Publicar Noticia</span> <span>🚀</span>
+              <span>Publicar Noticia</span>
             </button>
           </div>
         </div>
@@ -771,33 +775,33 @@
     <div class="admin-modal-card admin-modal-wide">
       <div class="admin-modal-header">
         <div class="modal-title-wrap">
-          <span class="modal-icon">&#x1F6E1;&#xFE0F;</span>
+          <span class="modal-icon"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="3" y2="3"/><line x1="4" x2="20" y1="12" y2="12"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="3" r="2"/><circle cx="12" cy="21" r="2"/></svg></span>
           <h3 id="admin-panel-title">Panel de Control &amp; Moderación</h3>
         </div>
         <button id="btn-close-admin-panel" class="btn-close-modal" aria-label="Cerrar">&#x2715;</button>
       </div>
       <div class="admin-panel-tabs" role="tablist">
         <button type="button" class="admin-panel-tab active" data-tab="reports">
-          <span>⚠️</span><span>Denuncias</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="3" y2="3"/><line x1="4" x2="20" y1="12" y2="12"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="3" r="2"/><circle cx="12" cy="21" r="2"/></svg><span>Denuncias</span>
           <span id="tab-reports-badge" class="admin-badge-reports" style="display:none;">0</span>
         </button>
         <button type="button" class="admin-panel-tab" data-tab="news">
-          <span>📰</span><span>Noticias</span>
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg><span>Noticias</span>
         </button>
         <button type="button" class="admin-panel-tab" data-tab="threads">
-          <span>💬</span><span>Debates del Foro</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span>Debates del Foro</span>
         </button>
         <button type="button" class="admin-panel-tab" data-tab="cronograma">
-          <span>📅</span><span>Cronograma</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg><span>Cronograma</span>
         </button>
         <button type="button" class="admin-panel-tab" data-tab="guia">
-          <span>💡</span><span>Guías & FAQ</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg><span>Guías & FAQ</span>
         </button>
         <button type="button" class="admin-panel-tab" data-tab="site">
-          <span>⚙️</span><span>Ajustes del Sitio</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Ajustes del Sitio</span>
         </button>
         <button type="button" class="admin-panel-tab" data-tab="password">
-          <span>🔒</span><span>Seguridad & Clave</span>
+          <svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Seguridad & Clave</span>
         </button>
       </div>
 
@@ -812,7 +816,7 @@
       <div id="admin-tab-news" class="admin-tab-content" style="display:none;">
         <div class="admin-news-list-header">
           <span>Artículos activos en el portal</span>
-          <button type="button" id="btn-admin-add-news-from-panel" class="btn-admin-sm-action">➕ Redactar Nueva</button>
+          <button type="button" id="btn-admin-add-news-from-panel" class="btn-admin-sm-action">Redactar Nueva</button>
         </div>
         <div id="admin-news-table-wrap" class="admin-news-table-wrap">
           <div class="admin-loading-state">Cargando lista de noticias...</div>
@@ -836,14 +840,14 @@
       <div id="admin-tab-cronograma" class="admin-tab-content" style="display:none;">
         <div class="admin-news-list-header">
           <span>Fases y fechas de la Temporada 2026</span>
-          <button type="button" id="btn-admin-add-phase" class="btn-admin-sm-action">➕ Agregar Fase</button>
+          <button type="button" id="btn-admin-add-phase" class="btn-admin-sm-action">Agregar Fase</button>
         </div>
         <div id="admin-cronograma-list-wrap" class="admin-dynamic-list-wrap">
           <div class="admin-loading-state">Cargando cronograma...</div>
         </div>
         <div class="admin-save-footer-row">
           <button type="button" id="btn-save-admin-cronograma" class="btn-admin-primary">
-            <span>💾 Guardar Cronograma Oficial</span>
+            <span>Guardar Cronograma Oficial</span>
           </button>
         </div>
       </div>
@@ -852,14 +856,14 @@
       <div id="admin-tab-guia" class="admin-tab-content" style="display:none;">
         <div class="admin-news-list-header">
           <span>Preguntas frecuentes y guía del espectador</span>
-          <button type="button" id="btn-admin-add-faq" class="btn-admin-sm-action">➕ Agregar Pregunta</button>
+          <button type="button" id="btn-admin-add-faq" class="btn-admin-sm-action">Agregar Pregunta</button>
         </div>
         <div id="admin-guia-list-wrap" class="admin-dynamic-list-wrap">
           <div class="admin-loading-state">Cargando preguntas frecuentes...</div>
         </div>
         <div class="admin-save-footer-row">
           <button type="button" id="btn-save-admin-guia" class="btn-admin-primary">
-            <span>💾 Guardar Guías & FAQ</span>
+            <span>Guardar Guías & FAQ</span>
           </button>
         </div>
       </div>
@@ -869,14 +873,14 @@
         <form id="form-admin-site-settings" class="admin-form" style="max-width:680px; margin:1rem auto;">
           <div class="topic-form-group">
             <label class="topic-form-label" style="display:flex; align-items:center; justify-content:space-between;">
-              <span>🔴 Marquesina de Último Momento (Breaking Ticker)</span>
+              <span>Marquesina de Último Momento (Breaking Ticker)</span>
               <label class="admin-toggle-switch">
                 <input type="checkbox" id="site-setting-ticker-active" checked>
                 <span class="toggle-slider"></span>
               </label>
             </label>
             <p class="admin-field-hint">Ingresá los mensajes rotativos que se mostrarán arriba del sitio (un mensaje por línea):</p>
-            <textarea id="site-setting-ticker-lines" class="topic-form-textarea" rows="5" placeholder="🥁 Temporada 2026 en marcha...&#10;💃 Cuerpos de Baile: Novedades..."></textarea>
+            <textarea id="site-setting-ticker-lines" class="topic-form-textarea" rows="5" placeholder="Temporada 2026 en marcha...&#10;Cuerpos de Baile: Novedades..."></textarea>
           </div>
 
           <div class="topic-form-group">
@@ -896,7 +900,7 @@
           </div>
 
           <button type="submit" id="btn-save-admin-settings" class="btn-admin-primary" style="margin-top:10px;">
-            <span>💾 Guardar Ajustes del Sitio</span>
+            <span>Guardar Ajustes del Sitio</span>
           </button>
         </form>
       </div>
@@ -905,7 +909,7 @@
       <div id="admin-tab-password" class="admin-tab-content" style="display:none;">
         <div class="admin-token-card">
           <div class="admin-token-header">
-            <span class="admin-token-icon">🔑</span>
+            <span class="admin-token-icon"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
             <div>
               <h4 class="admin-token-title">Token Maestro de Acceso Rápido</h4>
               <p class="admin-token-subtitle">Utilizá este token secreto para acceder al modo administrador sin ingresar usuario ni contraseña.</p>
@@ -913,16 +917,16 @@
           </div>
           <div class="admin-token-input-row">
             <input type="password" id="admin-active-token-display" class="topic-form-input admin-token-input" readonly value="" placeholder="Cargando token maestro...">
-            <button type="button" id="btn-toggle-view-active-token" class="btn-admin-table-action" title="Mostrar/Ocultar Token">👁️ Ver</button>
-            <button type="button" id="btn-copy-active-token" class="btn-admin-table-action" title="Copiar Token al portapapeles">📋 Copiar Token</button>
-            <button type="button" id="btn-copy-direct-admin-link" class="btn-admin-primary btn-direct-link-copy" title="Copiar enlace con login automático">🔗 Copiar Enlace Directo</button>
+            <button type="button" id="btn-toggle-view-active-token" class="btn-admin-table-action" title="Mostrar/Ocultar Token">Ver</button>
+            <button type="button" id="btn-copy-active-token" class="btn-admin-table-action" title="Copiar Token al portapapeles">Copiar Token</button>
+            <button type="button" id="btn-copy-direct-admin-link" class="btn-admin-primary btn-direct-link-copy" title="Copiar enlace con login automático">Copiar Enlace Directo</button>
           </div>
-          <p class="admin-field-hint" style="margin-top:8px;">💡 Guardá tu enlace directo en marcadores de tu navegador para ingresar automáticamente con un solo clic.</p>
+          <p class="admin-field-hint" style="margin-top:8px;">Guardá tu enlace directo en marcadores de tu navegador para ingresar automáticamente con un solo clic.</p>
         </div>
 
         <div class="admin-tab-divider"></div>
 
-        <h4 class="admin-subheading"><span>🔒</span> Actualizar Contraseña de Administrador</h4>
+        <h4 class="admin-subheading">Actualizar Contraseña de Administrador</h4>
         <form id="form-admin-change-pwd" class="admin-form" style="max-width:460px;margin:0 auto;">
           <div class="topic-form-group">
             <label for="pwd-actual" class="topic-form-label">Contraseña Actual</label>
@@ -937,7 +941,7 @@
             <input type="password" id="pwd-confirmar" class="topic-form-input" required minlength="6" autocomplete="new-password">
           </div>
           <button type="submit" id="btn-submit-change-pwd" class="btn-admin-primary" style="margin-top:10px; width:100%;">
-            <span>💾 Actualizar Contraseña</span>
+            <span>Actualizar Contraseña</span>
           </button>
         </form>
       </div>
@@ -949,14 +953,14 @@
     <div class="admin-modal-card admin-confirm-card">
       <div class="admin-confirm-header">
         <div class="admin-confirm-icon-wrap">
-          <span class="admin-confirm-icon">&#x26A0;&#xFE0F;</span>
+          <span class="admin-confirm-icon"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="3" y2="3"/><line x1="4" x2="20" y1="12" y2="12"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="3" r="2"/><circle cx="12" cy="21" r="2"/></svg></span>
         </div>
         <h3 id="admin-confirm-title" class="admin-confirm-title">¿Eliminar Noticia?</h3>
         <p id="admin-confirm-msg" class="admin-confirm-msg">Esta acción eliminará el artículo permanentemente del portal y no se puede deshacer.</p>
       </div>
       <div class="admin-confirm-actions">
         <button type="button" id="btn-cancel-admin-confirm" class="btn-admin-cancel-action">Cancelar</button>
-        <button type="button" id="btn-ok-admin-confirm" class="btn-admin-danger-action">🗑️ Sí, Eliminar</button>
+        <button type="button" id="btn-ok-admin-confirm" class="btn-admin-danger-action">Sí, Eliminar</button>
       </div>
     </div>
   </div>

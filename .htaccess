@@ -58,6 +58,7 @@ Options -Indexes
 
   # Enrutar páginas amigables
   RewriteRule ^comunidad/?$ comunidad.html [L]
+  RewriteRule ^simulador/?$ simulador.html [L]
   RewriteRule ^noticia/?$ noticia.html [L]
   RewriteRule ^foro/?$ foro.html [L]
 

@@ -297,6 +297,54 @@ function getForoDb() {
       }
     }
 
+    // Sincronizar noticias oficiales de data/comunidad.json en SQLite
+    try {
+      const comFile = path.join(__dirname, "data", "comunidad.json");
+      if (fs.existsSync(comFile)) {
+        const comData = JSON.parse(fs.readFileSync(comFile, "utf-8"));
+        if (Array.isArray(comData.noticias) && comData.noticias.length > 0) {
+          const upsertNoticia = foroDb.prepare(`
+            INSERT INTO noticias (id, titulo, categoria, categoria_slug, fecha, autor, tiempo_lectura, badge, resumen, contenido, bloques, tags, imagen_url, fijada)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              titulo=excluded.titulo,
+              categoria=excluded.categoria,
+              categoria_slug=excluded.categoria_slug,
+              fecha=excluded.fecha,
+              autor=excluded.autor,
+              tiempo_lectura=excluded.tiempo_lectura,
+              badge=excluded.badge,
+              resumen=excluded.resumen,
+              contenido=excluded.contenido,
+              bloques=excluded.bloques,
+              tags=excluded.tags,
+              imagen_url=excluded.imagen_url,
+              fijada=excluded.fijada
+          `);
+          for (const n of comData.noticias) {
+            upsertNoticia.run(
+              n.id,
+              n.titulo,
+              n.categoria,
+              n.categoriaSlug || "general",
+              n.fecha || "16/09/2026",
+              n.autor || "Redacción Estudiantina.online",
+              n.tiempoLectura || "3 min de lectura",
+              n.badge || "LANZAMIENTO",
+              n.resumen || "",
+              JSON.stringify(n.contenido || []),
+              JSON.stringify(n.bloques || []),
+              JSON.stringify(n.tags || []),
+              n.imagen || n.imagenUrl || "assets/logo.png",
+              n.fijada ? 1 : 0
+            );
+          }
+        }
+      }
+    } catch(e) {
+      console.error("Error sincronizando noticias de comunidad.json:", e);
+    }
+
     // Sembrar canales si está vacía
     const rowCanales = foroDb.prepare("SELECT COUNT(*) as count FROM canales").get();
     if (rowCanales && rowCanales.count === 0) {
@@ -1073,7 +1121,10 @@ const server = http.createServer((req, res) => {
           if (r.colegio_id) colegiosCounts[r.colegio_id] = r.count;
         });
 
-        sendOptimizedJson(req, res, 200, { status: "ok", canales, colegiosCounts }, { cacheable: true, maxAge: 20 });
+        const usersRow = getStmt(db, `SELECT COUNT(*) as count FROM usuarios`).get();
+        const totalUsuarios = usersRow ? Number(usersRow.count) : 0;
+
+        sendOptimizedJson(req, res, 200, { status: "ok", canales, colegiosCounts, totalUsuarios }, { cacheable: true, maxAge: 20 });
         return;
       }
 
@@ -1156,8 +1207,10 @@ const server = http.createServer((req, res) => {
         }
         const countRow = db.prepare(countSql).get(...countParams);
         const totalCount = countRow ? countRow.total : hilosRaw.length;
+        const usersRow = getStmt(db, `SELECT COUNT(*) as count FROM usuarios`).get();
+        const totalUsuarios = usersRow ? Number(usersRow.count) : 0;
 
-        sendOptimizedJson(req, res, 200, { status: "ok", total_count: totalCount, hilos }, { cacheable: !viewerGoogleId && !q, maxAge: 15 });
+        sendOptimizedJson(req, res, 200, { status: "ok", total_count: totalCount, total_usuarios: totalUsuarios, totalUsuarios, hilos }, { cacheable: !viewerGoogleId && !q, maxAge: 15 });
         return;
       }
 
@@ -2500,11 +2553,13 @@ const server = http.createServer((req, res) => {
     ? "index.html"
     : (pathname === "/comunidad"
         ? "comunidad.html"
-        : (pathname === "/noticia"
-            ? "noticia.html"
-            : (pathname === "/foro"
-                ? "foro.html"
-                : pathname.replace(/^\//, ""))));
+        : (pathname === "/simulador"
+            ? "simulador.html"
+            : (pathname === "/noticia"
+                ? "noticia.html"
+                : (pathname === "/foro"
+                    ? "foro.html"
+                    : pathname.replace(/^\//, "")))));
   let filePath = path.join(__dirname, relativePath);
 
   // Normalizar ruta para evitar path traversal

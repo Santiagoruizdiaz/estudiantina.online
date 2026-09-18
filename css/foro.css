@@ -4141,7 +4141,9 @@ body.light-mode .reddit-tab-btn.active #profile-count-tab-badges,
 .topic-modal-overlay,
 .auth-modal-overlay,
 .admin-modal-overlay,
-.profile-modal-overlay {
+.profile-modal-overlay,
+.share-modal-overlay,
+.report-modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
@@ -4157,7 +4159,9 @@ body.light-mode .reddit-tab-btn.active #profile-count-tab-badges,
 .auth-modal-overlay.active,
 .admin-modal-overlay.active,
 .profile-modal-overlay.active,
-.profile-modal-overlay.is-active {
+.profile-modal-overlay.is-active,
+.share-modal-overlay.active,
+.report-modal-overlay.active {
   display: flex;
   animation: fadeIn 0.2s ease-out;
 }
@@ -4165,7 +4169,9 @@ body.light-mode .reddit-tab-btn.active #profile-count-tab-badges,
 .topic-modal-card,
 .auth-modal-card,
 .admin-modal-card,
-.profile-modal-card {
+.profile-modal-card,
+.share-modal-card,
+.report-modal-card {
   width: 100%;
   max-width: 580px;
   max-height: 90vh;
@@ -4176,6 +4182,10 @@ body.light-mode .reddit-tab-btn.active #profile-count-tab-badges,
   overflow-y: auto;
   animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+}
+
+.share-modal-card {
+  max-width: 480px;
 }
 
 .onboarding-modal-card {
@@ -4229,10 +4239,359 @@ body.light-mode .reddit-tab-btn.active #profile-count-tab-badges,
 }
 
 .topic-modal-card .btn-close-modal,
-.auth-modal-card .btn-close-modal {
+.auth-modal-card .btn-close-modal,
+.share-modal-card .btn-modal-close {
   position: absolute;
   top: 14px;
   right: 14px;
+}
+
+/* Modal Compartir Debate */
+.share-modal-card .topic-modal-header {
+  padding-right: 48px;
+}
+
+.share-modal-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.share-modal-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--foro-text);
+  margin: 0;
+}
+
+.share-modal-thread-title {
+  font-size: 13px;
+  color: var(--foro-text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.share-modal-body {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.share-section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foro-text-secondary);
+  margin: 0;
+}
+
+.share-social-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+  gap: 10px;
+}
+
+.share-social-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--r-md);
+  background: var(--foro-card-hover, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--foro-border);
+  color: var(--foro-text);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.share-social-btn .social-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.share-social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.share-social-btn.share-whatsapp:hover {
+  background: rgba(37, 211, 102, 0.12);
+  border-color: #25D366;
+  color: #25D366;
+}
+
+.share-social-btn.share-x:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.share-social-btn.share-telegram:hover {
+  background: rgba(0, 136, 204, 0.12);
+  border-color: #0088cc;
+  color: #0088cc;
+}
+
+.share-social-btn.share-native:hover {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--gold-primary);
+  color: var(--gold-primary);
+}
+
+.share-copy-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--foro-card-inner, rgba(0, 0, 0, 0.2));
+  padding: 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--foro-border);
+}
+
+.share-copy-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foro-text-secondary);
+  margin: 0;
+}
+
+.share-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.share-input-url {
+  flex: 1;
+  min-width: 0;
+  background: var(--foro-card, #11141e);
+  border: 1px solid var(--foro-border);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  color: var(--foro-text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  text-overflow: ellipsis;
+}
+
+.share-input-url:focus {
+  border-color: var(--gold-primary);
+}
+
+.btn-share-copy-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background: var(--gold-primary, #f59e0b);
+  color: #090a0f;
+  border: none;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-share-copy-action:hover {
+  background: var(--gold-hover, #fbbf24);
+  transform: scale(1.02);
+}
+
+.btn-share-copy-action.copied {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+/* Menú Desplegable Flotante de Opciones (Tres Puntitos) */
+.forum-more-dropdown {
+  position: fixed;
+  z-index: 2100;
+  display: flex;
+  flex-direction: column;
+  background: var(--foro-card, #11141e);
+  border: 1px solid var(--foro-border);
+  border-radius: var(--r-md, 10px);
+  padding: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  min-width: 180px;
+  gap: 2px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeIn 0.15s ease-out;
+}
+
+.dropdown-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--r-sm, 6px);
+  background: transparent;
+  border: none;
+  color: var(--foro-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.dropdown-action-btn:hover {
+  background: var(--foro-card-hover, rgba(255, 255, 255, 0.08));
+}
+
+.dropdown-action-btn.action-danger {
+  color: #f87171;
+}
+
+.dropdown-action-btn.action-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Modal Reportar Usuario / Publicación */
+.report-modal-card {
+  max-width: 480px;
+}
+
+.report-modal-card .btn-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+
+.report-modal-main-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--foro-text);
+  margin: 0;
+}
+
+.report-modal-subtitle {
+  font-size: 13px;
+  color: var(--foro-text-secondary);
+  margin: 0;
+}
+
+.report-modal-body {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.report-target-preview {
+  background: var(--foro-card-inner, rgba(0, 0, 0, 0.25));
+  border: 1px solid var(--foro-border);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-preview-author {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-primary, #f59e0b);
+}
+
+.report-preview-snippet {
+  font-size: 13px;
+  color: var(--foro-text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.report-section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foro-text);
+  margin: 0;
+}
+
+.report-reasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-reason-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--foro-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  background: var(--foro-card-inner, rgba(0, 0, 0, 0.15));
+  transition: all 0.15s ease;
+}
+
+.report-reason-item:hover {
+  background: var(--foro-card-hover, rgba(255, 255, 255, 0.05));
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.report-reason-item input[type="radio"] {
+  accent-color: #ef4444;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.report-reason-item .reason-text {
+  font-size: 13px;
+  color: var(--foro-text);
+  font-weight: 500;
+  flex: 1;
+}
+
+.report-details-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.report-details-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foro-text-secondary);
+  margin: 0;
+}
+
+.report-details-textarea {
+  background: var(--foro-card, #11141e);
+  border: 1px solid var(--foro-border);
+  border-radius: var(--r-sm);
+  padding: 8px 12px;
+  color: var(--foro-text);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  min-height: 54px;
+}
+
+.report-details-textarea:focus {
+  border-color: #ef4444;
 }
 
 /* Formularios */

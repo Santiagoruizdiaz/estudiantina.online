@@ -6,6 +6,34 @@
 import { COLEGIOS } from "./colegios.js";
 import { UsuarioService } from "./usuario.js";
 
+
+function getSvg(name, cls = "") {
+  const svgs = {
+    calendar: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>`,
+    mapPin: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+    clock: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    edit: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>`,
+    trash: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+    message: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>`,
+    pin: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="17" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>`,
+    flag: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" x2="4" y2="15"/></svg>`,
+    check: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+    plus: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    eye: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    eyeOff: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>`,
+    save: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+    newspaper: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>`,
+    shield: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    school: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`,
+    share: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>`,
+    timer: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>`,
+    music: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+    award: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>`,
+    flame: `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`
+  };
+  return svgs[name] || "";
+}
+
 class ComunidadApp {
   constructor() {
     this.data = null;
@@ -45,7 +73,7 @@ class ComunidadApp {
 
   getColegio(id) {
     const found = (COLEGIOS || []).find(c => c.id === id);
-    return found || { id: "general", nombre: "Colegio", escudo: "🥁", apodo: "Colegio" };
+    return found || { id: "general", nombre: "Colegio", escudo: "", apodo: "Colegio" };
   }
 
   cacheDom() {
@@ -312,7 +340,7 @@ class ComunidadApp {
 
   populateSchoolSelects() {
     const optionsHtml = (COLEGIOS || []).map(c =>
-      `<option value="${c.id}">${c.escudo || "🥁"} ${c.nombre}</option>`
+      `<option value="${c.id}">${c.nombre}</option>`
     ).join("");
 
     if (this.topicSchool) this.topicSchool.innerHTML = optionsHtml;
@@ -415,7 +443,7 @@ class ComunidadApp {
 
       const col = this.getColegio(this.currentUser.colegioId);
       if (this.userProfileSchoolBadge) {
-        this.userProfileSchoolBadge.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+        this.userProfileSchoolBadge.textContent = `${col.nombre}`;
       }
       if (this.topicSchool) this.topicSchool.value = this.currentUser.colegioId;
     } else {
@@ -849,7 +877,7 @@ class ComunidadApp {
         if (!inputEl) return;
         const isPwd = inputEl.type === "password";
         inputEl.type = isPwd ? "text" : "password";
-        this.btnToggleAdminPassword.textContent = isPwd ? "🙈" : "👁️";
+        this.btnToggleAdminPassword.innerHTML = isPwd ? getSvg("eyeOff", "svg-icon-xs") : getSvg("eye", "svg-icon-xs");
       });
     }
 
@@ -946,14 +974,14 @@ class ComunidadApp {
         if (!this.adminActiveTokenDisplay) return;
         const isPwd = this.adminActiveTokenDisplay.type === "password";
         this.adminActiveTokenDisplay.type = isPwd ? "text" : "password";
-        this.btnToggleViewActiveToken.textContent = isPwd ? "🙈 Ocultar" : "👁️ Ver";
+        this.btnToggleViewActiveToken.textContent = isPwd ? "Ocultar" : "Ver";
       });
     }
     if (this.btnCopyActiveToken) {
       this.btnCopyActiveToken.addEventListener("click", () => {
         if (!this.adminToken) return;
         navigator.clipboard.writeText(this.adminToken);
-        this.showToast("📋 Token maestro copiado al portapapeles.");
+        this.showToast("Token maestro copiado al portapapeles.");
       });
     }
     if (this.btnCopyDirectAdminLink) {
@@ -962,7 +990,7 @@ class ComunidadApp {
         const url = new URL(window.location.href);
         url.searchParams.set("admin_token", this.adminToken);
         navigator.clipboard.writeText(url.toString());
-        this.showToast("🔗 Enlace directo copiado al portapapeles.");
+        this.showToast("Enlace directo copiado al portapapeles.");
       });
     }
 
@@ -1165,7 +1193,9 @@ class ComunidadApp {
       } else {
         this.cronogramaGrid.innerHTML = items.map((item, idx) => {
           const num = String(idx + 1).padStart(2, "0");
-          const icon = item.icono || "🥁";
+          const icon = item.icono && !item.icono.match(/[\u{1F300}-\u{1F9FF}]/u)
+            ? item.icono
+            : (idx === 0 ? getSvg("timer", "svg-icon-md") : (idx === 1 ? getSvg("music", "svg-icon-md") : getSvg("award", "svg-icon-md")));
           const isFeatured = idx === 0 ? "featured" : "";
           const statusLower = (item.estado || "").toLowerCase();
           const statusClass = statusLower.includes("desarrollo") || statusLower.includes("curso") || statusLower.includes("hoy") || statusLower.includes("vivo")
@@ -1178,9 +1208,9 @@ class ComunidadApp {
               <div class="cronograma-card-icon">${icon}</div>
               <h3>${item.fase || "Fase Oficial"}</h3>
               <div class="cronograma-meta">
-                ${item.fecha ? `<span>📅 ${item.fecha}</span>` : ""}
-                ${item.lugar ? `<span>📍 ${item.lugar}</span>` : ""}
-                ${item.horario ? `<span>⏰ ${item.horario}</span>` : ""}
+                ${item.fecha ? `<span>${getSvg("calendar", "svg-icon-xs")} ${item.fecha}</span>` : ""}
+                ${item.lugar ? `<span>${getSvg("mapPin", "svg-icon-xs")} ${item.lugar}</span>` : ""}
+                ${item.horario ? `<span>${getSvg("clock", "svg-icon-xs")} ${item.horario}</span>` : ""}
               </div>
               ${item.descripcion ? `<p>${item.descripcion}</p>` : (item.fase ? `<p>Encuentro oficial en el marco de la Estudiantina de Posadas 2026.</p>` : "")}
               ${item.estado ? `<div class="cronograma-card-status ${statusClass}">${item.estado}</div>` : ""}
@@ -1204,7 +1234,9 @@ class ComunidadApp {
     }
 
     listEl.innerHTML = items.map(item => {
-      const icon = item.icono || "📅";
+      const icon = item.icono && !item.icono.match(/[\u{1F300}-\u{1F9FF}]/u)
+        ? item.icono
+        : getSvg("calendar", "svg-icon-sm");
       const fase = item.fase || "Evento";
       const fechaLugar = [item.fecha, item.lugar].filter(Boolean).join(" &mdash; ") || "Fecha oficial";
       const estado = item.estado || "";
@@ -1301,7 +1333,7 @@ class ComunidadApp {
       if (this.heroArticle) this.heroArticle.innerHTML = "";
       if (this.newsGrid) this.newsGrid.innerHTML = `
         <div style="grid-column:1/-1; text-align:center; padding:3rem 1rem; color:#475569;">
-          <span style="font-size:2.5rem; display:block; margin-bottom:0.5rem;">🔍</span>
+          <span style="display:block; margin-bottom:0.5rem;"></span>
           <p style="font-size:1.05rem; font-weight:700; color:#fff;">No se encontraron noticias</p>
           <p style="font-size:0.85rem;">Proba con otros terminos o selecciona otra categoria.</p>
         </div>`;
@@ -1322,8 +1354,8 @@ class ComunidadApp {
         <div class="hero-article-inner" data-id="${heroNews.id}">
           ${this.adminToken ? `
             <div class="news-card-admin-bar">
-              <button class="btn-admin-edit-card" data-news-id="${heroNews.id}" type="button">✏️ Editar Noticia (Admin)</button>
-              <button class="btn-admin-del-card" data-news-id="${heroNews.id}" data-news-title="${(heroNews.titulo || '').replace(/"/g, '&quot;')}" type="button">🗑️ Borrar Noticia (Admin)</button>
+              <button class="btn-admin-edit-card" data-news-id="${heroNews.id}" type="button">Editar Noticia</button>
+              <button class="btn-admin-del-card" data-news-id="${heroNews.id}" data-news-title="${(heroNews.titulo || '').replace(/"/g, '&quot;')}" type="button">Borrar Noticia (Admin)</button>
             </div>
           ` : ""}
           ${(heroNews.imagen || heroNews.imagenUrl) ? `
@@ -1332,14 +1364,14 @@ class ComunidadApp {
             </div>
           ` : ""}
           <div class="hero-badge-row">
-            ${heroNews.fijada ? `<span style="background:rgba(255,215,0,0.18); border:1px solid var(--border-gold); color:var(--gold-bright); font-size:0.7rem; font-weight:800; padding:3px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;">📌 Portada Principal</span>` : ""}
+            ${heroNews.fijada ? `<span style="background:rgba(255,215,0,0.18); border:1px solid var(--border-gold); color:var(--gold-bright); font-size:0.7rem; font-weight:800; padding:3px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;">${getSvg("pin", "svg-icon-xs")} Portada Principal</span>` : ""}
             ${heroNews.badge ? `<span class="hero-breaking-badge">${heroNews.badge}</span>` : ""}
             <span class="hero-cat-badge">${heroNews.categoria}</span>
           </div>
           <h2 class="hero-title">${heroNews.titulo}</h2>
           <p class="hero-resumen">${heroNews.resumen}</p>
           <div class="hero-footer-row">
-            <span class="hero-meta">📅 ${heroNews.fecha} • <strong>${heroNews.autor}</strong> • ${heroNews.tiempoLectura}</span>
+            <span class="hero-meta">${getSvg("calendar", "svg-icon-xs")} ${heroNews.fecha} • <strong>${heroNews.autor}</strong> • ${heroNews.tiempoLectura}</span>
             <a href="noticia.html?id=${encodeURIComponent(heroNews.id)}" class="hero-read-btn" title="Leer nota completa">Leer nota completa ↗</a>
           </div>
         </div>`;
@@ -1361,8 +1393,8 @@ class ComunidadApp {
           <article class="news-card" data-id="${n.id}">
             ${this.adminToken ? `
               <div class="news-card-admin-bar">
-                <button class="btn-admin-edit-card" data-news-id="${n.id}" type="button">✏️ Editar</button>
-                <button class="btn-admin-del-card" data-news-id="${n.id}" data-news-title="${(n.titulo || '').replace(/"/g, '&quot;')}" type="button">🗑️ Borrar</button>
+                <button class="btn-admin-edit-card" data-news-id="${n.id}" type="button">Editar</button>
+                <button class="btn-admin-del-card" data-news-id="${n.id}" data-news-title="${(n.titulo || '').replace(/"/g, '&quot;')}" type="button">${getSvg("trash", "svg-icon-xs")} Borrar</button>
               </div>
             ` : ""}
             ${imgUrl ? `
@@ -1378,7 +1410,7 @@ class ComunidadApp {
             <p class="news-resumen">${n.resumen}</p>
             <div class="news-tags-row">${tags}</div>
             <div class="news-card-footer">
-              <span>📅 ${n.fecha} • ${n.autor}</span>
+              <span>${getSvg("calendar", "svg-icon-xs")} ${n.fecha} • ${n.autor}</span>
               <a href="noticia.html?id=${encodeURIComponent(n.id)}" class="news-read-more-btn" title="Leer nota">Leer nota ↗</a>
             </div>
           </article>`;
@@ -1420,7 +1452,7 @@ class ComunidadApp {
         <div class="trending-content">
           <span class="trending-category">${n.categoria}</span>
           <h4 class="trending-title">${n.titulo}</h4>
-          <span class="trending-meta">📅 ${n.fecha}</span>
+          <span class="trending-meta">${getSvg("calendar", "svg-icon-xs")} ${n.fecha}</span>
         </div>
       </div>`).join("");
 
@@ -1594,14 +1626,14 @@ class ComunidadApp {
       const imgSrc = n.imagen || n.imagenUrl;
       const thumb = imgSrc
         ? `<img class="reader-related-thumb" src="${imgSrc}" alt="${n.titulo}" loading="lazy">`
-        : `<div class="reader-related-thumb-placeholder">📰</div>`;
+        : `<div class="reader-related-thumb-placeholder">${getSvg("newspaper", "svg-icon-md")}</div>`;
       return `
         <div class="reader-related-item" data-related-id="${n.id}">
           ${thumb}
           <div class="reader-related-info">
             <span class="reader-related-cat">${n.categoria}</span>
             <span class="reader-related-title">${n.titulo}</span>
-            <span class="reader-related-date">📅 ${n.fecha}</span>
+            <span class="reader-related-date">${getSvg("calendar", "svg-icon-xs")} ${n.fecha}</span>
           </div>
         </div>
       `;
@@ -1678,7 +1710,7 @@ class ComunidadApp {
     this.channelsGrid.innerHTML = allChannels.map(ch => `
       <div class="channel-card ${this.activeCanal === ch.id ? "active" : ""}" data-channel-id="${ch.id}">
         <div class="channel-header">
-          <span class="channel-icon">${ch.icono || "💬"}</span>
+          <span class="channel-icon">${getSvg("message", "svg-icon-xs")}</span>
           <h4 class="channel-title">${ch.titulo}</h4>
         </div>
         <p class="channel-desc">${ch.descripcion || ""}</p>
@@ -1759,7 +1791,7 @@ class ComunidadApp {
           <span style="font-size:2.2rem; display:block; margin-bottom:0.5rem">&#x1F4AC;</span>
           <h4 style="color:#fff; font-family:var(--font-title); font-size:1.1rem; margin-bottom:0.3rem">Todavia no hay debates en este canal</h4>
           <p style="color:var(--text-mid); font-size:0.85rem; margin-bottom:1rem">¡Se el primero en encender la discusion!</p>
-          <button type="button" class="btn-propose-topic" id="btn-empty-create-thread">✍ Iniciar Primer Debate</button>
+          <button type="button" class="btn-propose-topic" id="btn-empty-create-thread">Iniciar Primer Debate</button>
         </div>`;
 
       const btnEmpty = document.getElementById("btn-empty-create-thread");
@@ -1792,12 +1824,12 @@ class ComunidadApp {
             </div>
             <div class="thread-content-block">
               <div class="thread-meta-top">
-                ${h.fijado ? `<span class="thread-pinned-badge">📌 FIJADO</span>` : ""}
+                ${h.fijado ? `<span class="thread-pinned-badge">FIJADO</span>` : ""}
                 <a href="foro.html?user=${encodeURIComponent(h.autor_google_id)}" style="display:inline-flex; align-items:center; gap:6px; color:inherit; text-decoration:none;">
                   <img class="thread-author-avatar-mini" src="${avatarSrc}" alt="${h.autor_nombre || 'Hincha'}" onerror="this.src='assets/avatar-default.webp'" />
                   <span class="thread-author-name-text" style="font-weight:700;">${displayAuthor}</span>
                 </a>
-                <span class="thread-school-badge">${col.escudo || "🥁"} ${col.nombre}</span>
+                <span class="thread-school-badge">${col.nombre}</span>
                 <span class="thread-channel-tag">${h.canal_id}</span>
                 <span class="thread-time-ago">${timeAgo}</span>
               </div>
@@ -1806,10 +1838,10 @@ class ComunidadApp {
               ${this.adminToken ? `
                 <div class="thread-admin-controls">
                   <button type="button" class="btn-admin-action-sm btn-admin-pin" data-thread-id="${h.id}" data-pinned="${h.fijado ? 1 : 0}">
-                    ${h.fijado ? "📌 Desfijar" : "📌 Fijar"}
+                    ${h.fijado ? "Desfijar" : "Fijar"}
                   </button>
                   <button type="button" class="btn-admin-action-sm btn-admin-del-thread" data-thread-id="${h.id}">
-                    🗑️ Borrar Hilo
+                    Borrar Hilo
                   </button>
                 </div>
               ` : ""}
@@ -1942,7 +1974,7 @@ class ComunidadApp {
       if (this.threadModalTitle)   this.threadModalTitle.textContent = h.titulo;
       if (this.threadModalAvatar)  this.threadModalAvatar.src = h.autor_avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${h.autor_google_id}`;
       if (this.threadModalAuthor)  this.threadModalAuthor.textContent = h.autor_nombre;
-      if (this.threadModalSchool)  this.threadModalSchool.textContent = `${col.escudo || "🥁"} ${col.nombre}`;
+      if (this.threadModalSchool)  this.threadModalSchool.textContent = `${col.nombre}`;
       if (this.threadModalDate)    this.threadModalDate.textContent = this.formatTimeAgo(h.creado_en);
       if (this.threadModalContent) this.threadModalContent.textContent = h.contenido;
       if (this.threadModalVotesCount) this.threadModalVotesCount.textContent = h.votos || 0;
@@ -1985,11 +2017,11 @@ class ComunidadApp {
                 <div class="reply-body">
                   <div class="reply-header">
                     <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}" class="reply-author" style="color:inherit; text-decoration:none; font-weight:700;">${displayAuthorC}</a>
-                    <span class="reply-school">${colC.escudo || "🥁"} ${colC.nombre}</span>
+                    <span class="reply-school">${colC.nombre}</span>
                     <span class="reply-time">${timeC}</span>
                     ${this.adminToken ? `
                       <button type="button" class="btn-admin-action-sm btn-admin-del-comment" data-comment-id="${c.id}" style="margin-left:auto; font-size:0.75rem; padding:2px 8px;">
-                        🗑️ Eliminar
+                        Eliminar
                       </button>
                     ` : ""}
                   </div>
@@ -2048,7 +2080,7 @@ class ComunidadApp {
         if (this.replyUserAvatar)   this.replyUserAvatar.src = this.currentUser.avatarUrl;
         if (this.replySchoolHint) {
           const userCol = this.getColegio(this.currentUser.colegioId);
-          this.replySchoolHint.textContent = `📍 Comentando como hincha de ${userCol.nombre}`;
+          this.replySchoolHint.textContent = `Comentando como hincha de ${userCol.nombre}`;
         }
       } else {
         if (this.threadReplyUnauth) this.threadReplyUnauth.style.display = "block";
@@ -2234,7 +2266,7 @@ class ComunidadApp {
         localStorage.setItem("comunidad_admin_token", this.adminToken);
         localStorage.setItem("comunidad_admin_user", username);
         this.activateAdminMode(username);
-        this.showToast(`¡Modo Administrador activado con éxito (${username})! 🔐`);
+        this.showToast(`Modo Administrador activado (${username})`);
       } else {
         this.adminLogout(false);
       }
@@ -2264,7 +2296,7 @@ class ComunidadApp {
       setTimeout(() => this.updateAdminBarOffset(), 50);
     }
     if (this.adminNewsToolbar) this.adminNewsToolbar.style.display = "flex";
-    if (this.adminBarUser) this.adminBarUser.textContent = `👤 Administrador (${username})`;
+    if (this.adminBarUser) this.adminBarUser.textContent = `Administrador (${username})`;
 
     if (this.btnAdminManageCronograma) this.btnAdminManageCronograma.style.display = "inline-flex";
     if (this.btnAdminManageGuia) this.btnAdminManageGuia.style.display = "inline-flex";
@@ -2355,7 +2387,7 @@ class ComunidadApp {
         this.closeAdminLogin();
         if (this.formAdminLogin) this.formAdminLogin.reset();
         this.activateAdminMode(this.adminUser);
-        this.showToast(`¡Acceso Maestro Concedido (${this.adminUser})! 🔐`);
+        this.showToast(`Acceso Maestro Concedido (${this.adminUser})`);
       } else {
         if (this.adminLoginError) {
           this.adminLoginError.textContent = data.message || "Token o credenciales no válidas.";
@@ -2371,7 +2403,7 @@ class ComunidadApp {
     } finally {
       if (this.btnSubmitAdminLogin) {
         this.btnSubmitAdminLogin.disabled = false;
-        this.btnSubmitAdminLogin.innerHTML = '<span>Validar Token y Entrar</span> <span>➔</span>';
+        this.btnSubmitAdminLogin.innerHTML = '<span>Validar Token y Entrar</span> <span>&rarr;</span>';
       }
     }
   }
@@ -2434,7 +2466,7 @@ class ComunidadApp {
     if (modalTitle) modalTitle.textContent = "Publicar Nueva Noticia";
 
     if (this.btnSubmitCreateNews) {
-      this.btnSubmitCreateNews.innerHTML = '<span>Publicar Noticia</span> <span>🚀</span>';
+      this.btnSubmitCreateNews.innerHTML = '<span>Publicar Noticia</span>';
     }
     if (this.formAdminNoticia) this.formAdminNoticia.reset();
     this.updateNewsImagePreview("");
@@ -2468,10 +2500,10 @@ class ComunidadApp {
     this.editingNewsId = news.id;
 
     const modalTitle = document.getElementById("admin-editor-title");
-    if (modalTitle) modalTitle.textContent = "✏️ Editar Noticia";
+    if (modalTitle) modalTitle.textContent = "Editar Noticia";
 
     if (this.btnSubmitCreateNews) {
-      this.btnSubmitCreateNews.innerHTML = '<span>Guardar Cambios</span> <span>💾</span>';
+      this.btnSubmitCreateNews.innerHTML = '<span>Guardar Cambios</span>';
     }
 
     if (this.newsInputRubro) {
@@ -2581,7 +2613,7 @@ class ComunidadApp {
     const total = this._editorBlocks.length;
 
     this.editorBlocksList.innerHTML = this._editorBlocks.map((block, i) => {
-      const typeLabels = { text: "¶ Párrafo", image: "🖼️ Imagen", quote: "💬 Cita" };
+      const typeLabels = { text: "Párrafo", image: "Imagen", quote: "Cita" };
       const label = typeLabels[block.type] || "Bloque";
       const upDisabled = i === 0 ? "disabled" : "";
       const downDisabled = i === total - 1 ? "disabled" : "";
@@ -2672,7 +2704,7 @@ class ComunidadApp {
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
         <span class="news-category-badge" style="background:var(--red-hot); color:#fff; padding:3px 8px; border-radius:4px; font-size:0.7rem; font-weight:800;">${badge}</span>
         <span class="admin-table-cat">${rubro}</span>
-        ${fijada ? '<span style="background:rgba(255,215,0,0.15); color:var(--gold-bright); border:1px solid var(--border-gold); padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700;">📌 Portada Principal</span>' : ''}
+        ${fijada ? '<span style="background:rgba(255,215,0,0.15); color:var(--gold-bright); border:1px solid var(--border-gold); padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:700;">${getSvg("pin", "svg-icon-xs")} Portada Principal</span>' : ''}
       </div>
       <h2>${title}</h2>
     `;
@@ -2756,7 +2788,7 @@ class ComunidadApp {
         this.updateNewsImagePreview("");
         this._editorBlocks = [];
         if (this.editorBlocksList) this.editorBlocksList.innerHTML = "";
-        this.showToast(isEdit ? "✏️ ¡Noticia actualizada con éxito!" : "🎉 ¡Noticia publicada con éxito en el portal!");
+        this.showToast(isEdit ? "Noticia actualizada con éxito" : "Noticia publicada con éxito en el portal");
         this.editingNewsId = null;
         await this.loadData();
         if (this.modalAdminPanel && this.modalAdminPanel.classList.contains("active")) {
@@ -2772,8 +2804,8 @@ class ComunidadApp {
       if (this.btnSubmitCreateNews) {
         this.btnSubmitCreateNews.disabled = false;
         this.btnSubmitCreateNews.innerHTML = isEdit
-          ? '<span>Guardar Cambios</span> <span>💾</span>'
-          : '<span>Publicar Noticia</span> <span>🚀</span>';
+          ? '<span>Guardar Cambios</span>'
+          : '<span>Publicar Noticia</span>';
       }
     }
   }
@@ -2860,7 +2892,7 @@ class ComunidadApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.showToast("🗑️ Noticia eliminada exitosamente.");
+        this.showToast("Noticia eliminada exitosamente.");
 
         // Eliminar inmediatamente del estado local en memoria
         if (this.data && Array.isArray(this.data.noticias)) {
@@ -2989,7 +3021,7 @@ class ComunidadApp {
       if (total === 0) {
         this.adminReportsContainer.innerHTML = `
           <div class="admin-empty-state">
-            <span style="font-size:2.2rem; display:block; margin-bottom:0.5rem">✨</span>
+
             <h4 style="color:#fff; font-size:1.05rem; margin-bottom:0.3rem">¡Bandeja de Moderación Limpia!</h4>
             <p style="color:var(--text-mid); font-size:0.85rem">No hay publicaciones ni comentarios con denuncias pendientes.</p>
           </div>`;
@@ -3002,7 +3034,7 @@ class ComunidadApp {
         html += hilos.map(h => `
           <div class="admin-report-card" data-tipo="hilo" data-id="${h.id}">
             <div class="admin-report-card-header">
-              <span class="admin-report-count">🚩 ${h.reportes} reporte${h.reportes === 1 ? "" : "s"}</span>
+              <span class="admin-report-count">${getSvg("flag", "svg-icon-xs")} ${h.reportes} reporte${h.reportes === 1 ? "" : "s"}</span>
               <span class="admin-report-author">Publicado por <strong>${h.autor_nombre}</strong> (${h.colegio_id})</span>
               <span class="admin-report-date">${this.formatTimeAgo(h.creado_en)}</span>
             </div>
@@ -3010,10 +3042,10 @@ class ComunidadApp {
             <p class="admin-report-item-content">${h.contenido}</p>
             <div class="admin-report-actions">
               <button type="button" class="btn-admin-action-sm btn-report-dismiss" data-tipo="hilo" data-id="${h.id}">
-                ✅ Descartar Reportes
+                Descartar Reportes
               </button>
               <button type="button" class="btn-admin-action-sm btn-report-delete" data-tipo="hilo" data-id="${h.id}">
-                🗑️ Eliminar Hilo Completo
+                Eliminar Hilo Completo
               </button>
             </div>
           </div>
@@ -3025,17 +3057,17 @@ class ComunidadApp {
         html += comentarios.map(c => `
           <div class="admin-report-card" data-tipo="comentario" data-id="${c.id}">
             <div class="admin-report-card-header">
-              <span class="admin-report-count">🚩 ${c.reportes} reporte${c.reportes === 1 ? "" : "s"}</span>
+              <span class="admin-report-count">${getSvg("flag", "svg-icon-xs")} ${c.reportes} reporte${c.reportes === 1 ? "" : "s"}</span>
               <span class="admin-report-author">Comentado por <strong>${c.autor_nombre}</strong> (${c.colegio_id})</span>
               <span class="admin-report-date">${this.formatTimeAgo(c.creado_en)}</span>
             </div>
             <p class="admin-report-item-content" style="font-size:0.95rem; color:#fff;">${c.contenido}</p>
             <div class="admin-report-actions">
               <button type="button" class="btn-admin-action-sm btn-report-dismiss" data-tipo="comentario" data-id="${c.id}">
-                ✅ Descartar Reportes
+                Descartar Reportes
               </button>
               <button type="button" class="btn-admin-action-sm btn-report-delete" data-tipo="comentario" data-id="${c.id}">
-                🗑️ Eliminar Comentario
+                Eliminar Comentario
               </button>
             </div>
           </div>
@@ -3127,10 +3159,10 @@ class ComunidadApp {
                 <td style="text-align:right;">
                   <div class="admin-actions-cell">
                     <button type="button" class="btn-admin-table-action btn-admin-edit-table" data-id="${n.id}">
-                      ✏️ Editar
+                      Editar
                     </button>
                     <button type="button" class="btn-admin-table-action danger btn-admin-del-table" data-id="${n.id}" data-title="${(n.titulo || '').replace(/"/g, '&quot;')}">
-                      🗑️ Borrar
+                      ${getSvg("trash", "svg-icon-xs")} Borrar
                     </button>
                   </div>
                 </td>
@@ -3224,22 +3256,22 @@ class ComunidadApp {
               <tr>
                 <td>
                   <strong style="color:#fff;">${h.titulo}</strong>
-                  ${h.fijado ? `<span class="thread-pinned-badge" style="margin-left:6px; font-size:0.65rem;">📌 FIJADO</span>` : ""}
+                  ${h.fijado ? `<span class="thread-pinned-badge" style="margin-left:6px; font-size:0.65rem;">FIJADO</span>` : ""}
                 </td>
                 <td><span class="admin-table-cat">${h.canal_id}</span></td>
                 <td style="font-size:0.78rem;">
                   <span style="color:#fff;">${h.autor_nombre}</span>
-                  <div style="color:var(--gold-bright); font-size:0.7rem;">${col.escudo || "🥁"} ${col.nombre}</div>
+                  <div style="color:var(--gold-bright); font-size:0.7rem;">${col.nombre}</div>
                 </td>
-                <td style="text-align:center; font-weight:700;">💬 ${h.count_comentarios ?? h.respuestas_count ?? 0}</td>
+                <td style="text-align:center; font-weight:700;">${h.count_comentarios ?? h.respuestas_count ?? 0}</td>
                 <td style="text-align:center; font-weight:700; color:var(--gold-bright);">▲ ${h.votos || 0}</td>
                 <td style="text-align:right;">
                   <div class="admin-actions-cell">
                     <button type="button" class="btn-admin-table-action btn-admin-table-pin" data-id="${h.id}" data-pinned="${h.fijado ? 1 : 0}">
-                      ${h.fijado ? "📌 Desfijar" : "📌 Fijar"}
+                      ${h.fijado ? "Desfijar" : "Fijar"}
                     </button>
                     <button type="button" class="btn-admin-table-action danger btn-admin-table-del-thread" data-id="${h.id}" data-title="${(h.titulo || '').replace(/"/g, '&quot;')}">
-                      🗑️ Eliminar
+                      ${getSvg("trash", "svg-icon-xs")} Eliminar
                     </button>
                   </div>
                 </td>
@@ -3291,8 +3323,8 @@ class ComunidadApp {
       ? this.data.cronograma
       : [
           { fase: "Pruebas Piloto", fecha: "Septiembre 2026", lugar: "Costanera de Posadas (4to Tramo)", horario: "14:00 a 23:00 hs", estado: "En desarrollo", icono: "⏱️" },
-          { fase: "Noches de Calle (Desfile Oficial)", fecha: "Septiembre - Octubre 2026", lugar: "4 Tramos de la Costanera", horario: "18:00 a 04:30 hs", estado: "Próximamente", icono: "🥁" },
-          { fase: "Show en el Anfiteatro", fecha: "Octubre 2026", lugar: "Anfiteatro Manuel Antonio Ramírez", horario: "17:00 a 05:00 hs", estado: "Cierre de Temporada", icono: "👑" }
+          { fase: "Noches de Calle (Desfile Oficial)", fecha: "Septiembre - Octubre 2026", lugar: "4 Tramos de la Costanera", horario: "18:00 a 04:30 hs", estado: "Próximamente", icono: "" },
+          { fase: "Show en el Anfiteatro", fecha: "Octubre 2026", lugar: "Anfiteatro Manuel Antonio Ramírez", horario: "17:00 a 05:00 hs", estado: "Cierre de Temporada", icono: "" }
         ];
 
     this._adminCronograma = JSON.parse(JSON.stringify(source));
@@ -3305,7 +3337,7 @@ class ComunidadApp {
     cards.forEach((card, idx) => {
       if (idx < this._adminCronograma.length) {
         this._adminCronograma[idx].fase    = card.querySelector(".phase-input-fase")?.value.trim() || "";
-        this._adminCronograma[idx].icono   = card.querySelector(".phase-input-icono")?.value.trim() || "🥁";
+        this._adminCronograma[idx].icono   = card.querySelector(".phase-input-icono")?.value.trim() || "";
         this._adminCronograma[idx].fecha   = card.querySelector(".phase-input-fecha")?.value.trim() || "";
         this._adminCronograma[idx].horario = card.querySelector(".phase-input-horario")?.value.trim() || "";
         this._adminCronograma[idx].lugar   = card.querySelector(".phase-input-lugar")?.value.trim() || "";
@@ -3320,7 +3352,7 @@ class ComunidadApp {
       this.adminCronogramaListWrap.innerHTML = `
         <div class="admin-empty-state">
           <p>No hay fases en el cronograma.</p>
-          <button type="button" class="btn-admin-sm-action" id="btn-admin-add-first-phase">➕ Agregar la Primera Fase</button>
+          <button type="button" class="btn-admin-sm-action" id="btn-admin-add-first-phase">Agregar la Primera Fase</button>
         </div>`;
       const addFirst = document.getElementById("btn-admin-add-first-phase");
       if (addFirst) addFirst.addEventListener("click", () => this.addAdminCronogramaPhase());
@@ -3334,7 +3366,7 @@ class ComunidadApp {
       return `
         <div class="admin-editor-card-item cronograma-phase-card" data-index="${idx}">
           <div class="admin-editor-item-header">
-            <span class="admin-editor-item-title"><span>📅</span> Fase #${idx + 1}</span>
+            <span class="admin-editor-item-title">Fase #${idx + 1}</span>
             <div class="admin-editor-item-actions">
               <button type="button" class="btn-order-ctrl btn-order-phase-up" data-index="${idx}" title="Subir fase" ${upDisabled}>↑</button>
               <button type="button" class="btn-order-ctrl btn-order-phase-down" data-index="${idx}" title="Bajar fase" ${downDisabled}>↓</button>
@@ -3348,7 +3380,7 @@ class ComunidadApp {
             </div>
             <div class="topic-form-group">
               <label class="topic-form-label">Ícono / Emoji</label>
-              <input type="text" class="topic-form-input phase-input-icono" placeholder="🥁" value="${(item.icono || '🥁').replace(/"/g, '&quot;')}">
+              <input type="text" class="topic-form-input phase-input-icono" placeholder="Fase" value="${(item.icono || '').replace(/"/g, '&quot;')}">
             </div>
           </div>
           <div class="form-row-2col">
@@ -3419,7 +3451,7 @@ class ComunidadApp {
     this.syncAdminCronogramaFromDOM();
     this._adminCronograma.push({
       fase: "",
-      icono: "🥁",
+      icono: "",
       fecha: "",
       horario: "",
       lugar: "Costanera de Posadas",
@@ -3482,7 +3514,7 @@ class ComunidadApp {
         this._adminCronograma = JSON.parse(JSON.stringify(cronograma));
         this.renderCronograma();
         this.renderAdminCronogramaList();
-        this.showToast("📅 ¡Cronograma oficial guardado y sincronizado!");
+        this.showToast("Cronograma oficial guardado y sincronizado.");
       } else {
         this.showToast(data.message || "Error al guardar cronograma.");
       }
@@ -3492,7 +3524,7 @@ class ComunidadApp {
     } finally {
       if (this.btnSaveAdminCronograma) {
         this.btnSaveAdminCronograma.disabled = false;
-        this.btnSaveAdminCronograma.innerHTML = '<span>💾 Guardar Cronograma Oficial</span>';
+        this.btnSaveAdminCronograma.innerHTML = '<span>Guardar Cronograma Oficial</span>';
       }
     }
   }
@@ -3548,7 +3580,7 @@ class ComunidadApp {
       this.adminGuiaListWrap.innerHTML = `
         <div class="admin-empty-state">
           <p>No hay preguntas frecuentes configuradas.</p>
-          <button type="button" class="btn-admin-sm-action" id="btn-admin-add-first-faq">➕ Agregar la Primera Pregunta</button>
+          <button type="button" class="btn-admin-sm-action" id="btn-admin-add-first-faq">Agregar la Primera Pregunta</button>
         </div>`;
       const addFirst = document.getElementById("btn-admin-add-first-faq");
       if (addFirst) addFirst.addEventListener("click", () => this.addAdminFaq());
@@ -3562,7 +3594,7 @@ class ComunidadApp {
       return `
         <div class="admin-editor-card-item guia-faq-card" data-index="${idx}">
           <div class="admin-editor-item-header">
-            <span class="admin-editor-item-title"><span>💡</span> Pregunta #${idx + 1}</span>
+            <span class="admin-editor-item-title">Pregunta #${idx + 1}</span>
             <div class="admin-editor-item-actions">
               <button type="button" class="btn-order-ctrl btn-order-faq-up" data-index="${idx}" title="Subir posición" ${upDisabled}>↑</button>
               <button type="button" class="btn-order-ctrl btn-order-faq-down" data-index="${idx}" title="Bajar posición" ${downDisabled}>↓</button>
@@ -3666,7 +3698,7 @@ class ComunidadApp {
         this._adminFaqs = JSON.parse(JSON.stringify(faq));
         this.renderGuia();
         this.renderAdminGuiaList();
-        this.showToast("💡 ¡Guía & FAQ guardadas y actualizadas en vivo!");
+        this.showToast("Guía y preguntas frecuentes actualizadas.");
       } else {
         this.showToast(data.message || "Error al guardar guías.");
       }
@@ -3676,7 +3708,7 @@ class ComunidadApp {
     } finally {
       if (this.btnSaveAdminGuia) {
         this.btnSaveAdminGuia.disabled = false;
-        this.btnSaveAdminGuia.innerHTML = '<span>💾 Guardar Guías & FAQ</span>';
+        this.btnSaveAdminGuia.innerHTML = '<span>Guardar Guías & FAQ</span>';
       }
     }
   }
@@ -3697,11 +3729,11 @@ class ComunidadApp {
         this.siteSettingTickerLines.value = a.tickerLines.join("\n");
       } else {
         this.siteSettingTickerLines.value = [
-          "🥁 Temporada 2026 en marcha — Pruebas Piloto iniciadas en la Costanera de Posadas",
-          "💃 Cuerpos de Baile: Novedades coreográficas y nuevas temáticas para las Noches de Calle",
-          "🎮 Simulador v2026 ya disponible — Modo Cuerpo de Baile con eventos exclusivos",
-          "📅 Noches de Calle oficiales: Septiembre - Octubre 2026",
-          "👑 Gran Cierre en el Anfiteatro Manuel Antonio Ramírez — Octubre 2026"
+          "Temporada 2026 en marcha — Pruebas Piloto iniciadas en la Costanera de Posadas",
+          "Cuerpos de Baile: Novedades coreográficas y nuevas temáticas para las Noches de Calle",
+          "Simulador v2026 ya disponible — Modo Cuerpo de Baile con eventos exclusivos",
+          "Noches de Calle oficiales: Septiembre - Octubre 2026",
+          "Gran Cierre en el Anfiteatro Manuel Antonio Ramírez — Octubre 2026"
         ].join("\n");
       }
     }
@@ -3753,7 +3785,7 @@ class ComunidadApp {
         if (!this.data) this.data = {};
         this.data.ajustes = ajustes;
         this.applySiteSettings();
-        this.showToast("⚙️ ¡Ajustes del portal actualizados con éxito!");
+        this.showToast("Ajustes del portal actualizados con éxito.");
       } else {
         this.showToast(data.message || "Error al guardar ajustes.");
       }
@@ -3763,7 +3795,7 @@ class ComunidadApp {
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
-        btnSubmit.innerHTML = '<span>💾 Guardar Ajustes del Sitio</span>';
+        btnSubmit.innerHTML = '<span>Guardar Ajustes del Sitio</span>';
       }
     }
   }
@@ -3802,7 +3834,7 @@ class ComunidadApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.showToast("🔐 Contraseña actualizada exitosamente.");
+        this.showToast("Contraseña actualizada exitosamente.");
         if (this.formAdminChangePwd) this.formAdminChangePwd.reset();
       } else {
         this.showToast(data.message || "Error al cambiar contraseña.");
@@ -3831,7 +3863,7 @@ class ComunidadApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.showToast(fijar ? "📌 Debate fijado al inicio" : "📌 Debate desfijado");
+        this.showToast(fijar ? "Debate fijado al inicio" : "Debate desfijado");
         this.loadThreads();
       } else {
         this.showToast(data.message || "Error al modificar fijado");
@@ -3855,7 +3887,7 @@ class ComunidadApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.showToast("🗑️ Debate eliminado con éxito.");
+        this.showToast("Debate eliminado con éxito.");
         this.loadThreads();
         this.checkAdminReportsBadge();
       } else {
@@ -3881,7 +3913,7 @@ class ComunidadApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.showToast("🗑️ Comentario eliminado.");
+        this.showToast("Comentario eliminado.");
         if (this.activeThreadId) {
           this.openThread(this.activeThreadId);
         }

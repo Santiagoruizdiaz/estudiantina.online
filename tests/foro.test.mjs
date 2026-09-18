@@ -6,12 +6,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const serverPath = path.resolve(__dirname, "../server.js");
+const testDbFile = path.resolve(__dirname, "../data/foro.foro.test.db");
 
 const TEST_PORT = 3898;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
@@ -19,9 +21,14 @@ const BASE_URL = `http://localhost:${TEST_PORT}`;
 test("Foro de Debate: Integración completa de endpoints", async (t) => {
   let serverProcess;
 
+  // Limpiar base de datos de prueba previa
+  for (const ext of ["", "-shm", "-wal"]) {
+    try { fs.unlinkSync(testDbFile + ext); } catch {}
+  }
+
   await new Promise((resolve, reject) => {
     serverProcess = spawn(process.execPath, [serverPath], {
-      env: { ...process.env, PORT: String(TEST_PORT) },
+      env: { ...process.env, PORT: String(TEST_PORT), DATABASE_PATH: testDbFile },
       stdio: ["ignore", "pipe", "pipe"]
     });
     const timeout = setTimeout(() => reject(new Error("Timeout")), 6000);
@@ -34,7 +41,12 @@ test("Foro de Debate: Integración completa de endpoints", async (t) => {
     serverProcess.on("error", (err) => { clearTimeout(timeout); reject(err); });
   });
 
-  t.after(() => { if (serverProcess) serverProcess.kill(); });
+  t.after(() => {
+    if (serverProcess) serverProcess.kill();
+    for (const ext of ["", "-shm", "-wal"]) {
+      try { fs.unlinkSync(testDbFile + ext); } catch {}
+    }
+  });
 
   await t.test("GET canales: retorna lista con hilos_count", async () => {
     const res = await fetch(`${BASE_URL}/api/foro?action=canales`);

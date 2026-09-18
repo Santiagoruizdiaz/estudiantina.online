@@ -3,7 +3,7 @@
  * Gestión del artículo individual, pestañas, galería, barra de lectura, lightbox y modo admin.
  */
 
-import { COLEGIOS_DB } from "./colegios.js";
+import { COLEGIOS } from "./colegios.js";
 import { UsuarioService } from "./usuario.js";
 
 function decodeEntities(str) {
@@ -263,7 +263,7 @@ class NoticiaPageApp {
         this.btnAdminEdit.style.display = "inline-flex";
         this.btnAdminEdit.addEventListener("click", () => {
           if (this.article) {
-            window.location.href = `comunidad.html?editNews=${encodeURIComponent(this.article.id)}`;
+            window.location.href = `index.html?editNews=${encodeURIComponent(this.article.id)}`;
           }
         });
       }
@@ -336,7 +336,7 @@ class NoticiaPageApp {
     // Breadcrumbs
     if (this.breadcrumbCat) {
       this.breadcrumbCat.textContent = art.categoria || "Noticias";
-      this.breadcrumbCat.href = `comunidad.html?cat=${encodeURIComponent(art.categoria || '')}`;
+      this.breadcrumbCat.href = `index.html?cat=${encodeURIComponent(art.categoria || '')}`;
     }
     if (this.breadcrumbTitle) {
       this.breadcrumbTitle.textContent = art.titulo;
@@ -399,7 +399,7 @@ class NoticiaPageApp {
       const tags = Array.isArray(art.tags) ? art.tags : [];
       if (tags.length > 0) {
         this.tagsList.innerHTML = tags.map(t =>
-          `<a href="comunidad.html?search=${encodeURIComponent(t)}" class="noticia-tag-item">#${t}</a>`
+          `<a href="index.html?search=${encodeURIComponent(t)}" class="noticia-tag-item">#${t}</a>`
         ).join("");
       } else {
         const box = document.getElementById("noticia-tags-box");
@@ -609,9 +609,9 @@ class NoticiaPageApp {
       });
       const data = await res.json();
       if (data.status === "ok") {
-        this.showToast("🗑️ Noticia eliminada exitosamente. Redirigiendo a Comunidad...");
+        this.showToast("Noticia eliminada exitosamente. Redirigiendo a Portal...");
         setTimeout(() => {
-          window.location.href = "comunidad.html";
+          window.location.href = "index.html";
         }, 1500);
       } else {
         this.showToast(data.message || "Error al eliminar noticia");
@@ -1029,7 +1029,7 @@ class NoticiaPageApp {
           <span style="font-size:3.5rem; display:block; margin-bottom:1rem;">🗞️</span>
           <h2 style="font-family:var(--font-display); font-size:2rem; color:var(--text-white); margin-bottom:0.75rem;">Noticia no encontrada</h2>
           <p style="color:var(--text-muted); margin-bottom:2rem; max-width:480px; margin-inline:auto;">${msg}</p>
-          <a href="comunidad.html" class="btn-cta-foro">
+          <a href="index.html" class="btn-cta-foro">
             <span>← Volver al Portal de Noticias</span>
           </a>
         </div>

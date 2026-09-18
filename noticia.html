@@ -39,8 +39,8 @@
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <link rel="stylesheet" href="css/comunidad.css?v=20260912_8">
-  <link rel="stylesheet" href="css/noticia.css?v=20260912_8">
+  <link rel="stylesheet" href="css/comunidad.css?v=20260916_9">
+  <link rel="stylesheet" href="css/noticia.css?v=20260916_10">
 </head>
 <body class="page-noticia">
 
@@ -51,36 +51,36 @@
         <div class="header-top-left">
           <span class="header-date" id="header-date">Cargando fecha...</span>
           <span class="header-separator">|</span>
-          <span class="header-location">&#x1F4CD; Posadas, Misiones</span>
+          <span class="header-location"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Posadas, Misiones</span>
         </div>
         <div class="header-top-right">
-          <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="header-social">&#x1F4F7; @estudiantina.online</a>
-          <a href="index.html" class="header-btn-game"><span>&#x1F3AE;</span><span>Ir al Simulador</span></a>
+          <a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="header-social"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg> @estudiantina.online</a>
+          <a href="simulador.html" class="header-btn-game"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/></svg><span>Ir al Simulador</span></a>
         </div>
       </div>
     </div>
 
     <div class="header-masthead">
       <div class="header-masthead-inner">
-        <a href="comunidad.html" class="masthead-brand" aria-label="Estudiantina Online Comunidad">
-          <span class="masthead-icon">&#x1F941;</span>
+        <a href="index.html" class="masthead-brand" aria-label="Estudiantina Online Comunidad">
+
           <div class="masthead-text-group">
             <span class="brand-logo">estudiantina<span class="brand-domain">.online</span></span>
             <span class="masthead-tagline">Portal de Comunidad &amp; Noticias</span>
           </div>
         </a>
-        <a href="index.html" class="header-btn-game-mobile" title="Ir al Simulador de Carrera">
-          <span>&#x1F3AE;</span><span>Simulador</span>
+        <a href="simulador.html" class="header-btn-game-mobile" title="Ir al Simulador de Carrera">
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="12" y2="12"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="15" x2="15.01" y1="13" y2="13"/><line x1="18" x2="18.01" y1="11" y2="11"/><rect width="20" height="12" x="2" y="6" rx="6"/></svg><span>Simulador</span>
         </a>
       </div>
     </div>
 
     <nav class="section-nav" aria-label="Secciones del portal">
       <div class="section-nav-inner">
-        <a href="comunidad.html#noticias" class="section-nav-link active">Noticias</a>
-        <a href="comunidad.html#cronograma" class="section-nav-link">Cronograma</a>
-        <a href="comunidad.html#guia" class="section-nav-link">Guía del Espectador</a>
-        <a href="foro.html" class="section-nav-link">💬 Foro</a>
+        <a href="index.html#noticias" class="section-nav-link active">Noticias</a>
+        <a href="index.html#cronograma" class="section-nav-link">Cronograma</a>
+        <a href="index.html#guia" class="section-nav-link">Guía del Espectador</a>
+        <a href="foro.html" class="section-nav-link">Foro</a>
       </div>
     </nav>
   </header>
@@ -90,7 +90,7 @@
     <div id="noticia-progress-bar" class="noticia-progress-bar"></div>
     <div class="noticia-subnav-inner">
       <div class="noticia-subnav-left">
-        <a href="comunidad.html#noticias" class="noticia-back-btn" id="btn-back-comunidad" title="Volver a la portada de noticias">
+        <a href="index.html#noticias" class="noticia-back-btn" id="btn-back-comunidad" title="Volver a la portada de noticias">
           <span class="back-arrow">←</span>
           <span>Volver a Noticias</span>
         </a>
@@ -100,14 +100,14 @@
       <div class="noticia-subnav-right">
         <!-- Acciones Admin (visibles solo si admin logueado) -->
         <button type="button" id="btn-noticia-admin-edit" class="noticia-nav-btn noticia-nav-btn-admin-edit" style="display:none;" title="Editar esta noticia">
-          <span>✏️</span><span>Editar</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Editar</span>
         </button>
         <button type="button" id="btn-noticia-admin-del" class="noticia-nav-btn noticia-nav-btn-admin-del" style="display:none;" title="Eliminar noticia">
-          <span>🗑️</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
         </button>
         <!-- Compartir -->
         <button type="button" id="btn-noticia-nav-share" class="noticia-nav-btn noticia-nav-btn-share" title="Compartir noticia">
-          <span>📱</span><span>Compartir</span>
+          <svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg><span>Compartir</span>
         </button>
       </div>
     </div>
@@ -121,16 +121,16 @@
       <nav class="noticia-breadcrumbs" aria-label="Ruta de navegación">
         <a href="index.html">Inicio</a>
         <span class="sep">›</span>
-        <a href="comunidad.html">Comunidad &amp; Noticias</a>
+        <a href="index.html">Comunidad &amp; Noticias</a>
         <span class="sep">›</span>
-        <a href="comunidad.html#noticias" id="noticia-breadcrumb-cat">Categoría</a>
+        <a href="index.html#noticias" id="noticia-breadcrumb-cat">Categoría</a>
         <span class="sep">›</span>
         <span class="current" id="noticia-breadcrumb-title">Cargando artículo...</span>
       </nav>
 
       <!-- Estado de Carga -->
       <div id="noticia-loading-state" style="text-align:center; padding: 4rem 1rem; color:var(--text-muted);">
-        <div style="font-size:2.5rem; margin-bottom:1rem; animation:pulseBreaking 1.5s infinite;">📰</div>
+        <div style="margin-bottom:1rem;"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></div>
         <p style="font-size:1.1rem; font-weight:600;">Cargando cobertura periodística...</p>
       </div>
 
@@ -150,17 +150,17 @@
           <!-- Byline & Compartir Rápido -->
           <div class="noticia-byline">
             <div class="noticia-author-box">
-              <div class="noticia-author-avatar" id="noticia-author-avatar">📰</div>
+              <div class="noticia-author-avatar" id="noticia-author-avatar"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg></div>
               <div class="noticia-author-info">
                 <span id="noticia-author-name" class="noticia-author-name">Redacción Oficial</span>
-                <span id="noticia-author-meta" class="noticia-author-meta">📅 08/09/2026 · ⏱️ 3 min de lectura · Posadas, Misiones</span>
+                <span id="noticia-author-meta" class="noticia-author-meta">08/09/2026 · 3 min de lectura · Posadas, Misiones</span>
               </div>
             </div>
 
             <div class="noticia-share-quick-bar">
-              <a href="#" id="btn-share-whatsapp" class="btn-quick-share share-whatsapp" target="_blank" rel="noopener noreferrer" title="Compartir en WhatsApp">🟢</a>
-              <a href="#" id="btn-share-x" class="btn-quick-share share-x" target="_blank" rel="noopener noreferrer" title="Compartir en X / Twitter">✖️</a>
-              <button type="button" id="btn-share-copy" class="btn-quick-share share-copy" title="Copiar enlace">🔗</button>
+              <a href="#" id="btn-share-whatsapp" class="btn-quick-share share-whatsapp" target="_blank" rel="noopener noreferrer" title="Compartir en WhatsApp"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+              <a href="#" id="btn-share-x" class="btn-quick-share share-x" target="_blank" rel="noopener noreferrer" title="Compartir en X / Twitter"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16m0-16L4 20"/></svg></a>
+              <button type="button" id="btn-share-copy" class="btn-quick-share share-copy" title="Copiar enlace"><svg class="svg-icon svg-icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button>
             </div>
           </div>
         </header>
@@ -175,18 +175,18 @@
         <div class="noticia-tabs-wrapper">
           <div class="noticia-tabs-nav" role="tablist">
             <button type="button" class="noticia-tab-btn active" data-tab="articulo" role="tab" aria-selected="true">
-              <span>📰</span><span>Artículo Completo</span>
+              <span>Artículo Completo</span>
             </button>
             <button type="button" class="noticia-tab-btn" data-tab="galeria" role="tab" aria-selected="false">
-              <span>🖼️</span><span>Galería de Fotos</span>
+              <span>Galería de Fotos</span>
               <span id="noticia-tab-gallery-count" class="tab-badge" style="display:none; font-size:0.75rem; background:var(--bg-elevated); padding:2px 6px; border-radius:10px;">0</span>
             </button>
             <button type="button" class="noticia-tab-btn" data-tab="debate" role="tab" aria-selected="false">
-              <span>💬</span><span>Comunidad &amp; Debate</span>
+              <span>Comunidad &amp; Debate</span>
               <span id="noticia-tab-comments-count" class="tab-badge" style="display:none; font-size:0.75rem; background:rgba(14,165,233,0.2); color:#38bdf8; padding:2px 7px; border-radius:10px; font-weight:800;">0</span>
             </button>
             <button type="button" class="noticia-tab-btn" data-tab="relacionadas" role="tab" aria-selected="false">
-              <span>🔗</span><span>Más Noticias</span>
+              <span>Más Noticias</span>
             </button>
           </div>
         </div>
@@ -212,7 +212,7 @@
         <!-- Pestaña 2: Galería de Fotos -->
         <div id="noticia-tab-galeria" class="noticia-tab-panel" role="tabpanel">
           <h3 style="font-family:var(--font-display); font-size:1.3rem; margin-bottom:0.75rem; color:var(--text-white);">
-            🖼️ Galería Fotográfica del Evento
+            Galería Fotográfica del Evento
           </h3>
           <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">Hacé click en cualquier imagen para verla en pantalla completa en alta resolución.</p>
           <div id="noticia-gallery-grid" class="noticia-gallery-grid">
@@ -237,7 +237,6 @@
         <!-- Sección de Artículos Relacionados al pie -->
         <section class="noticia-related-section">
           <h3 class="noticia-related-title">
-            <span>📰</span>
             <span>Más Cobertura de la Estudiantina</span>
           </h3>
           <div id="noticia-bottom-related-grid" class="noticia-related-grid">
@@ -259,7 +258,7 @@
       <span>WhatsApp</span>
     </a>
     <button type="button" id="btn-mobile-share" class="noticia-mobile-bar-btn">
-      <span>Compartir 📱</span>
+      <span>Compartir</span>
     </button>
     <button type="button" id="btn-mobile-top" class="noticia-mobile-bar-btn btn-top" title="Subir al inicio">
       <span>↑</span>
@@ -284,8 +283,8 @@
       <div class="footer-main-grid">
         <!-- Columna Marca -->
         <div class="footer-col-brand">
-          <a href="comunidad.html" class="footer-brand-link">
-            <span class="footer-brand-icon">&#x1F941;</span>
+          <a href="index.html" class="footer-brand-link">
+
             <div class="footer-brand-title">
               <span class="footer-brand-name">estudiantina<span class="footer-brand-domain">.online</span></span>
               <span class="footer-brand-sub">Portal de Comunidad &amp; Noticias</span>
@@ -295,8 +294,8 @@
             El espacio digital oficial de la fiesta de la juventud misionera. Noticias exclusivas, debates de hinchadas, cronograma de las Noches de Calle y el Simulador 2026.
           </p>
           <div class="footer-pills-row">
-            <span class="footer-pill">&#x1F4CD; Costanera de Posadas</span>
-            <span class="footer-pill">&#x1F941; 33 Colegios Oficiales</span>
+            <span class="footer-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Costanera de Posadas</span>
+            <span class="footer-pill"><svg class="svg-icon svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> 33 Colegios Oficiales</span>
           </div>
         </div>
 
@@ -304,10 +303,10 @@
         <div class="footer-col-nav">
           <h4 class="footer-col-title">Secciones</h4>
           <ul class="footer-nav-list">
-            <li><a href="comunidad.html#noticias" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F0;</span> Noticias &amp; Crónicas</a></li>
-            <li><a href="comunidad.html#cronograma" class="footer-nav-link"><span class="footer-link-icon">&#x1F4C5;</span> Cronograma de Calle</a></li>
-            <li><a href="comunidad.html#guia" class="footer-nav-link"><span class="footer-link-icon">&#x2753;</span> Guía &amp; Preguntas</a></li>
-            <li><a href="foro.html" class="footer-nav-link"><span class="footer-link-icon">&#x1F4AC;</span> Foro de Debate</a></li>
+            <li><a href="index.html#noticias" class="footer-nav-link">Noticias &amp; Crónicas</a></li>
+            <li><a href="index.html#cronograma" class="footer-nav-link">Cronograma de Calle</a></li>
+            <li><a href="index.html#guia" class="footer-nav-link">Guía &amp; Preguntas</a></li>
+            <li><a href="foro.html" class="footer-nav-link">Foro de Debate</a></li>
           </ul>
         </div>
 
@@ -315,10 +314,10 @@
         <div class="footer-col-nav">
           <h4 class="footer-col-title">Ecosistema</h4>
           <ul class="footer-nav-list">
-            <li><a href="index.html" class="footer-nav-link"><span class="footer-link-icon">&#x1F3AE;</span> Ir al Simulador</a></li>
-            <li><a href="index.html#ranking" class="footer-nav-link"><span class="footer-link-icon">&#x1F3C6;</span> Salón de la Fama</a></li>
-            <li><a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="footer-nav-link"><span class="footer-link-icon">&#x1F4F7;</span> Instagram Oficial</a></li>
-            <li><a href="index.html#terms" class="footer-nav-link"><span class="footer-link-icon">&#x2696;&#xFE0F;</span> Términos &amp; Condiciones</a></li>
+            <li><a href="simulador.html" class="footer-nav-link">Ir al Simulador</a></li>
+            <li><a href="simulador.html#ranking" class="footer-nav-link">Salón de la Fama</a></li>
+            <li><a href="https://www.instagram.com/estudiantina.online/" target="_blank" rel="noopener noreferrer" class="footer-nav-link">Instagram Oficial</a></li>
+            <li><a href="simulador.html#terms" class="footer-nav-link">Términos &amp; Condiciones</a></li>
           </ul>
         </div>
       </div>
@@ -326,7 +325,7 @@
       <!-- Barra inferior / Copyright -->
       <div class="footer-bottom-bar">
         <p class="footer-copy">
-          &copy; 2026 <strong>estudiantina.online</strong> &mdash; Obra cultural independiente sin fines de lucro. Desarrollado con pasi&oacute;n posade&ntilde;a.
+          &copy; 2026 <strong>estudiantina.online</strong> &mdash; Proyecto privado e independiente. Desarrollado con pasi&oacute;n posade&ntilde;a.
         </p>
         <button type="button" id="btn-footer-back-to-top" class="footer-back-to-top" aria-label="Volver arriba">
           <span>Subir</span>
@@ -336,6 +335,6 @@
     </div>
   </footer>
 
-  <script type="module" src="js/noticia.js?v=20260912_8"></script>
+  <script type="module" src="js/noticia.js?v=20260916_9"></script>
 </body>
 </html>
