@@ -5,6 +5,7 @@
   "description": "Simulador de Carrera online para la Estudiantina de Posadas fiel a Copero",
   "main": "index.html",
   "scripts": {
+    "build": "echo 'Build OK'",
     "start": "node server.js",
     "dev": "node --watch server.js",
     "test": "node scripts/test-runner.mjs",

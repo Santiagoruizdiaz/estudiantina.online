@@ -2638,6 +2638,13 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`🥁 Servidor Estudiantina Online activo en http://0.0.0.0:${PORT}`);
-});
+if (typeof PORT === "string" && isNaN(PORT)) {
+  server.listen(PORT, () => {
+    console.log(`🥁 Servidor Estudiantina Online activo en socket ${PORT}`);
+  });
+} else {
+  const numericPort = parseInt(PORT, 10) || 3000;
+  server.listen(numericPort, "0.0.0.0", () => {
+    console.log(`🥁 Servidor Estudiantina Online activo en http://0.0.0.0:${numericPort}`);
+  });
+}
