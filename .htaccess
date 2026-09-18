@@ -3,8 +3,9 @@
 # Proyecto: Estudiantina de Posadas (estudiantina.online)
 # ==============================================================================
 
-# 1. Juego de caracteres predeterminado en UTF-8
+# 1. Juego de caracteres predeterminado en UTF-8 y página inicial
 AddDefaultCharset UTF-8
+DirectoryIndex index.html
 
 # 2. Tipos MIME exactos para ES Modules de JavaScript y fuentes web
 <IfModule mod_mime.c>
@@ -21,7 +22,7 @@ AddDefaultCharset UTF-8
   AddType audio/ogg                           ogg
 </IfModule>
 
-# 3. Seguridad: Bloquear exploración de directorios, datos sensibles y archivos ocultos
+# 3. Seguridad: Bloquear exploración de directorios y archivos ocultos
 Options -Indexes
 
 <FilesMatch "^\.">
@@ -34,20 +35,14 @@ Options -Indexes
   </IfModule>
 </FilesMatch>
 
-# Proteger base de datos JSON
-<FilesMatch "(^ranking\.json$|\.json$)">
-  <If "%{REQUEST_URI} =~ m#^/data/#">
-    Require all denied
-  </If>
-</FilesMatch>
-
-# 4. Enrutamiento de API y SPA Fallback Limpio
+# 4. Enrutamiento de API y SPA Fallback Limpio (LiteSpeed / Apache)
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Proteger acceso directo a la carpeta data/
+  # Proteger acceso directo a la carpeta data/ y archivos sensibles
   RewriteRule ^data/ - [F,L]
+  RewriteRule \.(db|sql|log|env)$ - [F,L]
 
   # Enrutar llamadas limpias de API a PHP
   RewriteRule ^api/ranking/?$ api/ranking.php [L,QSA]
@@ -63,6 +58,8 @@ Options -Indexes
   RewriteRule ^foro/?$ foro.html [L]
 
   # Si el archivo o directorio solicitado no existe físicamente, servir index.html
+  # Protegido contra bucles infinitos de reescritura
+  RewriteCond %{REQUEST_URI} !^/index\.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.html [L]

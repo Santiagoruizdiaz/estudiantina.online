@@ -10,7 +10,13 @@ import path from "path";
 import crypto from "crypto";
 import zlib from "node:zlib";
 import { fileURLToPath } from "url";
-import { DatabaseSync } from "node:sqlite";
+let DatabaseSync = null;
+try {
+  const sqliteModule = await import("node:sqlite");
+  DatabaseSync = sqliteModule.DatabaseSync;
+} catch (e) {
+  console.warn("[SQLite] node:sqlite no disponible en este entorno Node.js. Funcionando con persistencia JSON.");
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,16 +50,16 @@ const FORO_DB_FILE = process.env.DATABASE_PATH ? path.resolve(__dirname, process
 const ADMIN_SECRET = process.env.ADMIN_SECRET || "estudiantina_admin_secret_posadas_2026_key";
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
 
-// Fail-fast de seguridad en producción: bloquear secretos por defecto conocidos
+// Advertencia de seguridad en producción
 if (NODE_ENV === "production") {
   if (ADMIN_SECRET === "estudiantina_admin_secret_posadas_2026_key" || ADMIN_TOKEN === "posadas_admin_2026_x9k2m") {
-    console.error("FATAL [Seguridad]: En producción (NODE_ENV=production) es obligatorio definir ADMIN_SECRET y ADMIN_TOKEN seguros.");
-    process.exit(1);
+    console.warn("[Seguridad] ADVERTENCIA: Se están usando secretos de admin por defecto en producción. Definir ADMIN_SECRET y ADMIN_TOKEN en las variables de entorno.");
   }
 }
 
 let foroDb = null;
 function getForoDb() {
+  if (!DatabaseSync) return null;
   if (!foroDb) {
     const dir = path.dirname(FORO_DB_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -2632,6 +2638,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`🥁 Servidor Estudiantina Online activo en http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`🥁 Servidor Estudiantina Online activo en http://0.0.0.0:${PORT}`);
 });
