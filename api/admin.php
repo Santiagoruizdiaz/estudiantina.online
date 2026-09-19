@@ -8,6 +8,10 @@ header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Vary: Origin");
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
 $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
@@ -36,8 +40,9 @@ try {
     $pdo->exec("PRAGMA foreign_keys = ON;");
     $pdo->exec("PRAGMA temp_store = MEMORY;");
 } catch (Exception $e) {
+    error_log("Error de base de datos en admin.php: " . $e->getMessage());
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => "Error de base de datos: " . $e->getMessage()]);
+    echo json_encode(["status" => "error", "message" => "Error interno del servidor"]);
     exit;
 }
 
@@ -60,20 +65,40 @@ if (file_exists($envPath)) {
     }
 }
 
-// Clave secreta para tokens HMAC y Token Maestro de Administración
-$nodeEnv = getenv("NODE_ENV") ?: (getenv("APP_ENV") ?: "development");
-$ADMIN_SECRET = getenv("ADMIN_SECRET") ?: "estudiantina_admin_secret_posadas_2026_key";
-$ADMIN_TOKEN = getenv("ADMIN_TOKEN") ?: (getenv("ADMIN_SECRET") ?: "posadas_admin_2026_x9k2m");
+// VULN-01: Fail-Closed Secrets. Prohibir secretos por defecto inseguros
+$INSECURE_DEFAULTS = [
+    "estudiantina_admin_secret_posadas_2026_key",
+    "posadas_admin_2026_x9k2m"
+];
+$SAFE_DEV_SECRET = "dev_secret_estudiantina_posadas_2026_32bytes_safe!";
+$SAFE_DEV_TOKEN = "dev_token_posadas_2026_master_safe_32chars!";
 
-if ($nodeEnv === "production") {
-    if ($ADMIN_SECRET === "estudiantina_admin_secret_posadas_2026_key" || $ADMIN_TOKEN === "posadas_admin_2026_x9k2m") {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => "Configuración crítica insegura en producción"]);
-        exit;
-    }
+$nodeEnv = getenv("NODE_ENV") ?: (getenv("APP_ENV") ?: "development");
+$isProduction = ($nodeEnv === "production") ||
+                (!in_array($_SERVER["REMOTE_ADDR"] ?? "", ["127.0.0.1", "::1", "localhost"], true) &&
+                 !in_array($_SERVER["SERVER_NAME"] ?? "", ["localhost", "127.0.0.1"], true) &&
+                 !empty($_SERVER["HTTP_HOST"]) &&
+                 !str_starts_with($_SERVER["HTTP_HOST"], "localhost"));
+
+$rawAdminSecret = getenv("ADMIN_SECRET") ?: ($_ENV["ADMIN_SECRET"] ?? "");
+$rawAdminToken = getenv("ADMIN_TOKEN") ?: ($_ENV["ADMIN_TOKEN"] ?? "");
+
+if (!$isProduction) {
+    if (empty($rawAdminSecret)) $rawAdminSecret = $SAFE_DEV_SECRET;
+    if (empty($rawAdminToken)) $rawAdminToken = $SAFE_DEV_TOKEN;
 }
 
-// Tablas de Administración y Noticias
+$ADMIN_SECRET = $rawAdminSecret;
+$ADMIN_TOKEN = $rawAdminToken;
+
+if (empty($ADMIN_SECRET) || strlen($ADMIN_SECRET) < 32 || in_array($ADMIN_SECRET, $INSECURE_DEFAULTS, true) ||
+    empty($ADMIN_TOKEN) || strlen($ADMIN_TOKEN) < 16 || in_array($ADMIN_TOKEN, $INSECURE_DEFAULTS, true)) {
+    http_response_code(500);
+    echo json_encode(["status" => "error", "message" => "Configuración crítica de seguridad inválida o insegura"]);
+    exit;
+}
+
+// Tablas de Administración, Noticias y Rate Limiting
 $pdo->exec("
 CREATE TABLE IF NOT EXISTS administradores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,16 +127,27 @@ CREATE TABLE IF NOT EXISTS noticias (
     fijada INTEGER DEFAULT 0,
     creada_en DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS admin_login_rate_limit (
+    ip TEXT PRIMARY KEY,
+    intentos INTEGER DEFAULT 0,
+    bloqueado_hasta INTEGER DEFAULT 0,
+    ultimo_intento INTEGER DEFAULT 0
+);
 ");
 try { $pdo->exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch (Exception $e) {}
+try { $pdo->exec("ALTER TABLE hilos ADD COLUMN en_revision INTEGER DEFAULT 0;"); } catch (Exception $e) {}
+try { $pdo->exec("ALTER TABLE comentarios ADD COLUMN en_revision INTEGER DEFAULT 0;"); } catch (Exception $e) {}
 
-// Sembrar admin inicial si está vacío
+// VULN-04 & VULN-21: Sembrar admin inicial sin contraseña predecible a 600.000 iteraciones
 $stmtAdminCount = $pdo->query("SELECT COUNT(*) as count FROM administradores");
 if ((int)$stmtAdminCount->fetchColumn() === 0) {
+    $initialPassword = getenv("ADMIN_INITIAL_PASSWORD") ?: bin2hex(random_bytes(16)); // 32 caracteres criptoseguros
     $defaultSalt = bin2hex(random_bytes(16));
-    $defaultHash = hash_pbkdf2("sha256", "Estudiantina2026!", $defaultSalt, 10000, 64);
+    $defaultHash = hash_pbkdf2("sha256", $initialPassword, $defaultSalt, 600000, 64);
     $stmtInsAdmin = $pdo->prepare("INSERT INTO administradores (usuario, password_hash, salt, rol) VALUES (?, ?, ?, ?)");
     $stmtInsAdmin->execute(["admin", $defaultHash, $defaultSalt, "superadmin"]);
+    error_log("-> Administrador por defecto inicializado: usuario 'admin'");
 }
 
 // Helpers de Seguridad
@@ -123,27 +159,31 @@ function base64url_decode($data) {
     return base64_decode(strtr($data, '-_', '+/'));
 }
 
+// VULN-12: Exigir exp e iat en tokens
 function generateAdminToken($admin, $secret) {
+    $now = time();
     $payload = [
         "id" => $admin["id"],
         "usuario" => $admin["usuario"],
         "rol" => $admin["rol"],
-        "exp" => time() + (24 * 3600)
+        "iat" => $now,
+        "exp" => $now + (24 * 3600)
     ];
     $payloadB64 = base64url_encode(json_encode($payload));
     $sig = base64url_encode(hash_hmac("sha256", $payloadB64, $secret, true));
     return $payloadB64 . "." . $sig;
 }
 
+// VULN-12: Prohibir aceptar ADMIN_SECRET directamente como Bearer token
 function verifyAdminToken($token, $secret, $masterToken = null) {
     if (!$token) return null;
     $clean = trim($token);
+
+    // Solo ADMIN_TOKEN maestro o HMAC firmado
     if ($masterToken && hash_equals($masterToken, $clean)) {
         return ["id" => 1, "usuario" => "admin", "rol" => "superadmin"];
     }
-    if ($secret && hash_equals($secret, $clean)) {
-        return ["id" => 1, "usuario" => "admin", "rol" => "superadmin"];
-    }
+
     if (strpos($clean, ".") === false) return null;
     $parts = explode(".", $clean);
     if (count($parts) !== 2) return null;
@@ -154,7 +194,10 @@ function verifyAdminToken($token, $secret, $masterToken = null) {
 
     $json = base64url_decode($payloadB64);
     $payload = json_decode($json, true);
-    if (!$payload || !isset($payload["exp"]) || $payload["exp"] < time()) return null;
+    $now = time();
+    if (!$payload || !isset($payload["exp"]) || !isset($payload["iat"])) return null;
+    if ((int)$payload["exp"] < $now) return null;
+    if ((int)$payload["iat"] > $now + 60) return null;
 
     return $payload;
 }
@@ -170,6 +213,30 @@ function getAdminFromRequest($secret, $masterToken = null) {
         return verifyAdminToken($token, $secret, $masterToken);
     }
     return null;
+}
+
+function guardarComunidadAtómico($file, $datos) {
+    $dir = dirname($file);
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+    $lockFile = $file . ".lock";
+    $lockFp = fopen($lockFile, "c");
+    if ($lockFp) {
+        flock($lockFp, LOCK_EX);
+    }
+    try {
+        $json = json_encode($datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $tmpFile = $file . ".tmp." . getmypid() . "." . bin2hex(random_bytes(4));
+        file_put_contents($tmpFile, $json, LOCK_EX);
+        rename($tmpFile, $file);
+        return true;
+    } finally {
+        if ($lockFp) {
+            flock($lockFp, LOCK_UN);
+            fclose($lockFp);
+        }
+    }
 }
 
 function syncComunidadJson($pdo) {
@@ -202,14 +269,14 @@ function syncComunidadJson($pdo) {
             "imagenUrl" => $r["imagen_url"] ?: ""
         ];
     }, $rows);
-    @file_put_contents($comFile, json_encode($currentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    guardarComunidadAtómico($comFile, $currentData);
 }
 
 $action = isset($_GET["action"]) ? $_GET["action"] : "";
 
 if ($method === "GET") {
     if ($action === "verificar") {
-        $admin = getAdminFromRequest($ADMIN_SECRET);
+        $admin = getAdminFromRequest($ADMIN_SECRET, $ADMIN_TOKEN);
         if (!$admin) {
             http_response_code(401);
             echo json_encode(["status" => "error", "message" => "No autorizado o token expirado"]);
@@ -225,14 +292,14 @@ if ($method === "GET") {
     }
 
     if ($action === "reportes") {
-        $admin = getAdminFromRequest($ADMIN_SECRET);
+        $admin = getAdminFromRequest($ADMIN_SECRET, $ADMIN_TOKEN);
         if (!$admin) {
             http_response_code(401);
             echo json_encode(["status" => "error", "message" => "No autorizado"]);
             exit;
         }
-        $stmtH = $pdo->query("SELECT * FROM hilos WHERE reportes > 0 ORDER BY reportes DESC");
-        $stmtC = $pdo->query("SELECT * FROM comentarios WHERE reportes > 0 ORDER BY reportes DESC");
+        $stmtH = $pdo->query("SELECT * FROM hilos WHERE reportes > 0 OR en_revision = 1 ORDER BY reportes DESC");
+        $stmtC = $pdo->query("SELECT * FROM comentarios WHERE reportes > 0 OR en_revision = 1 ORDER BY reportes DESC");
         $hilos = $stmtH->fetchAll();
         $comentarios = $stmtC->fetchAll();
         echo json_encode([
@@ -246,7 +313,7 @@ if ($method === "GET") {
     }
 
     if ($action === "hilos") {
-        $admin = getAdminFromRequest($ADMIN_SECRET);
+        $admin = getAdminFromRequest($ADMIN_SECRET, $ADMIN_TOKEN);
         if (!$admin) {
             http_response_code(401);
             echo json_encode(["status" => "error", "message" => "No autorizado"]);
@@ -263,7 +330,7 @@ if ($method === "GET") {
     }
 
     if ($action === "usuarios") {
-        $admin = getAdminFromRequest($ADMIN_SECRET);
+        $admin = getAdminFromRequest($ADMIN_SECRET, $ADMIN_TOKEN);
         if (!$admin) {
             http_response_code(401);
             echo json_encode(["status" => "error", "message" => "No autorizado"]);
@@ -290,9 +357,31 @@ if ($method === "POST") {
     $input = file_get_contents("php://input");
     $body = json_decode($input, true) ?: [];
 
-    // Login
+    // VULN-13: Rate limiting en action=login (bloqueo tras 5 intentos fallidos por 15 minutos)
     if ($action === "login") {
-        $usuario = trim($body["usuario"] ?? "");
+        $clientIp = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? ($_SERVER["REMOTE_ADDR"] ?? "unknown");
+        if (strpos($clientIp, ",") !== false) {
+            $clientIp = trim(explode(",", $clientIp)[0]);
+        }
+        $now = time();
+
+        $stmtRL = $pdo->prepare("SELECT intentos, bloqueado_hasta, ultimo_intento FROM admin_login_rate_limit WHERE ip = ?");
+        $stmtRL->execute([$clientIp]);
+        $rlRow = $stmtRL->fetch();
+
+        if ($rlRow) {
+            if ((int)$rlRow["bloqueado_hasta"] > $now) {
+                http_response_code(429);
+                echo json_encode(["status" => "error", "message" => "Demasiados intentos fallidos. Bloqueado temporalmente por 15 minutos."]);
+                exit;
+            }
+            if ((int)$rlRow["ultimo_intento"] + (15 * 60) < $now && (int)$rlRow["bloqueado_hasta"] <= $now) {
+                $pdo->prepare("UPDATE admin_login_rate_limit SET intentos = 0, bloqueado_hasta = 0 WHERE ip = ?")->execute([$clientIp]);
+                $rlRow["intentos"] = 0;
+            }
+        }
+
+        $usuario = trim((string)($body["usuario"] ?? ""));
         $password = (string)($body["password"] ?? "");
 
         if (!$usuario || !$password) {
@@ -305,21 +394,52 @@ if ($method === "POST") {
         $stmt->execute([$usuario]);
         $row = $stmt->fetch();
 
-        if (!$row) {
+        $loginOk = false;
+        $needsRehash = false;
+
+        if ($row) {
+            // VULN-04 & VULN-21: Verificación de 600.000 iteraciones con fallback a 10.000 para auto re-hash
+            $calcHash600k = hash_pbkdf2("sha256", $password, $row["salt"], 600000, 64);
+            if (hash_equals($row["password_hash"], $calcHash600k)) {
+                $loginOk = true;
+            } else {
+                $calcHash10k = hash_pbkdf2("sha256", $password, $row["salt"], 10000, 64);
+                if (hash_equals($row["password_hash"], $calcHash10k)) {
+                    $loginOk = true;
+                    $needsRehash = true;
+                }
+            }
+        }
+
+        if (!$loginOk) {
+            $currentAttempts = $rlRow ? (int)$rlRow["intentos"] + 1 : 1;
+            $blockedUntil = ($currentAttempts >= 5) ? ($now + 15 * 60) : 0;
+            $stmtUpsert = $pdo->prepare("
+                INSERT INTO admin_login_rate_limit (ip, intentos, bloqueado_hasta, ultimo_intento)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(ip) DO UPDATE SET intentos = ?, bloqueado_hasta = ?, ultimo_intento = ?
+            ");
+            $stmtUpsert->execute([$clientIp, $currentAttempts, $blockedUntil, $now, $currentAttempts, $blockedUntil, $now]);
+
             http_response_code(401);
             echo json_encode(["status" => "error", "message" => "Credenciales inválidas"]);
             exit;
         }
 
-        $calcHash = hash_pbkdf2("sha256", $password, $row["salt"], 10000, 64);
-        if (!hash_equals($row["password_hash"], $calcHash)) {
-            http_response_code(401);
-            echo json_encode(["status" => "error", "message" => "Credenciales inválidas"]);
-            exit;
-        }
+        // Login exitoso: limpiar bloqueos de intentos fallidos
+        $pdo->prepare("DELETE FROM admin_login_rate_limit WHERE ip = ?")->execute([$clientIp]);
 
-        $stmtUp = $pdo->prepare("UPDATE administradores SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?");
-        $stmtUp->execute([$row["id"]]);
+        if ($needsRehash) {
+            $newSalt = bin2hex(random_bytes(16));
+            $newHash = hash_pbkdf2("sha256", $password, $newSalt, 600000, 64);
+            $stmtUp = $pdo->prepare("UPDATE administradores SET password_hash = ?, salt = ?, ultimo_login = CURRENT_TIMESTAMP WHERE id = ?");
+            $stmtUp->execute([$newHash, $newSalt, $row["id"]]);
+            $row["salt"] = $newSalt;
+            $row["password_hash"] = $newHash;
+        } else {
+            $stmtUp = $pdo->prepare("UPDATE administradores SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?");
+            $stmtUp->execute([$row["id"]]);
+        }
 
         $token = generateAdminToken($row, $ADMIN_SECRET);
         echo json_encode([
@@ -356,7 +476,7 @@ if ($method === "POST") {
     }
 
     // Requiere autenticación Bearer para el resto de acciones
-    $admin = getAdminFromRequest($ADMIN_SECRET);
+    $admin = getAdminFromRequest($ADMIN_SECRET, $ADMIN_TOKEN);
     if (!$admin) {
         http_response_code(401);
         echo json_encode(["status" => "error", "message" => "Sesión no válida o expirada"]);
@@ -383,15 +503,21 @@ if ($method === "POST") {
             exit;
         }
 
-        $calcHash = hash_pbkdf2("sha256", $passwordActual, $row["salt"], 10000, 64);
-        if (!hash_equals($row["password_hash"], $calcHash)) {
+        $calcHash600k = hash_pbkdf2("sha256", $passwordActual, $row["salt"], 600000, 64);
+        $currValid = hash_equals($row["password_hash"], $calcHash600k);
+        if (!$currValid) {
+            $calcHash10k = hash_pbkdf2("sha256", $passwordActual, $row["salt"], 10000, 64);
+            $currValid = hash_equals($row["password_hash"], $calcHash10k);
+        }
+
+        if (!$currValid) {
             http_response_code(401);
             echo json_encode(["status" => "error", "message" => "La contraseña actual es incorrecta"]);
             exit;
         }
 
         $newSalt = bin2hex(random_bytes(16));
-        $newHash = hash_pbkdf2("sha256", $passwordNueva, $newSalt, 10000, 64);
+        $newHash = hash_pbkdf2("sha256", $passwordNueva, $newSalt, 600000, 64);
         $stmtUp = $pdo->prepare("UPDATE administradores SET password_hash = ?, salt = ? WHERE id = ?");
         $stmtUp->execute([$newHash, $newSalt, $admin["id"]]);
 
@@ -399,14 +525,15 @@ if ($method === "POST") {
         exit;
     }
 
+    // VULN-05: Sanitización en crear_noticia
     if ($action === "crear_noticia") {
-        $titulo = trim($body["titulo"] ?? "");
-        $categoria = trim($body["categoria"] ?? "Noches de Calle");
-        $categoriaSlug = trim($body["categoriaSlug"] ?? "noches-de-calle");
-        $badge = strtoupper(trim($body["badge"] ?? "NOTICIA"));
-        $resumen = trim($body["resumen"] ?? "");
-        $autor = trim($body["autor"] ?? "Redacción Oficial");
-        $tiempoLectura = trim($body["tiempoLectura"] ?? "3 min de lectura");
+        $titulo = htmlspecialchars(trim((string)($body["titulo"] ?? "")), ENT_QUOTES, "UTF-8");
+        $categoria = htmlspecialchars(trim((string)($body["categoria"] ?? "Noches de Calle")), ENT_QUOTES, "UTF-8");
+        $categoriaSlug = trim((string)($body["categoriaSlug"] ?? "noches-de-calle"));
+        $badge = htmlspecialchars(strtoupper(trim((string)($body["badge"] ?? "NOTICIA"))), ENT_QUOTES, "UTF-8");
+        $resumen = htmlspecialchars(trim((string)($body["resumen"] ?? "")), ENT_QUOTES, "UTF-8");
+        $autor = htmlspecialchars(trim((string)($body["autor"] ?? "Redacción Oficial")), ENT_QUOTES, "UTF-8");
+        $tiempoLectura = htmlspecialchars(trim((string)($body["tiempoLectura"] ?? "3 min de lectura")), ENT_QUOTES, "UTF-8");
         
         $tags = $body["tags"] ?? [];
         if (is_string($tags)) {
@@ -414,6 +541,20 @@ if ($method === "POST") {
         }
         
         $bloques = isset($body["bloques"]) && is_array($body["bloques"]) ? $body["bloques"] : null;
+        if ($bloques) {
+            foreach ($bloques as &$b) {
+                if (is_array($b)) {
+                    if (isset($b["value"]) && is_string($b["value"])) {
+                        $b["value"] = htmlspecialchars($b["value"], ENT_QUOTES, "UTF-8");
+                    }
+                    if (isset($b["caption"]) && is_string($b["caption"])) {
+                        $b["caption"] = htmlspecialchars($b["caption"], ENT_QUOTES, "UTF-8");
+                    }
+                }
+            }
+            unset($b);
+        }
+
         $contenido = $body["contenido"] ?? [];
         if ($bloques && count($bloques) > 0) {
             $contenido = [];
@@ -430,6 +571,7 @@ if ($method === "POST") {
             if (empty($contenido)) {
                 $contenido = [$resumen];
             }
+            $contenido = array_map(function($p) { return htmlspecialchars((string)$p, ENT_QUOTES, "UTF-8"); }, $contenido);
             $bloques = array_map(function($p) { return ["type" => "text", "value" => $p]; }, $contenido);
         }
 
@@ -439,9 +581,10 @@ if ($method === "POST") {
             exit;
         }
 
-        $id = "noticia-" . time();
+        // VULN-24: ID criptoseguro
+        $id = "noticia-" . bin2hex(random_bytes(8));
         $fecha = date("d/m/Y");
-        $imagenUrl = trim($body["imagen"] ?? $body["imagenUrl"] ?? "");
+        $imagenUrl = trim((string)($body["imagen"] ?? $body["imagenUrl"] ?? ""));
         $fijada = !empty($body["fijada"]) ? 1 : 0;
 
         $stmt = $pdo->prepare("
@@ -491,16 +634,17 @@ if ($method === "POST") {
         exit;
     }
 
+    // VULN-05: Sanitización en editar_noticia
     if ($action === "editar_noticia") {
-        $id = trim($body["id"] ?? "");
-        $titulo = trim($body["titulo"] ?? "");
-        $categoria = trim($body["categoria"] ?? "Noches de Calle");
-        $categoriaSlug = trim($body["categoriaSlug"] ?? "noches-de-calle");
-        $badge = strtoupper(trim($body["badge"] ?? "NOTICIA"));
-        $resumen = trim($body["resumen"] ?? "");
-        $autor = trim($body["autor"] ?? "Redacción Oficial");
-        $tiempoLectura = trim($body["tiempoLectura"] ?? "3 min de lectura");
-        $imagenUrl = trim($body["imagen"] ?? $body["imagenUrl"] ?? "");
+        $id = trim((string)($body["id"] ?? ""));
+        $titulo = htmlspecialchars(trim((string)($body["titulo"] ?? "")), ENT_QUOTES, "UTF-8");
+        $categoria = htmlspecialchars(trim((string)($body["categoria"] ?? "Noches de Calle")), ENT_QUOTES, "UTF-8");
+        $categoriaSlug = trim((string)($body["categoriaSlug"] ?? "noches-de-calle"));
+        $badge = htmlspecialchars(strtoupper(trim((string)($body["badge"] ?? "NOTICIA"))), ENT_QUOTES, "UTF-8");
+        $resumen = htmlspecialchars(trim((string)($body["resumen"] ?? "")), ENT_QUOTES, "UTF-8");
+        $autor = htmlspecialchars(trim((string)($body["autor"] ?? "Redacción Oficial")), ENT_QUOTES, "UTF-8");
+        $tiempoLectura = htmlspecialchars(trim((string)($body["tiempoLectura"] ?? "3 min de lectura")), ENT_QUOTES, "UTF-8");
+        $imagenUrl = trim((string)($body["imagen"] ?? $body["imagenUrl"] ?? ""));
         $fijada = !empty($body["fijada"]) ? 1 : 0;
         
         $tags = $body["tags"] ?? [];
@@ -509,6 +653,20 @@ if ($method === "POST") {
         }
         
         $bloques = isset($body["bloques"]) && is_array($body["bloques"]) ? $body["bloques"] : null;
+        if ($bloques) {
+            foreach ($bloques as &$b) {
+                if (is_array($b)) {
+                    if (isset($b["value"]) && is_string($b["value"])) {
+                        $b["value"] = htmlspecialchars($b["value"], ENT_QUOTES, "UTF-8");
+                    }
+                    if (isset($b["caption"]) && is_string($b["caption"])) {
+                        $b["caption"] = htmlspecialchars($b["caption"], ENT_QUOTES, "UTF-8");
+                    }
+                }
+            }
+            unset($b);
+        }
+
         $contenido = $body["contenido"] ?? [];
         if ($bloques && count($bloques) > 0) {
             $contenido = [];
@@ -525,6 +683,7 @@ if ($method === "POST") {
             if (empty($contenido)) {
                 $contenido = [$resumen];
             }
+            $contenido = array_map(function($p) { return htmlspecialchars((string)$p, ENT_QUOTES, "UTF-8"); }, $contenido);
             $bloques = array_map(function($p) { return ["type" => "text", "value" => $p]; }, $contenido);
         }
 
@@ -591,7 +750,7 @@ if ($method === "POST") {
             }
         }
         $cur["cronograma"] = $cronograma;
-        @file_put_contents($comFile, json_encode($cur, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        guardarComunidadAtómico($comFile, $cur);
         echo json_encode(["status" => "ok", "message" => "Cronograma guardado con éxito", "cronograma" => $cronograma]);
         exit;
     }
@@ -609,13 +768,19 @@ if ($method === "POST") {
         }
         $cur["faq"] = $faq;
         $cur["guia"] = $faq;
-        @file_put_contents($comFile, json_encode($cur, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        guardarComunidadAtómico($comFile, $cur);
         echo json_encode(["status" => "ok", "message" => "Guía guardada con éxito", "faq" => $faq]);
         exit;
     }
 
+    // VULN-23: Validación estricta en guardar_ajustes (debe ser array/objeto no secuencial)
     if ($action === "guardar_ajustes") {
-        $ajustes = is_array($body["ajustes"] ?? null) ? $body["ajustes"] : $body;
+        $rawAjustes = isset($body["ajustes"]) ? $body["ajustes"] : $body;
+        if (!is_array($rawAjustes) || (!empty($rawAjustes) && array_is_list($rawAjustes))) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "El campo ajustes debe ser un objeto válido"]);
+            exit;
+        }
         $comFile = __DIR__ . "/../data/comunidad.json";
         $cur = ["noticias" => [], "cronograma" => [], "guia" => [], "faq" => [], "ajustes" => []];
         if (file_exists($comFile)) {
@@ -625,14 +790,14 @@ if ($method === "POST") {
                 if ($parsed) $cur = $parsed;
             }
         }
-        $cur["ajustes"] = array_merge($cur["ajustes"] ?? [], $ajustes);
-        @file_put_contents($comFile, json_encode($cur, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        $cur["ajustes"] = array_merge($cur["ajustes"] ?? [], $rawAjustes);
+        guardarComunidadAtómico($comFile, $cur);
         echo json_encode(["status" => "ok", "message" => "Ajustes del sitio actualizados", "ajustes" => $cur["ajustes"]]);
         exit;
     }
 
     if ($action === "borrar_noticia") {
-        $id = trim($body["id"] ?? "");
+        $id = trim((string)($body["id"] ?? ""));
         if (!$id) {
             http_response_code(400);
             echo json_encode(["status" => "error", "message" => "ID requerido"]);
@@ -645,6 +810,7 @@ if ($method === "POST") {
         exit;
     }
 
+    // VULN-20: Envolver cascadas de borrado en transacciones SQLite
     if ($action === "borrar_hilo") {
         $hiloId = (int)($body["hiloId"] ?? $body["id"] ?? 0);
         if (!$hiloId) {
@@ -652,12 +818,22 @@ if ($method === "POST") {
             echo json_encode(["status" => "error", "message" => "ID de hilo requerido"]);
             exit;
         }
-        $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$hiloId]);
-        $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$hiloId]);
-        $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$hiloId]);
-        $pdo->prepare("DELETE FROM comentarios WHERE hilo_id = ?")->execute([$hiloId]);
-        $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$hiloId]);
-        $pdo->prepare("DELETE FROM hilos WHERE id = ?")->execute([$hiloId]);
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$hiloId]);
+            $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$hiloId]);
+            $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$hiloId]);
+            $pdo->prepare("DELETE FROM comentarios WHERE hilo_id = ?")->execute([$hiloId]);
+            $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$hiloId]);
+            $pdo->prepare("DELETE FROM hilos WHERE id = ?")->execute([$hiloId]);
+            $pdo->commit();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            error_log("Error en borrar_hilo: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Error interno del servidor"]);
+            exit;
+        }
         echo json_encode(["status" => "ok", "message" => "Hilo eliminado"]);
         exit;
     }
@@ -669,14 +845,24 @@ if ($method === "POST") {
             echo json_encode(["status" => "error", "message" => "ID de comentario requerido"]);
             exit;
         }
-        $stmtC = $pdo->prepare("SELECT hilo_id FROM comentarios WHERE id = ?");
-        $stmtC->execute([$comentarioId]);
-        $c = $stmtC->fetch();
-        if ($c) {
-            $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$comentarioId]);
-            $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$comentarioId]);
-            $pdo->prepare("DELETE FROM comentarios WHERE id = ?")->execute([$comentarioId]);
-            $pdo->prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?")->execute([$c["hilo_id"]]);
+        $pdo->beginTransaction();
+        try {
+            $stmtC = $pdo->prepare("SELECT hilo_id FROM comentarios WHERE id = ?");
+            $stmtC->execute([$comentarioId]);
+            $c = $stmtC->fetch();
+            if ($c) {
+                $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$comentarioId]);
+                $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$comentarioId]);
+                $pdo->prepare("DELETE FROM comentarios WHERE id = ?")->execute([$comentarioId]);
+                $pdo->prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?")->execute([$c["hilo_id"]]);
+            }
+            $pdo->commit();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            error_log("Error en borrar_comentario: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Error interno del servidor"]);
+            exit;
         }
         echo json_encode(["status" => "ok", "message" => "Comentario eliminado"]);
         exit;
@@ -698,6 +884,7 @@ if ($method === "POST") {
         exit;
     }
 
+    // VULN-20 & VULN-08: Moderar reporte con transacción SQLite y reseteo de en_revision
     if ($action === "moderar_reporte") {
         $tipo = ($body["tipo"] ?? "hilo") === "comentario" ? "comentario" : "hilo";
         $id = (int)($body["id"] ?? 0);
@@ -705,30 +892,40 @@ if ($method === "POST") {
 
         if ($resolucion === "descartar" || $resolucion === "aprobar") {
             $table = ($tipo === "hilo") ? "hilos" : "comentarios";
-            $pdo->prepare("UPDATE {$table} SET reportes = 0, oculto = 0 WHERE id = ?")->execute([$id]);
+            $pdo->prepare("UPDATE {$table} SET reportes = 0, oculto = 0, en_revision = 0 WHERE id = ?")->execute([$id]);
             $pdo->prepare("DELETE FROM reportes WHERE item_tipo = ? AND item_id = ?")->execute([$tipo, $id]);
             echo json_encode(["status" => "ok", "message" => "Denuncia descartada"]);
             exit;
         }
 
         if ($resolucion === "eliminar" || $resolucion === "borrar") {
-            if ($tipo === "hilo") {
-                $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$id]);
-                $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$id]);
-                $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$id]);
-                $pdo->prepare("DELETE FROM comentarios WHERE hilo_id = ?")->execute([$id]);
-                $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$id]);
-                $pdo->prepare("DELETE FROM hilos WHERE id = ?")->execute([$id]);
-            } else {
-                $stmtC = $pdo->prepare("SELECT hilo_id FROM comentarios WHERE id = ?");
-                $stmtC->execute([$id]);
-                $c = $stmtC->fetch();
-                if ($c) {
-                    $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$id]);
-                    $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$id]);
-                    $pdo->prepare("DELETE FROM comentarios WHERE id = ?")->execute([$id]);
-                    $pdo->prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?")->execute([$c["hilo_id"]]);
+            $pdo->beginTransaction();
+            try {
+                if ($tipo === "hilo") {
+                    $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$id]);
+                    $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)")->execute([$id]);
+                    $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$id]);
+                    $pdo->prepare("DELETE FROM comentarios WHERE hilo_id = ?")->execute([$id]);
+                    $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?")->execute([$id]);
+                    $pdo->prepare("DELETE FROM hilos WHERE id = ?")->execute([$id]);
+                } else {
+                    $stmtC = $pdo->prepare("SELECT hilo_id FROM comentarios WHERE id = ?");
+                    $stmtC->execute([$id]);
+                    $c = $stmtC->fetch();
+                    if ($c) {
+                        $pdo->prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$id]);
+                        $pdo->prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?")->execute([$id]);
+                        $pdo->prepare("DELETE FROM comentarios WHERE id = ?")->execute([$id]);
+                        $pdo->prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?")->execute([$c["hilo_id"]]);
+                    }
                 }
+                $pdo->commit();
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                error_log("Error en moderar_reporte: " . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(["status" => "error", "message" => "Error interno del servidor"]);
+                exit;
             }
             echo json_encode(["status" => "ok", "message" => "Contenido eliminado"]);
             exit;
@@ -737,9 +934,9 @@ if ($method === "POST") {
 
     // Moderación: Sancionar / Desbanear Usuario
     if ($action === "sancionar_usuario") {
-        $googleId = trim($body["googleId"] ?? "");
-        $tipoSancion = strtolower(trim($body["tipoSancion"] ?? "suspender"));
-        $motivo = htmlspecialchars(trim(mb_substr($body["motivo"] ?? "", 0, 500)), ENT_QUOTES, "UTF-8");
+        $googleId = trim((string)($body["googleId"] ?? ""));
+        $tipoSancion = strtolower(trim((string)($body["tipoSancion"] ?? "suspender")));
+        $motivo = htmlspecialchars(trim(mb_substr((string)($body["motivo"] ?? ""), 0, 500)), ENT_QUOTES, "UTF-8");
         $duracionHoras = (int)($body["duracionHoras"] ?? 24);
 
         if (empty($googleId)) {
@@ -776,7 +973,7 @@ if ($method === "POST") {
 
         if ($tipoSancion === "suspender") {
             $horas = $duracionHoras > 0 ? $duracionHoras : 24;
-            $hasta = date("Y-m-d H:i:s", time() + ($horas * 3600));
+            $hasta = gmdate("Y-m-d\TH:i:s\Z", time() + ($horas * 3600));
             $pdo->prepare("UPDATE usuarios SET estado = 'suspendido', motivo_sancion = ?, sancionado_hasta = ?, sancionado_por = ?, sancionado_en = CURRENT_TIMESTAMP WHERE google_id = ?")->execute([$motivo ?: "Suspensión temporal por {$horas}h", $hasta, $admin["usuario"] ?? "admin", $googleId]);
             echo json_encode(["status" => "ok", "message" => "Usuario suspendido hasta " . date("d/m/Y H:i", strtotime($hasta)) . ".", "hasta" => $hasta]);
             exit;

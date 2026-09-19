@@ -25,7 +25,7 @@ console.log("🧪 Ejecutando suite de pruebas automatizadas en Estudiantina.onli
 
 const result = spawnSync(
   process.execPath,
-  ["--test", "tests/simulador.test.mjs", "tests/api.test.mjs", "tests/foro.test.mjs"],
+  ["--test", "--test-concurrency=1", "tests/simulador.test.mjs", "tests/api.test.mjs", "tests/foro.test.mjs"],
   {
     cwd: projectRoot,
     stdio: "inherit"

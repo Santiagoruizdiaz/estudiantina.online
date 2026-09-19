@@ -1053,10 +1053,16 @@ class ForoApp {
       const email = decoded.email || "";
       const avatarUrl = decoded.picture || "";
 
+      localStorage.setItem("googleToken", response.credential);
+
       const res = await fetch("/api/foro?action=auth_google", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${response.credential}`
+        },
         body: JSON.stringify({
+          token: response.credential,
           googleId,
           nombre,
           email,
@@ -1071,6 +1077,7 @@ class ForoApp {
 
         if (json.needsOnboarding) {
           this.openOnboardingModal({
+            token: response.credential,
             googleId,
             nombre,
             email,
@@ -1141,10 +1148,15 @@ class ForoApp {
     }
 
     try {
+      const gToken = (this._pendingGoogleAuth && this._pendingGoogleAuth.token) || localStorage.getItem("googleToken") || "";
       const res = await fetch("/api/foro?action=completar_registro", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(gToken ? { "Authorization": `Bearer ${gToken}` } : {})
+        },
         body: JSON.stringify({
+          token: gToken,
           googleId: this._pendingGoogleAuth.googleId,
           username,
           nombre,
@@ -2821,10 +2833,15 @@ class ForoApp {
     const motivoCompleto = extraDetails ? `${motivoBase}: ${extraDetails}` : motivoBase;
 
     try {
+      const gToken = localStorage.getItem("googleToken") || "";
       const res = await fetch("/api/foro?action=reportar", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(gToken ? { "Authorization": `Bearer ${gToken}` } : {})
+        },
         body: JSON.stringify({
+          token: gToken,
           tipo,
           itemId,
           id: itemId,
@@ -3425,10 +3442,15 @@ class ForoApp {
     }
 
     try {
+      const gToken = localStorage.getItem("googleToken") || "";
       const res = await fetch("/api/foro?action=comentar", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(gToken ? { "Authorization": `Bearer ${gToken}` } : {})
+        },
         body: JSON.stringify({
+          token: gToken,
           hiloId: this.activeThreadId,
           googleId: this.currentUser.googleId,
           autorNombre: this.currentUser.nombre,
@@ -3489,10 +3511,15 @@ class ForoApp {
     }
 
     try {
+      const gToken = localStorage.getItem("googleToken") || "";
       const res = await fetch("/api/foro?action=crear_hilo", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(gToken ? { "Authorization": `Bearer ${gToken}` } : {})
+        },
         body: JSON.stringify({
+          token: gToken,
           canalId,
           colegioId: schoolId,
           titulo: title,
@@ -3544,10 +3571,15 @@ class ForoApp {
     }
 
     try {
+      const gToken = localStorage.getItem("googleToken") || "";
       const res = await fetch("/api/foro?action=votar", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(gToken ? { "Authorization": `Bearer ${gToken}` } : {})
+        },
         body: JSON.stringify({
+          token: gToken,
           tipo: targetType,
           itemId: targetId,
           id: targetId,
@@ -4345,9 +4377,14 @@ class ForoApp {
     }
 
     try {
+      const gToken = localStorage.getItem("googleToken") || "";
+      payload.token = gToken;
       const res = await fetch("/api/foro?action=editar_perfil", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(gToken ? { "Authorization": `Bearer ${gToken}` } : {})
+        },
         body: JSON.stringify(payload)
       });
 

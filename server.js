@@ -47,14 +47,37 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, "data", "ranking.json");
 const FORO_DB_FILE = process.env.DATABASE_PATH ? path.resolve(__dirname, process.env.DATABASE_PATH) : path.join(__dirname, "data", "foro.db");
-const ADMIN_SECRET = process.env.ADMIN_SECRET || "estudiantina_admin_secret_posadas_2026_key";
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
 
-// Advertencia de seguridad en producción
-if (NODE_ENV === "production") {
-  if (ADMIN_SECRET === "estudiantina_admin_secret_posadas_2026_key" || ADMIN_TOKEN === "posadas_admin_2026_x9k2m") {
-    console.warn("[Seguridad] ADVERTENCIA: Se están usando secretos de admin por defecto en producción. Definir ADMIN_SECRET y ADMIN_TOKEN en las variables de entorno.");
-  }
+// VULN-01: Fail-Closed Secrets. Prohibir secretos por defecto inseguros
+const INSECURE_DEFAULTS = [
+  "estudiantina_admin_secret_posadas_2026_key",
+  "posadas_admin_2026_x9k2m"
+];
+const SAFE_DEV_SECRET = "dev_secret_estudiantina_posadas_2026_32bytes_safe!";
+const SAFE_DEV_TOKEN = "dev_token_posadas_2026_master_safe_32chars!";
+
+const isProduction = NODE_ENV === "production";
+let rawAdminSecret = process.env.ADMIN_SECRET;
+let rawAdminToken = process.env.ADMIN_TOKEN;
+
+if (!isProduction) {
+  if (!rawAdminSecret) rawAdminSecret = SAFE_DEV_SECRET;
+  if (!rawAdminToken) rawAdminToken = SAFE_DEV_TOKEN;
+}
+
+const ADMIN_SECRET = rawAdminSecret || "";
+const ADMIN_TOKEN = rawAdminToken || "";
+
+const isSecretsInvalid = !ADMIN_SECRET ||
+  ADMIN_SECRET.length < 32 ||
+  INSECURE_DEFAULTS.includes(ADMIN_SECRET) ||
+  !ADMIN_TOKEN ||
+  ADMIN_TOKEN.length < 16 ||
+  INSECURE_DEFAULTS.includes(ADMIN_TOKEN);
+
+if (isProduction && isSecretsInvalid) {
+  console.error("FATAL [Seguridad]: En producción (NODE_ENV=production) es obligatorio definir ADMIN_SECRET (>= 32 chars) y ADMIN_TOKEN (>= 16 chars) seguros.");
+  process.exit(1);
 }
 
 let foroDb = null;
@@ -90,6 +113,12 @@ function getForoDb() {
           creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
           ultimo_login DATETIME
       );
+      CREATE TABLE IF NOT EXISTS admin_login_rate_limit (
+          ip TEXT PRIMARY KEY,
+          intentos INTEGER DEFAULT 0,
+          bloqueado_hasta INTEGER DEFAULT 0,
+          ultimo_intento INTEGER DEFAULT 0
+      );
       CREATE TABLE IF NOT EXISTS noticias (
           id TEXT PRIMARY KEY,
           titulo TEXT NOT NULL,
@@ -111,8 +140,8 @@ function getForoDb() {
           id TEXT PRIMARY KEY,
           titulo TEXT NOT NULL,
           descripcion TEXT,
-          icono TEXT,
-          color TEXT
+          icono TEXT DEFAULT '💬',
+          color TEXT DEFAULT '#38bdf8'
       );
       CREATE TABLE IF NOT EXISTS hilos (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -124,10 +153,12 @@ function getForoDb() {
           autor_avatar TEXT,
           colegio_id TEXT DEFAULT 'janssen',
           votos INTEGER DEFAULT 0,
+          reportes INTEGER DEFAULT 0,
           respuestas_count INTEGER DEFAULT 0,
           fijado INTEGER DEFAULT 0,
-          reportes INTEGER DEFAULT 0,
           oculto INTEGER DEFAULT 0,
+          en_revision INTEGER DEFAULT 0,
+          noticia_id TEXT,
           creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
       );
       CREATE TABLE IF NOT EXISTS comentarios (
@@ -142,6 +173,7 @@ function getForoDb() {
           votos INTEGER DEFAULT 0,
           reportes INTEGER DEFAULT 0,
           oculto INTEGER DEFAULT 0,
+          en_revision INTEGER DEFAULT 0,
           creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
       );
       CREATE TABLE IF NOT EXISTS votos (
@@ -163,7 +195,10 @@ function getForoDb() {
 
     try { foroDb.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE hilos ADD COLUMN noticia_id TEXT"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE hilos ADD COLUMN reportes INTEGER DEFAULT 0"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE hilos ADD COLUMN en_revision INTEGER DEFAULT 0"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE comentarios ADD COLUMN parent_id INTEGER DEFAULT NULL"); } catch (e) {}
+    try { foroDb.exec("ALTER TABLE comentarios ADD COLUMN en_revision INTEGER DEFAULT 0"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN estado TEXT DEFAULT 'activo'"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN motivo_sancion TEXT"); } catch (e) {}
     try { foroDb.exec("ALTER TABLE usuarios ADD COLUMN sancionado_hasta DATETIME"); } catch (e) {}
@@ -192,13 +227,24 @@ function getForoDb() {
     try { foroDb.exec("CREATE INDEX IF NOT EXISTS idx_hilos_noticia ON hilos(noticia_id)"); } catch (e) {}
     try { foroDb.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(LOWER(username)) WHERE username != '' AND username IS NOT NULL;"); } catch (e) {}
 
-    // Sembrar administrador inicial si no existe
+    // VULN-04 & VULN-21: Sembrar administrador inicial con PBKDF2 600.000 iteraciones y contraseña aleatoria segura
     const rowAdmins = foroDb.prepare("SELECT COUNT(*) as count FROM administradores").get();
     if (rowAdmins && rowAdmins.count === 0) {
+      const initialPassword = process.env.ADMIN_INITIAL_PASSWORD || crypto.randomBytes(16).toString("hex");
       const defaultSalt = crypto.randomBytes(16).toString("hex");
-      const defaultHash = crypto.pbkdf2Sync("Estudiantina2026!", defaultSalt, 10000, 32, "sha256").toString("hex");
+      const defaultHash = crypto.pbkdf2Sync(initialPassword, defaultSalt, 600000, 32, "sha256").toString("hex");
       foroDb.prepare("INSERT INTO administradores (usuario, password_hash, salt, rol) VALUES (?, ?, ?, ?)").run("admin", defaultHash, defaultSalt, "superadmin");
-      console.log("-> Administrador por defecto inicializado: usuario 'admin'");
+      if (!process.env.ADMIN_INITIAL_PASSWORD) {
+        console.log("-> Administrador generado con contraseña inicial segura aleatoria (32 hex chars):", initialPassword);
+      } else {
+        console.log("-> Administrador por defecto inicializado desde ADMIN_INITIAL_PASSWORD");
+      }
+    }
+
+    if (NODE_ENV === "test") {
+      try {
+        foroDb.prepare("DELETE FROM admin_login_rate_limit WHERE ip IN ('::1', '127.0.0.1', '::ffff:127.0.0.1', 'unknown')").run();
+      } catch (e) {}
     }
 
     // Sembrar noticias iniciales desde data/comunidad.json si la tabla está vacía
@@ -531,7 +577,11 @@ function sendOptimizedJson(req, res, statusCode, payload, { cacheable = false, m
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Vary": "Origin",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin"
   };
 
   if (cacheable && statusCode === 200) {
@@ -571,11 +621,13 @@ function sendOptimizedJson(req, res, statusCode, payload, { cacheable = false, m
 
 // Helpers de Seguridad de Administración
 function generateAdminToken(admin) {
+  const now = Math.floor(Date.now() / 1000);
   const payload = {
     id: admin.id,
     usuario: admin.usuario,
     rol: admin.rol,
-    exp: Date.now() + 24 * 60 * 60 * 1000 // 24 horas
+    iat: now,
+    exp: now + 24 * 60 * 60 // 24 horas
   };
   const payloadB64 = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = crypto.createHmac("sha256", ADMIN_SECRET).update(payloadB64).digest("base64url");
@@ -585,9 +637,12 @@ function generateAdminToken(admin) {
 function verifyAdminToken(token) {
   if (!token || typeof token !== "string") return null;
   const clean = token.trim();
-  if (clean === ADMIN_TOKEN || clean === ADMIN_SECRET) {
+
+  // VULN-12: Reject ADMIN_SECRET as Bearer token. Solo ADMIN_TOKEN maestro o HMAC firmado
+  if (ADMIN_TOKEN && clean.length === ADMIN_TOKEN.length && crypto.timingSafeEqual(Buffer.from(clean), Buffer.from(ADMIN_TOKEN))) {
     return { id: 1, usuario: "admin", rol: "superadmin" };
   }
+
   if (!clean.includes(".")) return null;
   const parts = clean.split(".");
   if (parts.length !== 2) return null;
@@ -601,7 +656,12 @@ function verifyAdminToken(token) {
 
   try {
     const payload = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf-8"));
-    if (payload.exp && payload.exp < Date.now()) return null;
+    const now = Math.floor(Date.now() / 1000);
+    if (!payload || typeof payload.exp !== "number" || typeof payload.iat !== "number") return null;
+    const expSec = payload.exp > 10000000000 ? Math.floor(payload.exp / 1000) : payload.exp;
+    const iatSec = payload.iat > 10000000000 ? Math.floor(payload.iat / 1000) : payload.iat;
+    if (expSec < now) return null;
+    if (iatSec > now + 60) return null;
     return payload;
   } catch (e) {
     return null;
@@ -614,6 +674,63 @@ function getAdminFromRequest(req) {
     return verifyAdminToken(authHeader.substring(7).trim());
   }
   return null;
+}
+
+// VULN-03: Google ID Token verification
+async function verifyGoogleToken(token, explicitGoogleId = null, req = null) {
+  const isTest = (NODE_ENV === "test");
+
+  if (req) {
+    const testHeader = req.headers["x-test-google-id"];
+    if (isTest && testHeader) {
+      return { googleId: String(testHeader).trim(), email: "", name: "", avatar: "" };
+    }
+    if (!token) {
+      const auth = req.headers["authorization"] || "";
+      if (auth.startsWith("Bearer ")) {
+        token = auth.substring(7).trim();
+      }
+    }
+  }
+
+  if (isTest && token && (token.startsWith("test-") || token.startsWith("test_") || token === "test-token")) {
+    return { googleId: token, email: "", name: "", avatar: "" };
+  }
+
+  if (isTest && explicitGoogleId && !token) {
+    return { googleId: explicitGoogleId, email: "", name: "", avatar: "" };
+  }
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`, {
+      signal: AbortSignal.timeout(5000)
+    });
+    if (!res.ok) return null;
+    const info = await res.json();
+    if (!info || !info.sub) return null;
+
+    if (info.exp && Number(info.exp) * 1000 < Date.now()) {
+      return null;
+    }
+
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (clientId && info.aud && info.aud !== clientId) {
+      return null;
+    }
+
+    return {
+      googleId: info.sub,
+      email: info.email || "",
+      name: info.name || "",
+      avatar: info.picture || ""
+    };
+  } catch (e) {
+    return null;
+  }
 }
 
 const RESERVED_USERNAMES = new Set([
@@ -768,9 +885,26 @@ function syncComunidadJson(db) {
       imagen: r.imagen_url || "",
       imagenUrl: r.imagen_url || ""
     }));
-    fs.writeFileSync(comunidadFile, JSON.stringify(currentData, null, 2), "utf-8");
+    guardarComunidad(currentData);
   } catch (e) {
     console.error("Error sincronizando comunidad.json:", e);
+  }
+}
+
+function guardarComunidad(datos) {
+  try {
+    const comunidadFile = path.join(__dirname, "data", "comunidad.json");
+    const dir = path.dirname(comunidadFile);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const tempFile = path.join(dir, `comunidad.${Date.now()}.${crypto.randomBytes(4).toString("hex")}.tmp`);
+    fs.writeFileSync(tempFile, JSON.stringify(datos, null, 2), "utf-8");
+    fs.renameSync(tempFile, comunidadFile);
+    return true;
+  } catch (err) {
+    console.error("Error guardando comunidad.json:", err);
+    return false;
   }
 }
 
@@ -792,6 +926,17 @@ const MIME_TYPES = {
   ".xml": "application/xml; charset=utf-8",
   ".txt": "text/plain; charset=utf-8"
 };
+
+// VULN-10: Whitelist estricta de colegios oficiales de Posadas
+const COLEGIOS_WHITELIST = new Set([
+  'janssen', 'industrial', 'santa_maria', 'roque', 'san_basilio',
+  'madre_misericordia', 'epet_34', 'goyena', 'nacional', 'normal_estados_unidos',
+  'comercio_6', 'comercio_18', 'humanista', 'inmaculada', 'san_alberto',
+  'santa_catalina', 'carmelitas', 'san_pedro', 'jesus_nino', 'bop_1',
+  'bop_9', 'bop_17', 'bop_85', 'epet_2', 'epet_36', 'comercio_5',
+  'comercio_jugo', 'bolivar', 'normal_10', 'virgen_itati', 'combate_mborore',
+  'lisandro_torre', 'fray_mamerto'
+]);
 
 function leerRanking() {
   try {
@@ -818,13 +963,16 @@ function leerRanking() {
   }
 }
 
+// VULN-09: Escritura atómica vía archivo temporal + renombre
 function guardarRanking(datos) {
   try {
     const dir = path.dirname(DATA_FILE);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(datos, null, 2), "utf-8");
+    const tempFile = path.join(dir, `ranking.${Date.now()}.${crypto.randomBytes(4).toString("hex")}.tmp`);
+    fs.writeFileSync(tempFile, JSON.stringify(datos, null, 2), "utf-8");
+    fs.renameSync(tempFile, DATA_FILE);
     return true;
   } catch (err) {
     console.error("Error guardando ranking:", err);
@@ -859,6 +1007,10 @@ const server = http.createServer((req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Vary", "Origin");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
   if (req.method === "OPTIONS") {
     res.writeHead(200);
@@ -969,22 +1121,29 @@ const server = http.createServer((req, res) => {
         if (payloadTooLarge) return;
         try {
           const body = JSON.parse(bodyStr || "{}");
-          const action = body.action;
+          const action = body.action || reqUrl.searchParams.get("action") || "";
           const data = leerRanking();
 
           if (action === "registrarEgresado") {
             const egresado = body.egresado;
             if (!egresado) {
-              res.writeHead(400);
-              res.end(JSON.stringify({ error: "Datos de egresado faltantes" }));
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Datos de egresado faltantes" }));
+              return;
+            }
+
+            const colegioId = String(egresado.colegioId || "").trim().toLowerCase();
+            if (!colegioId || !COLEGIOS_WHITELIST.has(colegioId)) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Colegio no válido o no autorizado" }));
               return;
             }
 
             const nuevoRegistro = {
-              id: "global_" + Date.now() + "_" + Math.floor(Math.random() * 900 + 100),
+              id: "global_" + Date.now() + "_" + crypto.randomBytes(4).toString("hex"),
               nombre: String(egresado.nombre || "Egresado").slice(0, 30),
               apodoJugador: String(egresado.apodoJugador || "").slice(0, 35),
-              colegioId: String(egresado.colegioId || "janssen").replace(/[^a-zA-Z0-9_\-]/g, ""),
+              colegioId,
               colegioNombre: String(egresado.colegioNombre || "").slice(0, 50),
               colegioApodo: String(egresado.colegioApodo || "").slice(0, 35),
               escudo: String(egresado.escudo || "🥁").slice(0, 10),
@@ -1010,7 +1169,7 @@ const server = http.createServer((req, res) => {
               guardarRanking(data);
             }
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({
               status: "ok",
               entroTop10,
@@ -1022,55 +1181,65 @@ const server = http.createServer((req, res) => {
           }
 
           if (action === "registrarInicio") {
-            const colegioId = String(body.colegioId || "").replace(/[^a-zA-Z0-9_\-]/g, "");
-            if (colegioId) {
-              if (!data.colegios[colegioId]) {
-                data.colegios[colegioId] = {
-                  partidasIniciadas: 0,
-                  temporadasJugadas: 0,
-                  titulosOro: 0,
-                  podiosTotales: 0
-                };
-              }
-              data.colegios[colegioId].partidasIniciadas = (data.colegios[colegioId].partidasIniciadas || 0) + 1;
-              guardarRanking(data);
+            const colegioId = String(body.colegioId || "").trim().toLowerCase();
+            if (!colegioId || !COLEGIOS_WHITELIST.has(colegioId)) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Colegio no válido o no autorizado" }));
+              return;
             }
-            res.writeHead(200);
+
+            if (!data.colegios[colegioId]) {
+              data.colegios[colegioId] = {
+                partidasIniciadas: 0,
+                temporadasJugadas: 0,
+                titulosOro: 0,
+                podiosTotales: 0
+              };
+            }
+            data.colegios[colegioId].partidasIniciadas = (data.colegios[colegioId].partidasIniciadas || 0) + 1;
+            guardarRanking(data);
+
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "ok" }));
             return;
           }
 
           if (action === "registrarTemporada") {
-            const colegioId = String(body.colegioId || "").replace(/[^a-zA-Z0-9_\-]/g, "");
-            const puesto = Number(body.puesto) || 0;
-            if (colegioId) {
-              if (!data.colegios[colegioId]) {
-                data.colegios[colegioId] = {
-                  partidasIniciadas: 0,
-                  temporadasJugadas: 0,
-                  titulosOro: 0,
-                  podiosTotales: 0
-                };
-              }
-              data.colegios[colegioId].temporadasJugadas = (data.colegios[colegioId].temporadasJugadas || 0) + 1;
-              if (puesto === 1) {
-                data.colegios[colegioId].titulosOro = (data.colegios[colegioId].titulosOro || 0) + 1;
-              }
-              if (puesto >= 1 && puesto <= 3) {
-                data.colegios[colegioId].podiosTotales = (data.colegios[colegioId].podiosTotales || 0) + 1;
-              }
-              guardarRanking(data);
+            const colegioId = String(body.colegioId || "").trim().toLowerCase();
+            if (!colegioId || !COLEGIOS_WHITELIST.has(colegioId)) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Colegio no válido o no autorizado" }));
+              return;
             }
-            res.writeHead(200);
+
+            const puesto = Number(body.puesto) || 0;
+            if (!data.colegios[colegioId]) {
+              data.colegios[colegioId] = {
+                partidasIniciadas: 0,
+                temporadasJugadas: 0,
+                titulosOro: 0,
+                podiosTotales: 0
+              };
+            }
+            data.colegios[colegioId].temporadasJugadas = (data.colegios[colegioId].temporadasJugadas || 0) + 1;
+            if (puesto === 1) {
+              data.colegios[colegioId].titulosOro = (data.colegios[colegioId].titulosOro || 0) + 1;
+            }
+            if (puesto >= 1 && puesto <= 3) {
+              data.colegios[colegioId].podiosTotales = (data.colegios[colegioId].podiosTotales || 0) + 1;
+            }
+            guardarRanking(data);
+
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "ok" }));
             return;
           }
 
-          res.writeHead(200);
-          res.end(JSON.stringify({ status: "ignored" }));
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "error", message: "Acción POST no válida" }));
         } catch (e) {
-          res.writeHead(400);
-          res.end(JSON.stringify({ error: "Error procesando petición" }));
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "error", message: "Error procesando petición" }));
         }
       });
       return;
@@ -1153,7 +1322,7 @@ const server = http.createServer((req, res) => {
             COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
           FROM hilos h
           LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
-          WHERE h.oculto = 0
+          WHERE h.oculto = 0 AND (h.en_revision = 0 OR h.en_revision IS NULL)
         `;
         const params = [];
 
@@ -1167,10 +1336,11 @@ const server = http.createServer((req, res) => {
           params.push(colegio);
         }
 
-        // Búsqueda full-text sobre título, contenido y nombre de autor
+        // VULN-22: Búsqueda full-text escapando caracteres comodín LIKE (% y _)
         if (q) {
-          sql += " AND (h.titulo LIKE ? OR h.contenido LIKE ? OR h.autor_nombre LIKE ? OR u.username LIKE ?)";
-          const like = `%${q}%`;
+          const escapedQ = q.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+          sql += " AND (h.titulo LIKE ? ESCAPE '\\' OR h.contenido LIKE ? ESCAPE '\\' OR h.autor_nombre LIKE ? ESCAPE '\\' OR u.username LIKE ? ESCAPE '\\')";
+          const like = `%${escapedQ}%`;
           params.push(like, like, like, like);
         }
 
@@ -1196,7 +1366,7 @@ const server = http.createServer((req, res) => {
         });
 
         // Conteo total para métricas y paginación en frontend
-        let countSql = "SELECT COUNT(*) as total FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0";
+        let countSql = "SELECT COUNT(*) as total FROM hilos h LEFT JOIN usuarios u ON h.autor_google_id = u.google_id WHERE h.oculto = 0 AND (h.en_revision = 0 OR h.en_revision IS NULL)";
         const countParams = [];
         if (canal !== "todos" && canal !== "") {
           countSql += " AND h.canal_id = ?";
@@ -1207,8 +1377,9 @@ const server = http.createServer((req, res) => {
           countParams.push(colegio);
         }
         if (q) {
-          countSql += " AND (h.titulo LIKE ? OR h.contenido LIKE ? OR h.autor_nombre LIKE ? OR u.username LIKE ?)";
-          const like = `%${q}%`;
+          const escapedQ = q.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+          countSql += " AND (h.titulo LIKE ? ESCAPE '\\' OR h.contenido LIKE ? ESCAPE '\\' OR h.autor_nombre LIKE ? ESCAPE '\\' OR u.username LIKE ? ESCAPE '\\')";
+          const like = `%${escapedQ}%`;
           countParams.push(like, like, like, like);
         }
         const countRow = db.prepare(countSql).get(...countParams);
@@ -1233,12 +1404,12 @@ const server = http.createServer((req, res) => {
             COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
           FROM hilos h
           LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
-          WHERE h.id = ? AND h.oculto = 0
+          WHERE h.id = ? AND h.oculto = 0 AND (h.en_revision = 0 OR h.en_revision IS NULL)
         `).get(id);
 
         if (!hilo) {
           res.writeHead(404);
-          res.end(JSON.stringify({ status: "error", message: "Hilo no encontrado" }));
+          res.end(JSON.stringify({ status: "error", message: "Hilo no encontrado o eliminado" }));
           return;
         }
 
@@ -1260,7 +1431,7 @@ const server = http.createServer((req, res) => {
             COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
           FROM comentarios c
           LEFT JOIN usuarios u ON c.autor_google_id = u.google_id
-          WHERE c.hilo_id = ? AND c.oculto = 0
+          WHERE c.hilo_id = ? AND c.oculto = 0 AND (c.en_revision = 0 OR c.en_revision IS NULL)
           ORDER BY c.creado_en ASC
         `).all(id);
 
@@ -1283,12 +1454,20 @@ const server = http.createServer((req, res) => {
       }
 
       if (action === "noticia_hilo") {
-        const noticiaId = (reqUrl.searchParams.get("noticiaId") || "").trim();
+        const noticiaId = (reqUrl.searchParams.get("noticiaId") || reqUrl.searchParams.get("noticia_id") || "").trim();
         const viewerGoogleId = (reqUrl.searchParams.get("googleId") || "").trim();
 
         if (!noticiaId) {
           res.writeHead(400);
           res.end(JSON.stringify({ status: "error", message: "Parámetro noticiaId requerido" }));
+          return;
+        }
+
+        // VULN-10: Verificar existencia de la noticia antes de crear hilo
+        const notic = db.prepare("SELECT * FROM noticias WHERE id = ?").get(noticiaId);
+        if (!notic) {
+          res.writeHead(404);
+          res.end(JSON.stringify({ status: "error", message: "Noticia no encontrada" }));
           return;
         }
 
@@ -1303,14 +1482,13 @@ const server = http.createServer((req, res) => {
             COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
           FROM hilos h
           LEFT JOIN usuarios u ON h.autor_google_id = u.google_id
-          WHERE h.noticia_id = ? AND h.oculto = 0
+          WHERE h.noticia_id = ? AND h.oculto = 0 AND (h.en_revision = 0 OR h.en_revision IS NULL)
         `).get(noticiaId);
 
         // Si no existe, crearlo on-demand buscando los datos de la noticia
         if (!hilo) {
-          const notic = db.prepare("SELECT * FROM noticias WHERE id = ?").get(noticiaId);
-          const titulo = notic ? notic.titulo : `Debate: Noticia ${noticiaId}`;
-          const contenido = notic ? (notic.resumen || notic.titulo) : "Espacio oficial de debate y comentarios sobre esta cobertura periodística.";
+          const titulo = notic.titulo || `Debate: Noticia ${noticiaId}`;
+          const contenido = notic.resumen || (notic.titulo || "Espacio oficial de debate y comentarios sobre esta cobertura periodística.");
 
           const ins = db.prepare(`
             INSERT INTO hilos (canal_id, titulo, contenido, autor_google_id, autor_nombre, autor_avatar, colegio_id, noticia_id)
@@ -1348,7 +1526,7 @@ const server = http.createServer((req, res) => {
             COALESCE(u.rol_estudiantil, 'Hincha de Tribuna') as autor_rol
           FROM comentarios c
           LEFT JOIN usuarios u ON c.autor_google_id = u.google_id
-          WHERE c.hilo_id = ? AND c.oculto = 0
+          WHERE c.hilo_id = ? AND c.oculto = 0 AND (c.en_revision = 0 OR c.en_revision IS NULL)
           ORDER BY c.creado_en ASC
         `).all(hilo.id);
 
@@ -1503,21 +1681,35 @@ const server = http.createServer((req, res) => {
         bodyStr += chunk;
       });
 
-      req.on("end", () => {
+      req.on("end", async () => {
         if (payloadTooLarge) return;
         try {
           const body = JSON.parse(bodyStr || "{}");
 
           if (action === "auth_google") {
-            const googleId = String(body.googleId || "").trim();
-            const nombre = String(body.nombre || "").trim();
-            const email = String(body.email || "").trim();
-            const avatarUrl = String(body.avatarUrl || "").trim();
+            const rawGoogleId = String(body.googleId || "").trim();
+            const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Token de autenticación no válido" }));
+              return;
+            }
+            const googleId = auth.googleId;
+            const nombre = String(body.nombre || auth.name || "").trim();
+            const email = String(body.email || auth.email || "").trim();
+            const avatarUrl = String(body.avatarUrl || auth.avatar || "").trim();
             const colegioId = String(body.colegioId || "janssen").trim();
 
             if (!googleId || !nombre) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Datos incompletos" }));
+              return;
+            }
+
+            // VULN-15: Limitar tamaño de avatar
+            if (avatarUrl && avatarUrl.length > 300000) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Avatar supera el tamaño máximo permitido (300KB)" }));
               return;
             }
 
@@ -1534,7 +1726,7 @@ const server = http.createServer((req, res) => {
             const rowUser = db.prepare("SELECT * FROM usuarios WHERE google_id = ?").get(googleId);
             const needsOnboarding = !rowUser || !rowUser.username || rowUser.username.trim() === "";
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({
               status: "ok",
               needsOnboarding,
@@ -1555,7 +1747,14 @@ const server = http.createServer((req, res) => {
           }
 
           if (action === "completar_registro") {
-            const googleId = String(body.googleId || "").trim();
+            const rawGoogleId = String(body.googleId || "").trim();
+            const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "No autorizado. Token de Google inválido." }));
+              return;
+            }
+            const googleId = auth.googleId;
             const rawUsername = String(body.username || "").trim();
             const nombre = escapeHtml(String(body.nombre || "").trim().slice(0, 50));
             const colegioId = String(body.colegioId || "janssen").trim();
@@ -1567,14 +1766,21 @@ const server = http.createServer((req, res) => {
             const avatarUrl = String(body.avatarUrl || "").trim();
 
             if (!googleId) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "ID de usuario requerido" }));
+              return;
+            }
+
+            // VULN-15: Limitar tamaño de avatar
+            if (avatarUrl && avatarUrl.length > 300000) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "El avatar supera el tamaño máximo permitido (300KB)" }));
               return;
             }
 
             const checkUser = validateUsername(rawUsername);
             if (!checkUser.valid) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: checkUser.message }));
               return;
             }
@@ -1582,13 +1788,13 @@ const server = http.createServer((req, res) => {
             // Validar unicidad en SQLite
             const taken = db.prepare("SELECT google_id FROM usuarios WHERE LOWER(username) = LOWER(?) AND google_id != ?").get(checkUser.username, googleId);
             if (taken) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "El nombre de usuario ya está registrado por otro hincha." }));
               return;
             }
 
             if (!nombre || nombre.length < 2) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "El nombre debe tener al menos 2 caracteres." }));
               return;
             }
@@ -1616,7 +1822,7 @@ const server = http.createServer((req, res) => {
               db.prepare("UPDATE comentarios SET autor_nombre = ?, autor_avatar = ?, colegio_id = ? WHERE autor_google_id = ?").run(nombre, finalAvatar, colegioId, googleId);
             } catch (e) {}
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({
               status: "ok",
               message: "¡Registro completado con éxito!",
@@ -1637,7 +1843,14 @@ const server = http.createServer((req, res) => {
           }
 
           if (action === "editar_perfil") {
-            const googleId = String(body.googleId || "").trim();
+            const rawGoogleId = String(body.googleId || "").trim();
+            const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "No autorizado. Token de Google inválido." }));
+              return;
+            }
+            const googleId = auth.googleId;
             const rawUsername = String(body.username || "").trim();
             const nombre = escapeHtml(String(body.nombre || "").trim().slice(0, 50));
             const colegioId = String(body.colegioId || "janssen").trim();
@@ -1650,12 +1863,20 @@ const server = http.createServer((req, res) => {
             const restoreGoogleAvatar = body.restoreGoogleAvatar === true;
 
             if (!googleId) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "ID de usuario requerido" }));
               return;
             }
+
+            // VULN-15: Limitar tamaño de avatar
+            if (avatarUrl && avatarUrl.length > 300000) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "El avatar supera el tamaño máximo permitido (300KB)" }));
+              return;
+            }
+
             if (!nombre || nombre.length < 2) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "El nombre debe tener al menos 2 caracteres" }));
               return;
             }
@@ -1665,13 +1886,13 @@ const server = http.createServer((req, res) => {
             if (rawUsername) {
               const checkUser = validateUsername(rawUsername);
               if (!checkUser.valid) {
-                res.writeHead(400);
+                res.writeHead(400, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ status: "error", message: checkUser.message }));
                 return;
               }
               const taken = db.prepare("SELECT google_id FROM usuarios WHERE LOWER(username) = LOWER(?) AND google_id != ?").get(checkUser.username, googleId);
               if (taken) {
-                res.writeHead(400);
+                res.writeHead(400, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ status: "error", message: "El nombre de usuario ya está registrado por otro hincha." }));
                 return;
               }
@@ -1681,7 +1902,7 @@ const server = http.createServer((req, res) => {
             // Verificar si el usuario está sancionado
             const sanction = checkUserSanction(db, googleId);
             if (sanction && sanction.bloqueado) {
-              res.writeHead(403);
+              res.writeHead(403, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: sanction.mensaje, sanction }));
               return;
             }
@@ -1717,7 +1938,7 @@ const server = http.createServer((req, res) => {
               db.prepare("UPDATE comentarios SET autor_nombre = ?, autor_avatar = ?, colegio_id = ? WHERE autor_google_id = ?").run(nombre, finalAvatarUrl, colegioId, googleId);
             } catch (e) {}
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({
               status: "ok",
               message: "Perfil actualizado con éxito",
@@ -1741,38 +1962,53 @@ const server = http.createServer((req, res) => {
             const canalId = String(body.canalId || "general").trim();
             const titulo = escapeHtml(String(body.titulo || "").trim().slice(0, 150));
             const contenido = escapeHtml(String(body.contenido || "").trim().slice(0, 3000));
-            const googleId = String(body.googleId || "").trim();
+            const rawGoogleId = String(body.googleId || "").trim();
             const autorNombre = escapeHtml(String(body.autorNombre || "").trim().slice(0, 60));
             const autorAvatar = String(body.autorAvatar || "").trim();
             const colegioId = String(body.colegioId || "janssen").trim();
 
             if (!titulo || titulo.length < 5) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "El título debe tener al menos 5 caracteres" }));
               return;
             }
             if (!contenido || contenido.length < 10) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "El contenido debe tener al menos 10 caracteres" }));
               return;
             }
-            if (!googleId || !autorNombre) {
-              res.writeHead(401);
+            if (!rawGoogleId || !autorNombre) {
+              res.writeHead(401, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Iniciá sesión con Google para publicar" }));
+              return;
+            }
+
+            const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Debés identificarte con tu cuenta de Google para publicar." }));
+              return;
+            }
+            const googleId = auth.googleId;
+
+            // VULN-15: Limitar tamaño de avatar
+            if (autorAvatar && autorAvatar.length > 300000) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "El avatar supera el tamaño máximo permitido (300KB)" }));
               return;
             }
 
             // Verificar si el usuario está suspendido o baneado
             const sanctionHilo = checkUserSanction(db, googleId);
             if (sanctionHilo && sanctionHilo.bloqueado) {
-              res.writeHead(403);
+              res.writeHead(403, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: sanctionHilo.mensaje, sanction: sanctionHilo }));
               return;
             }
 
             // Rate-limiting: máximo 1 debate cada 30 segundos por usuario
             if (!checkRateLimit(googleId)) {
-              res.writeHead(429);
+              res.writeHead(429, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Esperá 30 segundos entre debates. ¡No hagas spam!" }));
               return;
             }
@@ -1782,7 +2018,7 @@ const server = http.createServer((req, res) => {
               VALUES (?, ?, ?, ?, ?, ?, ?)
             `).run(canalId, titulo, contenido, googleId, autorNombre, autorAvatar, colegioId);
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "ok", hiloId: info.lastInsertRowid, message: "Debate publicado con éxito!" }));
             return;
           }
@@ -1790,25 +2026,40 @@ const server = http.createServer((req, res) => {
           if (action === "comentar") {
             const hiloId = parseInt(body.hiloId || 0, 10);
             const contenido = escapeHtml(String(body.contenido || "").trim().slice(0, 2000));
-            const googleId = String(body.googleId || "").trim();
+            const rawGoogleId = String(body.googleId || "").trim();
             const autorNombre = escapeHtml(String(body.autorNombre || "").trim().slice(0, 60));
             const autorAvatar = String(body.autorAvatar || "").trim();
             const colegioId = String(body.colegioId || "janssen").trim();
 
             if (hiloId <= 0 || !contenido) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Comentario vacío" }));
               return;
             }
-            if (!googleId || !autorNombre) {
-              res.writeHead(401);
+            if (!rawGoogleId || !autorNombre) {
+              res.writeHead(401, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Iniciá sesión con Google para comentar" }));
+              return;
+            }
+
+            const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Iniciá sesión con Google para responder." }));
+              return;
+            }
+            const googleId = auth.googleId;
+
+            // VULN-15: Limitar tamaño de avatar
+            if (autorAvatar && autorAvatar.length > 300000) {
+              res.writeHead(400, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "El avatar supera el tamaño máximo permitido (300KB)" }));
               return;
             }
 
             // Rate-limiting de comentarios: máximo 1 comentario cada 5s por usuario
             if (!checkCommentRateLimit(googleId)) {
-              res.writeHead(429);
+              res.writeHead(429, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Esperá unos segundos entre comentarios. ¡No hagas spam!" }));
               return;
             }
@@ -1816,15 +2067,15 @@ const server = http.createServer((req, res) => {
             // Verificar si el usuario está suspendido o baneado
             const sanctionComentario = checkUserSanction(db, googleId);
             if (sanctionComentario && sanctionComentario.bloqueado) {
-              res.writeHead(403);
+              res.writeHead(403, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: sanctionComentario.mensaje, sanction: sanctionComentario }));
               return;
             }
 
-            // Validar que el hilo exista y no esté oculto
-            const hiloExist = db.prepare("SELECT id FROM hilos WHERE id = ? AND oculto = 0").get(hiloId);
+            // Validar que el hilo exista y no esté oculto ni en revisión
+            const hiloExist = db.prepare("SELECT id FROM hilos WHERE id = ? AND oculto = 0 AND (en_revision = 0 OR en_revision IS NULL)").get(hiloId);
             if (!hiloExist) {
-              res.writeHead(404);
+              res.writeHead(404, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "El debate no existe o fue eliminado" }));
               return;
             }
@@ -1838,7 +2089,7 @@ const server = http.createServer((req, res) => {
 
             db.prepare("UPDATE hilos SET respuestas_count = respuestas_count + 1 WHERE id = ?").run(hiloId);
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "ok", message: "Respuesta enviada!" }));
             return;
           }
@@ -1846,13 +2097,27 @@ const server = http.createServer((req, res) => {
           if (action === "votar") {
             const tipo = body.tipo === "comentario" ? "comentario" : "hilo";
             const itemId = parseInt(body.itemId || body.id || 0, 10);
-            const googleId = String(body.googleId || "").trim();
+            const rawGoogleId = String(body.googleId || "").trim();
 
-            if (itemId <= 0 || !googleId) {
-              res.writeHead(400);
+            if (itemId <= 0) {
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Parámetros inválidos" }));
               return;
             }
+
+            if (!rawGoogleId) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Debés identificarte para votar." }));
+              return;
+            }
+
+            const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Debés identificarte para votar." }));
+              return;
+            }
+            const googleId = auth.googleId;
 
             const check = db.prepare("SELECT 1 FROM votos WHERE item_tipo = ? AND item_id = ? AND google_id = ?").get(tipo, itemId, googleId);
             const table = tipo === "hilo" ? "hilos" : "comentarios";
@@ -1863,13 +2128,18 @@ const server = http.createServer((req, res) => {
               db.prepare(`UPDATE ${table} SET votos = MAX(0, votos - 1) WHERE id = ?`).run(itemId);
               voted = false;
             } else {
-              db.prepare("INSERT INTO votos (item_tipo, item_id, google_id) VALUES (?, ?, ?)").run(tipo, itemId, googleId);
-              db.prepare(`UPDATE ${table} SET votos = votos + 1 WHERE id = ?`).run(itemId);
-              voted = true;
+              // VULN-26: Voto idempotente
+              try {
+                db.prepare("INSERT INTO votos (item_tipo, item_id, google_id) VALUES (?, ?, ?)").run(tipo, itemId, googleId);
+                db.prepare(`UPDATE ${table} SET votos = votos + 1 WHERE id = ?`).run(itemId);
+                voted = true;
+              } catch (e) {
+                voted = true;
+              }
             }
 
             const row = db.prepare(`SELECT votos FROM ${table} WHERE id = ?`).get(itemId);
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "ok", voted, votos: row ? row.votos : 0 }));
             return;
           }
@@ -1877,31 +2147,39 @@ const server = http.createServer((req, res) => {
           if (action === "reportar") {
             const tipo = body.tipo === "comentario" ? "comentario" : "hilo";
             const itemId = parseInt(body.itemId || body.id || 0, 10);
-            const reporterGoogleId = String(body.googleId || "").trim();
+            const rawReporterId = String(body.googleId || "").trim();
             const motivo = escapeHtml(String(body.motivo || "").trim().slice(0, 200));
 
             if (itemId <= 0) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Item inválido" }));
               return;
             }
 
-            if (!reporterGoogleId) {
-              res.writeHead(401);
+            if (!rawReporterId) {
+              res.writeHead(401, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Debés identificarte para reportar contenido." }));
               return;
             }
 
+            const auth = await verifyGoogleToken(body.token, rawReporterId, req);
+            if (!auth) {
+              res.writeHead(401, { "Content-Type": "application/json" });
+              res.end(JSON.stringify({ status: "error", message: "Debés identificarte para reportar contenido." }));
+              return;
+            }
+            const reporterGoogleId = auth.googleId;
+
             const table = tipo === "hilo" ? "hilos" : "comentarios";
             const item = db.prepare(`SELECT id, autor_google_id FROM ${table} WHERE id = ?`).get(itemId);
             if (!item) {
-              res.writeHead(404);
+              res.writeHead(404, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "Publicación no encontrada" }));
               return;
             }
 
             if (item.autor_google_id === reporterGoogleId) {
-              res.writeHead(400);
+              res.writeHead(400, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "error", message: "No podés reportar tu propia publicación." }));
               return;
             }
@@ -1909,7 +2187,7 @@ const server = http.createServer((req, res) => {
             // Validar si este usuario ya reportó previamente este ítem
             const alreadyReported = db.prepare("SELECT 1 FROM reportes WHERE item_tipo = ? AND item_id = ? AND reporter_google_id = ?").get(tipo, itemId, reporterGoogleId);
             if (alreadyReported) {
-              res.writeHead(200);
+              res.writeHead(200, { "Content-Type": "application/json" });
               res.end(JSON.stringify({ status: "ok", message: "Ya registraste un reporte para esta publicación previamente.", alreadyReported: true }));
               return;
             }
@@ -1923,19 +2201,21 @@ const server = http.createServer((req, res) => {
 
             db.prepare(`UPDATE ${table} SET reportes = ? WHERE id = ?`).run(totalRep, itemId);
             if (totalRep >= 3) {
-              db.prepare(`UPDATE ${table} SET oculto = 1 WHERE id = ?`).run(itemId);
+              // VULN-08: Moderación preventiva marca en_revision = 1 sin ocultar permanentemente (oculto = 1 reservado para admin)
+              db.prepare(`UPDATE ${table} SET en_revision = 1 WHERE id = ?`).run(itemId);
             }
 
-            res.writeHead(200);
+            res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "ok", message: "Reporte registrado. Nuestro equipo lo revisará.", reportes: totalRep }));
             return;
           }
 
-          res.writeHead(400);
+          res.writeHead(400, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ status: "error", message: "Acción POST no reconocida" }));
         } catch (err) {
-          res.writeHead(500);
-          res.end(JSON.stringify({ status: "error", message: err.message }));
+          console.error("Error en /api/foro POST:", err);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ status: "error", message: "Error interno del servidor" }));
         }
       });
       return;
@@ -1946,6 +2226,12 @@ const server = http.createServer((req, res) => {
   if (pathname === "/api/admin" || pathname === "/api/admin.php") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+
+    if (isSecretsInvalid) {
+      res.writeHead(500);
+      res.end(JSON.stringify({ status: "error", message: "Configuración crítica de seguridad inválida o insegura" }));
+      return;
+    }
 
     const db = getForoDb();
     const action = reqUrl.searchParams.get("action") || "";
@@ -1975,8 +2261,8 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({ status: "error", message: "No autorizado" }));
           return;
         }
-        const hilosReportados = db.prepare("SELECT * FROM hilos WHERE reportes > 0 ORDER BY reportes DESC").all();
-        const comentariosReportados = db.prepare("SELECT * FROM comentarios WHERE reportes > 0 ORDER BY reportes DESC").all();
+        const hilosReportados = db.prepare("SELECT * FROM hilos WHERE reportes > 0 OR en_revision = 1 ORDER BY reportes DESC").all();
+        const comentariosReportados = db.prepare("SELECT * FROM comentarios WHERE reportes > 0 OR en_revision = 1 ORDER BY reportes DESC").all();
         res.writeHead(200);
         res.end(JSON.stringify({
           status: "ok",
@@ -2056,6 +2342,22 @@ const server = http.createServer((req, res) => {
 
           // Login de Administrador
           if (action === "login") {
+            const clientIp = (req.headers["x-forwarded-for"] ? String(req.headers["x-forwarded-for"]).split(",")[0].trim() : (req.socket.remoteAddress || "unknown"));
+            const now = Math.floor(Date.now() / 1000);
+
+            const rlRow = db.prepare("SELECT intentos, bloqueado_hasta, ultimo_intento FROM admin_login_rate_limit WHERE ip = ?").get(clientIp);
+            if (rlRow) {
+              if (Number(rlRow.bloqueado_hasta) > now) {
+                res.writeHead(429);
+                res.end(JSON.stringify({ status: "error", message: "Demasiados intentos fallidos. Bloqueado temporalmente por 15 minutos." }));
+                return;
+              }
+              if (Number(rlRow.ultimo_intento) + (15 * 60) < now && Number(rlRow.bloqueado_hasta) <= now) {
+                db.prepare("UPDATE admin_login_rate_limit SET intentos = 0, bloqueado_hasta = 0 WHERE ip = ?").run(clientIp);
+                rlRow.intentos = 0;
+              }
+            }
+
             const usuario = String(body.usuario || "").trim();
             const password = String(body.password || "");
 
@@ -2066,24 +2368,51 @@ const server = http.createServer((req, res) => {
             }
 
             const row = db.prepare("SELECT * FROM administradores WHERE usuario = ?").get(usuario);
-            if (!row) {
+            let loginOk = false;
+            let needsRehash = false;
+
+            if (row) {
+              const hash600k = crypto.pbkdf2Sync(password, row.salt, 600000, 32, "sha256").toString("hex");
+              const bufHash = Buffer.from(hash600k);
+              const bufExpected = Buffer.from(row.password_hash);
+              if (bufHash.length === bufExpected.length && crypto.timingSafeEqual(bufHash, bufExpected)) {
+                loginOk = true;
+              } else {
+                const hash10k = crypto.pbkdf2Sync(password, row.salt, 10000, 32, "sha256").toString("hex");
+                const bufHash10k = Buffer.from(hash10k);
+                if (bufHash10k.length === bufExpected.length && crypto.timingSafeEqual(bufHash10k, bufExpected)) {
+                  loginOk = true;
+                  needsRehash = true;
+                }
+              }
+            }
+
+            if (!loginOk) {
+              const currentAttempts = rlRow ? (Number(rlRow.intentos) + 1) : 1;
+              const blockedUntil = (currentAttempts >= 5) ? (now + 15 * 60) : 0;
+              db.prepare(`
+                INSERT INTO admin_login_rate_limit (ip, intentos, bloqueado_hasta, ultimo_intento)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(ip) DO UPDATE SET intentos = ?, bloqueado_hasta = ?, ultimo_intento = ?
+              `).run(clientIp, currentAttempts, blockedUntil, now, currentAttempts, blockedUntil, now);
+
               res.writeHead(401);
               res.end(JSON.stringify({ status: "error", message: "Credenciales inválidas" }));
               return;
             }
 
-            const hash = crypto.pbkdf2Sync(password, row.salt, 10000, 32, "sha256").toString("hex");
-            const bufHash = Buffer.from(hash);
-            const bufExpected = Buffer.from(row.password_hash);
-            const isMatch = (bufHash.length === bufExpected.length && crypto.timingSafeEqual(bufHash, bufExpected)) ||
-                            (usuario === "admin" && (password === "admin123" || password === "admin"));
-            if (!isMatch) {
-              res.writeHead(401);
-              res.end(JSON.stringify({ status: "error", message: "Credenciales inválidas" }));
-              return;
+            db.prepare("DELETE FROM admin_login_rate_limit WHERE ip = ?").run(clientIp);
+
+            if (needsRehash) {
+              const newSalt = crypto.randomBytes(16).toString("hex");
+              const newHash = crypto.pbkdf2Sync(password, newSalt, 600000, 32, "sha256").toString("hex");
+              db.prepare("UPDATE administradores SET password_hash = ?, salt = ?, ultimo_login = CURRENT_TIMESTAMP WHERE id = ?").run(newHash, newSalt, row.id);
+              row.salt = newSalt;
+              row.password_hash = newHash;
+            } else {
+              db.prepare("UPDATE administradores SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?").run(row.id);
             }
 
-            db.prepare("UPDATE administradores SET ultimo_login = CURRENT_TIMESTAMP WHERE id = ?").run(row.id);
             const token = generateAdminToken(row);
 
             res.writeHead(200);
@@ -2147,17 +2476,24 @@ const server = http.createServer((req, res) => {
               return;
             }
 
-            const hash = crypto.pbkdf2Sync(passwordActual, row.salt, 10000, 32, "sha256").toString("hex");
-            const bufHash = Buffer.from(hash);
+            const hash600k = crypto.pbkdf2Sync(passwordActual, row.salt, 600000, 32, "sha256").toString("hex");
+            const bufHash = Buffer.from(hash600k);
             const bufExpected = Buffer.from(row.password_hash);
-            if (bufHash.length !== bufExpected.length || !crypto.timingSafeEqual(bufHash, bufExpected)) {
+            let currValid = bufHash.length === bufExpected.length && crypto.timingSafeEqual(bufHash, bufExpected);
+            if (!currValid) {
+              const hash10k = crypto.pbkdf2Sync(passwordActual, row.salt, 10000, 32, "sha256").toString("hex");
+              const bufHash10k = Buffer.from(hash10k);
+              currValid = bufHash10k.length === bufExpected.length && crypto.timingSafeEqual(bufHash10k, bufExpected);
+            }
+
+            if (!currValid) {
               res.writeHead(401);
               res.end(JSON.stringify({ status: "error", message: "La contraseña actual es incorrecta" }));
               return;
             }
 
             const newSalt = crypto.randomBytes(16).toString("hex");
-            const newHash = crypto.pbkdf2Sync(passwordNueva, newSalt, 10000, 32, "sha256").toString("hex");
+            const newHash = crypto.pbkdf2Sync(passwordNueva, newSalt, 600000, 32, "sha256").toString("hex");
             db.prepare("UPDATE administradores SET password_hash = ?, salt = ? WHERE id = ?").run(newHash, newSalt, admin.id);
 
             res.writeHead(200);
@@ -2167,20 +2503,36 @@ const server = http.createServer((req, res) => {
 
           // Crear Noticia
           if (action === "crear_noticia") {
-            const titulo = String(body.titulo || "").trim();
-            const categoria = String(body.categoria || "Noches de Calle").trim();
+            const titulo = escapeHtml(String(body.titulo || "").trim());
+            const categoria = escapeHtml(String(body.categoria || "Noches de Calle").trim());
             const categoriaSlug = String(body.categoriaSlug || "noches-de-calle").trim();
-            const badge = String(body.badge || "NOTICIA").trim().toUpperCase();
-            const resumen = String(body.resumen || "").trim();
-            const autor = String(body.autor || "Redacción Oficial").trim();
-            const tiempoLectura = String(body.tiempoLectura || "3 min de lectura").trim();
+            const badge = escapeHtml(String(body.badge || "NOTICIA").trim().toUpperCase());
+            const resumen = escapeHtml(String(body.resumen || "").trim());
+            const autor = escapeHtml(String(body.autor || "Redacción Oficial").trim());
+            const tiempoLectura = escapeHtml(String(body.tiempoLectura || "3 min de lectura").trim());
             const tags = Array.isArray(body.tags) ? body.tags : (typeof body.tags === "string" ? body.tags.split(",").map(t=>t.trim()).filter(Boolean) : []);
-            // Support bloques (new block-based format) or legacy contenido string array
+
             let bloques = Array.isArray(body.bloques) ? body.bloques : null;
+            if (bloques) {
+              bloques = bloques.map(b => {
+                if (b && typeof b === "object") {
+                  const cleaned = { ...b };
+                  if (typeof cleaned.value === "string") {
+                    cleaned.value = escapeHtml(cleaned.value);
+                  }
+                  if (typeof cleaned.caption === "string") {
+                    cleaned.caption = escapeHtml(cleaned.caption);
+                  }
+                  return cleaned;
+                }
+                return b;
+              });
+            }
+
             let contenido = body.contenido;
             if (bloques && bloques.length > 0) {
-              // Derive plain contenido from text blocks for backward compat
-              contenido = bloques.filter(b => b.type === 'text').map(b => b.value).filter(Boolean);
+              contenido = bloques.filter(b => b && b.type === "text" && b.value).map(b => b.value);
+              if (contenido.length === 0) contenido = [resumen];
             } else {
               if (typeof contenido === "string") {
                 contenido = contenido.split("\n\n").map(p => p.trim()).filter(Boolean);
@@ -2188,8 +2540,8 @@ const server = http.createServer((req, res) => {
               if (!Array.isArray(contenido) || contenido.length === 0) {
                 contenido = [resumen];
               }
-              // Build bloques from text contenido
-              bloques = contenido.map(p => ({ type: 'text', value: p }));
+              contenido = contenido.map(p => escapeHtml(String(p)));
+              bloques = contenido.map(p => ({ type: "text", value: p }));
             }
 
             if (!titulo || !resumen) {
@@ -2198,13 +2550,12 @@ const server = http.createServer((req, res) => {
               return;
             }
 
-            const id = "noticia-" + Date.now();
+            const id = "noticia-" + crypto.randomBytes(8).toString("hex");
             const fecha = new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
             const imagenUrl = String(body.imagen || body.imagenUrl || "").trim();
             const fijada = body.fijada ? 1 : 0;
 
-            // Ensure bloques column exists
             try { db.exec("ALTER TABLE noticias ADD COLUMN bloques TEXT"); } catch(e) {}
 
             db.prepare(`
@@ -2245,27 +2596,45 @@ const server = http.createServer((req, res) => {
           // Editar Noticia
           if (action === "editar_noticia") {
             const id = String(body.id || "").trim();
-            const titulo = String(body.titulo || "").trim();
-            const categoria = String(body.categoria || "Noches de Calle").trim();
+            const titulo = escapeHtml(String(body.titulo || "").trim());
+            const categoria = escapeHtml(String(body.categoria || "Noches de Calle").trim());
             const categoriaSlug = String(body.categoriaSlug || "noches-de-calle").trim();
-            const badge = String(body.badge || "NOTICIA").trim().toUpperCase();
-            const resumen = String(body.resumen || "").trim();
-            const autor = String(body.autor || "Redacción Oficial").trim();
-            const tiempoLectura = String(body.tiempoLectura || "3 min de lectura").trim();
+            const badge = escapeHtml(String(body.badge || "NOTICIA").trim().toUpperCase());
+            const resumen = escapeHtml(String(body.resumen || "").trim());
+            const autor = escapeHtml(String(body.autor || "Redacción Oficial").trim());
+            const tiempoLectura = escapeHtml(String(body.tiempoLectura || "3 min de lectura").trim());
             const imagenUrl = String(body.imagen || body.imagenUrl || "").trim();
             const fijada = body.fijada ? 1 : 0;
             const tags = Array.isArray(body.tags) ? body.tags : (typeof body.tags === "string" ? body.tags.split(",").map(t=>t.trim()).filter(Boolean) : []);
-            // Support bloques
+
             let bloques = Array.isArray(body.bloques) ? body.bloques : null;
+            if (bloques) {
+              bloques = bloques.map(b => {
+                if (b && typeof b === "object") {
+                  const cleaned = { ...b };
+                  if (typeof cleaned.value === "string") {
+                    cleaned.value = escapeHtml(cleaned.value);
+                  }
+                  if (typeof cleaned.caption === "string") {
+                    cleaned.caption = escapeHtml(cleaned.caption);
+                  }
+                  return cleaned;
+                }
+                return b;
+              });
+            }
+
             let contenido = body.contenido;
             if (bloques && bloques.length > 0) {
-              contenido = bloques.filter(b => b.type === 'text').map(b => b.value).filter(Boolean);
+              contenido = bloques.filter(b => b && b.type === "text" && b.value).map(b => b.value);
+              if (contenido.length === 0) contenido = [resumen];
             } else {
               if (typeof contenido === "string") {
                 contenido = contenido.split("\n\n").map(p => p.trim()).filter(Boolean);
               }
               if (!Array.isArray(contenido) || contenido.length === 0) contenido = [resumen];
-              bloques = contenido.map(p => ({ type: 'text', value: p }));
+              contenido = contenido.map(p => escapeHtml(String(p)));
+              bloques = contenido.map(p => ({ type: "text", value: p }));
             }
 
             if (!id || !titulo || !resumen) {
@@ -2326,12 +2695,19 @@ const server = http.createServer((req, res) => {
               return;
             }
 
-            db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(hiloId);
-            db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(hiloId);
-            db.prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?").run(hiloId);
-            db.prepare("DELETE FROM comentarios WHERE hilo_id = ?").run(hiloId);
-            db.prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?").run(hiloId);
-            db.prepare("DELETE FROM hilos WHERE id = ?").run(hiloId);
+            db.exec("BEGIN IMMEDIATE");
+            try {
+              db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(hiloId);
+              db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(hiloId);
+              db.prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?").run(hiloId);
+              db.prepare("DELETE FROM comentarios WHERE hilo_id = ?").run(hiloId);
+              db.prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?").run(hiloId);
+              db.prepare("DELETE FROM hilos WHERE id = ?").run(hiloId);
+              db.exec("COMMIT");
+            } catch (e) {
+              try { db.exec("ROLLBACK"); } catch (_) {}
+              throw e;
+            }
 
             res.writeHead(200);
             res.end(JSON.stringify({ status: "ok", message: "Hilo y comentarios eliminados" }));
@@ -2347,12 +2723,19 @@ const server = http.createServer((req, res) => {
               return;
             }
 
-            const c = db.prepare("SELECT hilo_id FROM comentarios WHERE id = ?").get(comentarioId);
-            if (c) {
-              db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?").run(comentarioId);
-              db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?").run(comentarioId);
-              db.prepare("DELETE FROM comentarios WHERE id = ?").run(comentarioId);
-              db.prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?").run(c.hilo_id);
+            db.exec("BEGIN IMMEDIATE");
+            try {
+              const c = db.prepare("SELECT hilo_id FROM comentarios WHERE id = ?").get(comentarioId);
+              if (c) {
+                db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?").run(comentarioId);
+                db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?").run(comentarioId);
+                db.prepare("DELETE FROM comentarios WHERE id = ?").run(comentarioId);
+                db.prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?").run(c.hilo_id);
+              }
+              db.exec("COMMIT");
+            } catch (e) {
+              try { db.exec("ROLLBACK"); } catch (_) {}
+              throw e;
             }
 
             res.writeHead(200);
@@ -2379,15 +2762,15 @@ const server = http.createServer((req, res) => {
 
           // Moderación: Gestionar Denuncia / Reporte
           if (action === "moderar_reporte") {
-            const tipo = String(body.tipo || "hilo");
+            const tipo = String(body.tipo || "hilo") === "comentario" ? "comentario" : "hilo";
             const id = parseInt(body.id || "0", 10);
             const resolucion = String(body.accion || body.resolucion || "descartar").toLowerCase();
 
             if (resolucion === "descartar" || resolucion === "aprobar") {
               if (tipo === "hilo") {
-                db.prepare("UPDATE hilos SET reportes = 0, oculto = 0 WHERE id = ?").run(id);
+                db.prepare("UPDATE hilos SET reportes = 0, oculto = 0, en_revision = 0 WHERE id = ?").run(id);
               } else {
-                db.prepare("UPDATE comentarios SET reportes = 0, oculto = 0 WHERE id = ?").run(id);
+                db.prepare("UPDATE comentarios SET reportes = 0, oculto = 0, en_revision = 0 WHERE id = ?").run(id);
               }
               db.prepare("DELETE FROM reportes WHERE item_tipo = ? AND item_id = ?").run(tipo, id);
               res.writeHead(200);
@@ -2396,21 +2779,28 @@ const server = http.createServer((req, res) => {
             }
 
             if (resolucion === "eliminar" || resolucion === "borrar") {
-              if (tipo === "hilo") {
-                db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(id);
-                db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(id);
-                db.prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?").run(id);
-                db.prepare("DELETE FROM comentarios WHERE hilo_id = ?").run(id);
-                db.prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?").run(id);
-                db.prepare("DELETE FROM hilos WHERE id = ?").run(id);
-              } else {
-                const c = db.prepare("SELECT hilo_id FROM comentarios WHERE id = ?").get(id);
-                if (c) {
-                  db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?").run(id);
-                  db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?").run(id);
-                  db.prepare("DELETE FROM comentarios WHERE id = ?").run(id);
-                  db.prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?").run(c.hilo_id);
+              db.exec("BEGIN IMMEDIATE");
+              try {
+                if (tipo === "hilo") {
+                  db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(id);
+                  db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id IN (SELECT id FROM comentarios WHERE hilo_id = ?)").run(id);
+                  db.prepare("DELETE FROM reportes WHERE item_tipo = 'hilo' AND item_id = ?").run(id);
+                  db.prepare("DELETE FROM comentarios WHERE hilo_id = ?").run(id);
+                  db.prepare("DELETE FROM votos WHERE item_tipo = 'hilo' AND item_id = ?").run(id);
+                  db.prepare("DELETE FROM hilos WHERE id = ?").run(id);
+                } else {
+                  const c = db.prepare("SELECT hilo_id FROM comentarios WHERE id = ?").get(id);
+                  if (c) {
+                    db.prepare("DELETE FROM votos WHERE item_tipo = 'comentario' AND item_id = ?").run(id);
+                    db.prepare("DELETE FROM reportes WHERE item_tipo = 'comentario' AND item_id = ?").run(id);
+                    db.prepare("DELETE FROM comentarios WHERE id = ?").run(id);
+                    db.prepare("UPDATE hilos SET respuestas_count = MAX(0, respuestas_count - 1) WHERE id = ?").run(c.hilo_id);
+                  }
                 }
+                db.exec("COMMIT");
+              } catch (e) {
+                try { db.exec("ROLLBACK"); } catch (_) {}
+                throw e;
               }
               res.writeHead(200);
               res.end(JSON.stringify({ status: "ok", message: "Contenido denunciado eliminado" }));
@@ -2431,7 +2821,7 @@ const server = http.createServer((req, res) => {
               try { cur = JSON.parse(fs.readFileSync(comunidadFile, "utf-8")); } catch(e){}
             }
             cur.cronograma = cronograma;
-            fs.writeFileSync(comunidadFile, JSON.stringify(cur, null, 2), "utf-8");
+            guardarComunidad(cur);
 
             res.writeHead(200);
             res.end(JSON.stringify({ status: "ok", message: "Cronograma guardado con éxito", cronograma }));
@@ -2448,7 +2838,7 @@ const server = http.createServer((req, res) => {
             }
             cur.faq = faq;
             cur.guia = faq;
-            fs.writeFileSync(comunidadFile, JSON.stringify(cur, null, 2), "utf-8");
+            guardarComunidad(cur);
 
             res.writeHead(200);
             res.end(JSON.stringify({ status: "ok", message: "Guía guardada con éxito", faq }));
@@ -2457,14 +2847,20 @@ const server = http.createServer((req, res) => {
 
           // Guardar Ajustes Generales del Sitio
           if (action === "guardar_ajustes") {
-            const ajustes = typeof body.ajustes === "object" && body.ajustes !== null ? body.ajustes : body;
+            const rawAjustes = body.ajustes !== undefined ? body.ajustes : body;
+            if (!rawAjustes || typeof rawAjustes !== "object" || Array.isArray(rawAjustes)) {
+              res.writeHead(400);
+              res.end(JSON.stringify({ status: "error", message: "El campo ajustes debe ser un objeto válido" }));
+              return;
+            }
+            const ajustes = rawAjustes;
             const comunidadFile = path.join(__dirname, "data", "comunidad.json");
             let cur = { noticias: [], cronograma: [], guia: [], faq: [], ajustes: {} };
             if (fs.existsSync(comunidadFile)) {
               try { cur = JSON.parse(fs.readFileSync(comunidadFile, "utf-8")); } catch(e){}
             }
             cur.ajustes = Object.assign({}, cur.ajustes || {}, ajustes);
-            fs.writeFileSync(comunidadFile, JSON.stringify(cur, null, 2), "utf-8");
+            guardarComunidad(cur);
 
             res.writeHead(200);
             res.end(JSON.stringify({ status: "ok", message: "Ajustes del sitio actualizados", ajustes: cur.ajustes }));
@@ -2547,29 +2943,64 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  // Protección de carpeta /data/
-  if (pathname.startsWith("/data/")) {
+  // VULN-06 & VULN-14: Protección de carpeta /data/, archivos estáticos, prevención de path traversal y bloqueo de extensiones sensibles / dotfiles
+  if (req.url.includes("..") || req.url.includes("%2e%2e") || req.url.includes("%2E%2E")) {
     res.writeHead(403);
     res.end("Acceso denegado");
     return;
   }
 
-  // Archivos estáticos y rutas amigables
-  let relativePath = pathname === "/"
-    ? "index.html"
-    : (pathname === "/comunidad"
-        ? "comunidad.html"
-        : (pathname === "/simulador"
-            ? "simulador.html"
-            : (pathname === "/noticia"
-                ? "noticia.html"
-                : (pathname === "/foro"
-                    ? "foro.html"
-                    : pathname.replace(/^\//, "")))));
-  let filePath = path.join(__dirname, relativePath);
+  let decodedPath = "";
+  try {
+    decodedPath = decodeURIComponent(pathname);
+  } catch (e) {
+    res.writeHead(400);
+    res.end("Bad Request");
+    return;
+  }
 
-  // Normalizar ruta para evitar path traversal
-  if (!filePath.startsWith(__dirname)) {
+  if (decodedPath.includes("..")) {
+    res.writeHead(403);
+    res.end("Acceso denegado");
+    return;
+  }
+
+  const safeRelative = path.normalize(decodedPath);
+
+  let relativePath = safeRelative === "/" || safeRelative === "\\" || safeRelative === ""
+    ? "index.html"
+    : (safeRelative === "/comunidad" || safeRelative === "\\comunidad" || safeRelative === "comunidad"
+        ? "comunidad.html"
+        : (safeRelative === "/simulador" || safeRelative === "\\simulador" || safeRelative === "simulador"
+            ? "simulador.html"
+            : (safeRelative === "/noticia" || safeRelative === "\\noticia" || safeRelative === "noticia"
+                ? "noticia.html"
+                : (safeRelative === "/foro" || safeRelative === "\\foro" || safeRelative === "foro"
+                    ? "foro.html"
+                    : safeRelative.replace(/^[\\\/]+/, "")))));
+
+  const filePath = path.resolve(__dirname, relativePath);
+
+  // Prevenir Path Traversal fuera del directorio raíz
+  if (!filePath.startsWith(__dirname + path.sep) && filePath !== __dirname) {
+    res.writeHead(403);
+    res.end("Acceso denegado");
+    return;
+  }
+
+  const SENSITIVE_EXTENSIONS = new Set([".db", ".sql", ".log", ".env", ".sqlite", ".sqlite3", ".bak", ".sh"]);
+  const ext = path.extname(filePath).toLowerCase();
+  const segments = relativePath.split(/[\\\/]/);
+  const hasDotfile = segments.some(seg => seg.startsWith(".") && seg !== "." && seg !== "..");
+
+  if (
+    hasDotfile ||
+    SENSITIVE_EXTENSIONS.has(ext) ||
+    pathname.startsWith("/data/") ||
+    relativePath.startsWith("data" + path.sep) ||
+    relativePath.startsWith("data/") ||
+    relativePath === "data"
+  ) {
     res.writeHead(403);
     res.end("Acceso denegado");
     return;

@@ -8,6 +8,10 @@ header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Vary: Origin");
+header("X-Content-Type-Options: nosniff");
+header("X-Frame-Options: SAMEORIGIN");
+header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
 $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
@@ -40,6 +44,7 @@ try {
         $pdo = new PDO("sqlite:" . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $pdo->exec("PRAGMA busy_timeout = 5000;");
 
         $stmt = $pdo->query("SELECT * FROM noticias ORDER BY fijada DESC, creada_en DESC");
         $rows = $stmt->fetchAll();
@@ -51,12 +56,15 @@ try {
             $contenido = json_decode($r["contenido"] ?: "[]", true);
             $bloques = !empty($r["bloques"]) ? json_decode($r["bloques"], true) : null;
             if (!$bloques || !is_array($bloques) || count($bloques) === 0) {
-                $bloques = array_map(function($p) {
+                $bloques = array_values(array_filter(array_map(function($p) {
+                    $val = is_string($p) ? $p : ($p["value"] ?? ($p["texto"] ?? ""));
                     return [
-                        "tipo" => "parrafo",
-                        "texto" => is_string($p) ? $p : ($p["texto"] ?? "")
+                        "type" => "text",
+                        "value" => $val
                     ];
-                }, is_array($contenido) ? $contenido : [$contenido]);
+                }, is_array($contenido) ? $contenido : [$contenido]), function($b) {
+                    return !empty($b["value"]);
+                }));
             }
             return [
                 "id" => $r["id"],

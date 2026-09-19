@@ -17,6 +17,8 @@ const testDbFile = path.resolve(__dirname, "../data/foro.foro.test.db");
 
 const TEST_PORT = 3898;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
+const TEST_ADMIN_TOKEN = "dev_token_posadas_2026_master_safe_32chars!";
+const TEST_ADMIN_SECRET = "dev_secret_estudiantina_posadas_2026_32bytes_safe!";
 
 test("Foro de Debate: Integración completa de endpoints", async (t) => {
   let serverProcess;
@@ -28,7 +30,14 @@ test("Foro de Debate: Integración completa de endpoints", async (t) => {
 
   await new Promise((resolve, reject) => {
     serverProcess = spawn(process.execPath, [serverPath], {
-      env: { ...process.env, PORT: String(TEST_PORT), DATABASE_PATH: testDbFile },
+      env: {
+        ...process.env,
+        PORT: String(TEST_PORT),
+        DATABASE_PATH: testDbFile,
+        NODE_ENV: "test",
+        ADMIN_TOKEN: TEST_ADMIN_TOKEN,
+        ADMIN_SECRET: TEST_ADMIN_SECRET
+      },
       stdio: ["ignore", "pipe", "pipe"]
     });
     const timeout = setTimeout(() => reject(new Error("Timeout")), 6000);
@@ -647,7 +656,7 @@ test("Foro de Debate: Integración completa de endpoints", async (t) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer estudiantina_admin_secret_posadas_2026_key"
+        "Authorization": `Bearer ${TEST_ADMIN_TOKEN}`
       },
       body: JSON.stringify({ hiloId })
     });

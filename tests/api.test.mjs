@@ -12,6 +12,8 @@ const testDbFile = path.resolve(__dirname, "../data/foro.api.test.db");
 
 const TEST_PORT = 3899;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
+const TEST_ADMIN_TOKEN = "dev_token_posadas_2026_master_safe_32chars!";
+const TEST_ADMIN_SECRET = "dev_secret_estudiantina_posadas_2026_32bytes_safe!";
 
 test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t) => {
   let serverProcess;
@@ -24,7 +26,14 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   // Iniciar servidor de pruebas en puerto aislado con base de datos temporal
   await new Promise((resolve, reject) => {
     serverProcess = spawn(process.execPath, [serverPath], {
-      env: { ...process.env, PORT: String(TEST_PORT), DATABASE_PATH: testDbFile },
+      env: {
+        ...process.env,
+        PORT: String(TEST_PORT),
+        DATABASE_PATH: testDbFile,
+        NODE_ENV: "test",
+        ADMIN_TOKEN: TEST_ADMIN_TOKEN,
+        ADMIN_SECRET: TEST_ADMIN_SECRET
+      },
       stdio: ["ignore", "pipe", "pipe"]
     });
 
@@ -111,7 +120,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Admin: Validación con Token Maestro retorna 200 y status ok", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
+    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
     const res = await fetch(`${BASE_URL}/api/admin?action=verificar`, {
       headers: { "Authorization": `Bearer ${masterToken}` }
     });
@@ -122,7 +131,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Admin: POST login_token valida token maestro y rechaza tokens inválidos", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
+    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
     const resOk = await fetch(`${BASE_URL}/api/admin?action=login_token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -141,7 +150,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Moderación Foro: Sancionar usuario y verificar bloqueo 403 al crear hilo/comentar", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
+    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
     const testBadUser = "bad_user_test_999";
 
     // 1. Sancionar usuario (suspender por 24 horas)
@@ -225,7 +234,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Moderación Foro: GET usuarios y fijar/borrar hilos", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || process.env.ADMIN_SECRET || "posadas_admin_2026_x9k2m";
+    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
 
     // 1. Obtener lista de usuarios
     const resUsers = await fetch(`${BASE_URL}/api/admin?action=usuarios`, {
@@ -307,5 +316,142 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
     assert.match(res.headers.get("content-type"), /text\/html/);
     const html = await res.text();
     assert.ok(html.includes("hero-article"));
+  });
+
+  await t.test("VULN-02: Backdoor eliminado en server.js (admin/admin123 rechazado con 401)", async () => {
+    const res = await fetch(`${BASE_URL}/api/admin?action=login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Forwarded-For": "198.51.100." + Date.now()
+      },
+      body: JSON.stringify({ usuario: "admin", password: "admin123" })
+    });
+    assert.equal(res.status, 401, "El backdoor admin/admin123 debe ser rechazado con 401");
+  });
+
+  await t.test("VULN-12: ADMIN_SECRET rechazado como Bearer token", async () => {
+    const res = await fetch(`${BASE_URL}/api/admin?action=verificar`, {
+      headers: { "Authorization": `Bearer ${TEST_ADMIN_SECRET}` }
+    });
+    assert.equal(res.status, 401, "ADMIN_SECRET directo no debe ser aceptado como Bearer token");
+  });
+
+  await t.test("VULN-06 & VULN-14: Bloqueo de dotfiles, extensiones sensibles y path traversal con 403", async () => {
+    const resEnv = await fetch(`${BASE_URL}/.env`);
+    assert.equal(resEnv.status, 403, "Acceso a .env debe dar 403");
+
+    const resDb = await fetch(`${BASE_URL}/data/foro.db`);
+    assert.equal(resDb.status, 403, "Acceso a archivo .db debe dar 403");
+
+    const resTraversal = await fetch(`${BASE_URL}/..%2fpackage.json`);
+    assert.equal(resTraversal.status, 403, "Path traversal debe dar 403");
+  });
+
+  await t.test("VULN-23: guardar_ajustes rechaza arrays o no-objetos con 400", async () => {
+    const res = await fetch(`${BASE_URL}/api/admin?action=guardar_ajustes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${TEST_ADMIN_TOKEN}`
+      },
+      body: JSON.stringify({ ajustes: ["no", "es", "un", "objeto"] })
+    });
+    assert.equal(res.status, 400, "ajustes como array debe retornar 400");
+  });
+
+  await t.test("VULN-10: Ranking rechaza colegioId fuera de whitelist con 400", async () => {
+    const res = await fetch(`${BASE_URL}/api/ranking?action=registrarInicio`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ colegioId: "colegio_fantasma_invalido" })
+    });
+    assert.equal(res.status, 400, "Colegio inválido debe retornar 400");
+  });
+
+  await t.test("VULN-13: Rate limit en login bloquea temporalmente tras 5 intentos fallidos con 429", async () => {
+    const testIp = `198.51.100.${Date.now() % 200 + 10}`;
+    for (let i = 0; i < 5; i++) {
+      const res = await fetch(`${BASE_URL}/api/admin?action=login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Forwarded-For": testIp
+        },
+        body: JSON.stringify({ usuario: "admin", password: `wrong-pass-${i}` })
+      });
+      assert.equal(res.status, 401);
+    }
+
+    // El 6to intento debe recibir 429 Too Many Requests
+    const resBlocked = await fetch(`${BASE_URL}/api/admin?action=login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Forwarded-For": testIp
+      },
+      body: JSON.stringify({ usuario: "admin", password: "wrong-pass-again" })
+    });
+    assert.equal(resBlocked.status, 429, "Debe responder 429 tras 5 intentos fallidos");
+  });
+
+  await t.test("VULN-05 & VULN-24: crear_noticia sanitiza HTML y genera ID criptoseguro", async () => {
+    const res = await fetch(`${BASE_URL}/api/admin?action=crear_noticia`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${TEST_ADMIN_TOKEN}`
+      },
+      body: JSON.stringify({
+        titulo: "<script>alert('xss')</script>Título Seguro",
+        resumen: "<img src=x onerror=alert(1)>Resumen Seguro",
+        autor: "<b>Autor</b>",
+        badge: "<i>Urgente</i>",
+        categoria: "Noches <marquee>calle</marquee>",
+        bloques: [
+          { type: "text", value: "<script>dangerous()</script>Texto en bloque" }
+        ]
+      })
+    });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.status, "ok");
+    assert.ok(data.noticiaId.startsWith("noticia-"));
+    // ID criptoseguro de 16 caracteres hexadecimales después de 'noticia-'
+    assert.match(data.noticiaId, /^noticia-[0-9a-f]{16}$/);
+    assert.ok(!data.noticia.titulo.includes("<script>"));
+    assert.ok(data.noticia.titulo.includes("&lt;script&gt;"));
+    assert.ok(!data.noticia.resumen.includes("<img"));
+    assert.ok(data.noticia.bloques[0].value.includes("&lt;script&gt;"));
+
+    // Cleanup: borrar la noticia de prueba
+    await fetch(`${BASE_URL}/api/admin?action=borrar_noticia`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${TEST_ADMIN_TOKEN}`
+      },
+      body: JSON.stringify({ id: data.noticiaId })
+    });
+  });
+
+  await t.test("VULN-10: noticia_hilo con noticia inexistente retorna 404", async () => {
+    const res = await fetch(`${BASE_URL}/api/foro?action=noticia_hilo&noticia_id=noticia-fantasma-inexistente-12345`);
+    assert.equal(res.status, 404, "Debate de noticia inexistente debe responder 404");
+  });
+
+  await t.test("VULN-15: Avatar mayor a 300.000 caracteres retorna 400", async () => {
+    const hugeAvatar = "data:image/png;base64," + "A".repeat(300001);
+    const res = await fetch(`${BASE_URL}/api/foro?action=completar_registro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        googleId: "test-huge-avatar-user",
+        username: "test_huge_av",
+        nombre: "Test Huge",
+        avatarUrl: hugeAvatar
+      })
+    });
+    assert.equal(res.status, 400, "Avatar > 300k chars debe retornar 400");
   });
 });

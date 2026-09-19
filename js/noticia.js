@@ -8,9 +8,16 @@ import { UsuarioService } from "./usuario.js";
 
 function decodeEntities(str) {
   if (!str) return "";
-  const txt = document.createElement("textarea");
-  txt.innerHTML = str;
-  return txt.value;
+  const entityMap = {
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": "\"",
+    "&#039;": "'",
+    "&#x27;": "'",
+    "&#39;": "'"
+  };
+  return String(str).replace(/&(?:amp|lt|gt|quot|#039|#x27|#39);/g, (match) => entityMap[match] || match);
 }
 
 function escapeHtml(str) {
@@ -369,10 +376,11 @@ class NoticiaPageApp {
     }
 
     // Portada
-    const coverUrl = art.imagen || art.imagenUrl;
-    if (coverUrl && this.coverFigure && this.coverImg) {
+    const rawCoverUrl = art.imagen || art.imagenUrl;
+    const coverUrl = rawCoverUrl ? encodeURI(String(rawCoverUrl).trim()).replace(/["'<>()]/g, "") : "";
+    if (coverUrl && !/^javascript:/i.test(coverUrl) && this.coverFigure && this.coverImg) {
       this.coverImg.src = coverUrl;
-      this.coverImg.alt = art.titulo;
+      this.coverImg.alt = art.titulo || "Fotografía de portada";
       this.coverFigure.style.display = "block";
     } else if (this.coverFigure) {
       this.coverFigure.style.display = "none";
@@ -399,7 +407,7 @@ class NoticiaPageApp {
       const tags = Array.isArray(art.tags) ? art.tags : [];
       if (tags.length > 0) {
         this.tagsList.innerHTML = tags.map(t =>
-          `<a href="index.html?search=${encodeURIComponent(t)}" class="noticia-tag-item">#${t}</a>`
+          `<a href="index.html?search=${encodeURIComponent(t)}" class="noticia-tag-item">#${escapeHtml(t)}</a>`
         ).join("");
       } else {
         const box = document.getElementById("noticia-tags-box");
@@ -421,33 +429,47 @@ class NoticiaPageApp {
     this.loadForumThread();
   }
 
-  renderBlocks(art) {
+  renderBlocks(artOrBlocks) {
     if (!this.bodyEditorial) return;
 
-    let bloques = art.bloques;
+    let bloques = Array.isArray(artOrBlocks) ? artOrBlocks : (artOrBlocks?.bloques);
     if (!bloques || !Array.isArray(bloques) || bloques.length === 0) {
-      const contenido = Array.isArray(art.contenido) ? art.contenido : [art.resumen || ""];
-      bloques = contenido.map(p => ({ type: "text", value: p }));
+      const art = Array.isArray(artOrBlocks) ? null : artOrBlocks;
+      const contenido = art && Array.isArray(art.contenido) ? art.contenido : [art?.resumen || ""];
+      bloques = contenido.filter(Boolean).map(p => ({ type: "text", value: p }));
     }
 
     const html = bloques.map(block => {
+      if (!block || typeof block !== "object") return "";
+
       if (block.type === "image" && block.value) {
-        const captionHtml = block.caption
-          ? `<figcaption class="noticia-inline-caption">📷 ${block.caption}</figcaption>`
+        const safeSrc = encodeURI(String(block.value).trim()).replace(/["'<>()]/g, "");
+        if (!safeSrc || /^javascript:/i.test(safeSrc)) return "";
+        const safeCaption = escapeHtml(block.caption || "");
+        const safeAlt = escapeHtml(block.caption || "Fotografía de la nota");
+        const captionHtml = safeCaption
+          ? `<figcaption class="noticia-inline-caption">📷 ${safeCaption}</figcaption>`
           : "";
         return `
           <figure class="noticia-inline-image-block">
-            <img src="${block.value}" alt="${block.caption || 'Fotografía de la nota'}" loading="lazy">
+            <img src="${safeSrc}" alt="${safeAlt}" loading="lazy">
             ${captionHtml}
           </figure>`;
       }
+
       if (block.type === "quote" && block.value) {
-        return `<blockquote class="noticia-pullquote-block">${block.value}</blockquote>`;
+        const safeQuote = escapeHtml(block.value);
+        const safeCaption = block.caption
+          ? `<cite class="noticia-pullquote-caption" style="display:block; margin-top:0.5rem; font-size:0.9rem; font-style:normal; opacity:0.85;">— ${escapeHtml(block.caption)}</cite>`
+          : "";
+        return `<blockquote class="noticia-pullquote-block">${safeQuote}${safeCaption}</blockquote>`;
       }
+
       if (block.type === "text" && block.value) {
-        const cleanText = block.value.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>');
+        const cleanText = escapeHtml(block.value).replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>');
         return `<p>${cleanText}</p>`;
       }
+
       return "";
     }).join("");
 
@@ -458,14 +480,14 @@ class NoticiaPageApp {
     if (!this.galleryGrid) return;
 
     const images = [];
-    const coverUrl = art.imagen || art.imagenUrl;
-    if (coverUrl) {
-      images.push({ src: coverUrl, caption: "Fotografía de Portada" });
+    const rawCover = art.imagen || art.imagenUrl;
+    if (rawCover) {
+      images.push({ src: rawCover, caption: "Fotografía de Portada" });
     }
 
     const bloques = Array.isArray(art.bloques) ? art.bloques : [];
     bloques.forEach((b, i) => {
-      if (b.type === "image" && b.value) {
+      if (b && b.type === "image" && b.value) {
         images.push({ src: b.value, caption: b.caption || `Fotografía del evento #${i + 1}` });
       }
     });
@@ -483,12 +505,18 @@ class NoticiaPageApp {
       return;
     }
 
-    this.galleryGrid.innerHTML = images.map(img => `
-      <div class="noticia-gallery-item" data-src="${img.src}" data-caption="${(img.caption || '').replace(/"/g, '&quot;')}">
-        <img src="${img.src}" alt="${img.caption}" loading="lazy">
-        ${img.caption ? `<div class="noticia-gallery-item-caption">${img.caption}</div>` : ""}
-      </div>
-    `).join("");
+    this.galleryGrid.innerHTML = images.map(img => {
+      const safeSrc = encodeURI(String(img.src || "").trim()).replace(/["'<>()]/g, "");
+      if (!safeSrc || /^javascript:/i.test(safeSrc)) return "";
+      const safeCaption = escapeHtml(img.caption || "");
+      const safeAlt = escapeHtml(img.caption || "Fotografía de la galería");
+      return `
+        <div class="noticia-gallery-item" data-src="${safeSrc}" data-caption="${safeCaption}">
+          <img src="${safeSrc}" alt="${safeAlt}" loading="lazy">
+          ${safeCaption ? `<div class="noticia-gallery-item-caption">${safeCaption}</div>` : ""}
+        </div>
+      `;
+    }).filter(Boolean).join("");
 
     // Clic en foto de la galería -> abrir Lightbox
     this.galleryGrid.querySelectorAll(".noticia-gallery-item").forEach(item => {
@@ -504,16 +532,22 @@ class NoticiaPageApp {
       .slice(0, 3);
 
     const makeCardHtml = (n) => {
-      const img = n.imagen || n.imagenUrl || "assets/noticias/noticia-01.webp";
+      const rawImg = n.imagen || n.imagenUrl || "assets/noticias/noticia-01.webp";
+      const safeImg = encodeURI(String(rawImg).trim()).replace(/["'<>()]/g, "");
+      const safeTitle = escapeHtml(n.titulo || "");
+      const safeCat = escapeHtml(n.categoria || "Noticias");
+      const safeFecha = escapeHtml(n.fecha || "");
+      const safeLectura = escapeHtml(n.tiempoLectura || "3 min");
+      const safeId = encodeURIComponent(String(n.id || ""));
       return `
-        <a href="noticia.html?id=${n.id}" class="noticia-related-card">
+        <a href="noticia.html?id=${safeId}" class="noticia-related-card">
           <div class="noticia-related-thumb-wrap">
-            <img src="${img}" alt="${(n.titulo || '').replace(/"/g, '&quot;')}" loading="lazy">
+            <img src="${safeImg}" alt="${safeTitle}" loading="lazy">
           </div>
           <div class="noticia-related-content">
-            <span class="noticia-related-cat">${n.categoria}</span>
-            <h4 class="noticia-related-heading">${n.titulo}</h4>
-            <span class="noticia-related-footer">📅 ${n.fecha} · ⏱️ ${n.tiempoLectura || '3 min'}</span>
+            <span class="noticia-related-cat">${safeCat}</span>
+            <h4 class="noticia-related-heading">${safeTitle}</h4>
+            <span class="noticia-related-footer">📅 ${safeFecha} · ⏱️ ${safeLectura}</span>
           </div>
         </a>
       `;
@@ -670,7 +704,7 @@ class NoticiaPageApp {
       const userCol = isLogged ? this.getColegio(this.currentUser.colegioId) : null;
 
       // Opciones de colegios para el selector
-      const colegiosOptions = COLEGIOS.map(c => `<option value="${c.id}" ${isLogged && this.currentUser.colegioId === c.id ? "selected" : ""}>${c.escudo || "🥁"} ${c.nombre}</option>`).join("");
+      const colegiosOptions = COLEGIOS.map(c => `<option value="${encodeURIComponent(c.id)}" ${isLogged && this.currentUser.colegioId === c.id ? "selected" : ""}>${escapeHtml(c.escudo || "🥁")} ${escapeHtml(c.nombre)}</option>`).join("");
 
       // Header del bloque
       const headerHtml = `
@@ -692,13 +726,16 @@ class NoticiaPageApp {
       // Bloque de formulario / login
       let formHtml = "";
       if (isLogged) {
+        const safeAvatar = encodeURI(String(this.currentUser.avatarUrl || 'assets/avatar-default.webp').trim()).replace(/["'<>()]/g, "");
+        const safeUserColEscudo = escapeHtml(userCol ? (userCol.escudo || "🥁") : "🥁");
+        const safeUserColNombre = escapeHtml(userCol ? userCol.nombre : "");
         formHtml = `
           <div class="noticia-comment-form-wrap">
             <div class="noticia-comment-user-header">
               <div class="noticia-comment-user-info">
-                <img src="${this.currentUser.avatarUrl}" alt="Avatar" class="noticia-comment-user-avatar">
+                <img src="${safeAvatar}" alt="Avatar" class="noticia-comment-user-avatar">
                 <span class="noticia-comment-user-name">${escapeHtml(this.currentUser.nombre)}</span>
-                <span class="noticia-comment-school-badge">${userCol.escudo || "🥁"} ${userCol.nombre}</span>
+                <span class="noticia-comment-school-badge">${safeUserColEscudo} ${safeUserColNombre}</span>
               </div>
               <div class="noticia-school-selector-wrap">
                 <select class="noticia-select-school" aria-label="Cambiar colegio">
@@ -760,16 +797,23 @@ class NoticiaPageApp {
           const votosCount = Number(c.votos || 0);
           const rawUser = c.autor_username || (c.autor_nombre ? c.autor_nombre.toLowerCase().replace(/\s+/g, "_") : "hincha");
           const displayHandle = `u/${rawUser}`;
+          const safeDisplayHandle = escapeHtml(displayHandle);
+          const safeAvatar = encodeURI(String(c.autor_avatar || 'assets/avatar-default.webp').trim()).replace(/["'<>()]/g, "");
+          const safeCommentId = parseInt(c.id, 10) || 0;
+          const safeAutorNombre = escapeHtml(c.autor_nombre || 'Hincha');
+          const safeAutorGoogleId = encodeURIComponent(c.autor_google_id || '');
+          const safeSchoolEscudo = escapeHtml(col ? (col.escudo || "🥁") : "🥁");
+          const safeSchoolNombre = escapeHtml(col ? col.nombre : "");
           return `
-            <article class="noticia-comment-card" data-comment-id="${c.id}">
+            <article class="noticia-comment-card" data-comment-id="${safeCommentId}">
               <div class="noticia-comment-card-header">
                 <div class="noticia-comment-author-box">
-                  <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}" title="Ver perfil de ${displayHandle}">
-                    <img src="${c.autor_avatar || 'assets/avatar-default.webp'}" alt="${escapeHtml(c.autor_nombre || 'Hincha')}" class="noticia-comment-author-avatar" onerror="this.src='assets/avatar-default.webp'">
+                  <a href="foro.html?user=${safeAutorGoogleId}" title="Ver perfil de ${safeDisplayHandle}">
+                    <img src="${safeAvatar}" alt="${safeAutorNombre}" class="noticia-comment-author-avatar" onerror="this.src='assets/avatar-default.webp'">
                   </a>
                   <div>
-                    <a href="foro.html?user=${encodeURIComponent(c.autor_google_id)}" class="noticia-comment-author-name" style="color:inherit; text-decoration:none; font-weight:700;">${displayHandle}</a>
-                    <span class="noticia-comment-school-badge" style="margin-left:5px;">${col.escudo || "🥁"} ${col.nombre}</span>
+                    <a href="foro.html?user=${safeAutorGoogleId}" class="noticia-comment-author-name" style="color:inherit; text-decoration:none; font-weight:700;">${safeDisplayHandle}</a>
+                    <span class="noticia-comment-school-badge" style="margin-left:5px;">${safeSchoolEscudo} ${safeSchoolNombre}</span>
                   </div>
                 </div>
                 <span class="noticia-comment-date">${timeAgo(c.creado_en)}</span>
@@ -778,11 +822,11 @@ class NoticiaPageApp {
                 ${escapeHtml(c.contenido).replace(/\n/g, '<br>')}
               </div>
               <div class="noticia-comment-footer">
-                <button type="button" class="noticia-vote-pill ${hasVoted ? 'has-voted' : ''}" data-comment-id="${c.id}">
+                <button type="button" class="noticia-vote-pill ${hasVoted ? 'has-voted' : ''}" data-comment-id="${safeCommentId}">
                   <span>▲</span>
                   <span class="vote-count">${votosCount}</span>
                 </button>
-                <button type="button" class="noticia-report-btn" data-comment-id="${c.id}">
+                <button type="button" class="noticia-report-btn" data-comment-id="${safeCommentId}">
                   <span>🚩 Reportar</span>
                 </button>
               </div>
@@ -1028,7 +1072,7 @@ class NoticiaPageApp {
         <div style="text-align:center; padding:5rem 1rem;">
           <span style="font-size:3.5rem; display:block; margin-bottom:1rem;">🗞️</span>
           <h2 style="font-family:var(--font-display); font-size:2rem; color:var(--text-white); margin-bottom:0.75rem;">Noticia no encontrada</h2>
-          <p style="color:var(--text-muted); margin-bottom:2rem; max-width:480px; margin-inline:auto;">${msg}</p>
+          <p style="color:var(--text-muted); margin-bottom:2rem; max-width:480px; margin-inline:auto;">${escapeHtml(msg)}</p>
           <a href="index.html" class="btn-cta-foro">
             <span>← Volver al Portal de Noticias</span>
           </a>
