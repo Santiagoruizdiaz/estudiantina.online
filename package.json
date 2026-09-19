@@ -11,7 +11,8 @@
     "test": "node scripts/test-runner.mjs",
     "lint": "node scripts/check-syntax.mjs",
     "check": "node scripts/check-syntax.mjs",
-    "quality-gate": "node scripts/antigravity-stop-gate.mjs"
+    "quality-gate": "node scripts/antigravity-stop-gate.mjs",
+    "smoke-test": "node scripts/smoke-test-production.mjs"
   },
   "keywords": [
     "estudiantina",

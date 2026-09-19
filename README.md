@@ -117,6 +117,7 @@ npm start              # Inicia el servidor local de desarrollo
 npm test               # Ejecuta la suite completa de pruebas automatizadas
 npm run check          # Chequeo estático de sintaxis (JS y JSON)
 npm run quality-gate   # Ejecución del Quality Gate formal
+npm run smoke-test     # Sondas pasivas post-despliegue en producción
 ```
 
 ### Variables de Entorno (Opcionales)
