@@ -927,15 +927,15 @@ const MIME_TYPES = {
   ".txt": "text/plain; charset=utf-8"
 };
 
-// VULN-10: Whitelist estricta de colegios oficiales de Posadas
+// VULN-10: Whitelist estricta de 33 colegios oficiales de Posadas (alineado 100% con js/colegios.js y api/ranking.php)
 const COLEGIOS_WHITELIST = new Set([
-  'janssen', 'industrial', 'santa_maria', 'roque', 'san_basilio',
-  'madre_misericordia', 'epet_34', 'goyena', 'nacional', 'normal_estados_unidos',
-  'comercio_6', 'comercio_18', 'humanista', 'inmaculada', 'san_alberto',
-  'santa_catalina', 'carmelitas', 'san_pedro', 'jesus_nino', 'bop_1',
-  'bop_9', 'bop_17', 'bop_85', 'epet_2', 'epet_36', 'comercio_5',
-  'comercio_jugo', 'bolivar', 'normal_10', 'virgen_itati', 'combate_mborore',
-  'lisandro_torre', 'fray_mamerto'
+  "janssen", "industrial", "santa_maria", "roque", "san_basilio",
+  "madre_misericordia", "pedro_goyena", "nacional", "normal_mixta",
+  "humanista", "cep_4", "virgen_itati", "comercio_6", "mborore",
+  "san_alberto", "del_carmen", "jesus_nino", "inmaculada", "epet_2",
+  "jesus_nazareth", "comercio_8", "lisandro_torre", "epet_34", "bop_9",
+  "estrada", "san_jorge", "san_miguel", "verbo_divino", "normal_10",
+  "comercio_18", "santa_catalina", "bop_1", "epet_37"
 ]);
 
 function leerRanking() {
@@ -1695,7 +1695,7 @@ const server = http.createServer((req, res) => {
               return;
             }
             const googleId = auth.googleId;
-            const nombre = String(body.nombre || auth.name || "").trim();
+            const nombre = escapeHtml(String(body.nombre || auth.name || "").trim().slice(0, 50));
             const email = String(body.email || auth.email || "").trim();
             const avatarUrl = String(body.avatarUrl || auth.avatar || "").trim();
             const colegioId = String(body.colegioId || "janssen").trim();

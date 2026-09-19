@@ -76,7 +76,16 @@ function withJsonLock($file, callable $mutator) {
     if (!$lockFp) {
         throw new Exception("No se pudo abrir archivo de lock");
     }
-    if (!@flock($lockFp, LOCK_EX)) {
+    $startTime = microtime(true);
+    $locked = false;
+    while (microtime(true) - $startTime < 3.0) {
+        if (@flock($lockFp, LOCK_EX | LOCK_NB)) {
+            $locked = true;
+            break;
+        }
+        usleep(50000);
+    }
+    if (!$locked && !@flock($lockFp, LOCK_EX)) {
         @fclose($lockFp);
         throw new Exception("No se pudo adquirir el lock exclusivo");
     }

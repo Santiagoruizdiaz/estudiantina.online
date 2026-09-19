@@ -60,6 +60,25 @@ try {
     exit;
 }
 
+// Carga de variables de entorno desde .env si existe en la raíz
+$envPath = __DIR__ . "/../.env";
+if (file_exists($envPath)) {
+    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || str_starts_with($line, "#")) continue;
+        $parts = explode("=", $line, 2);
+        if (count($parts) === 2) {
+            $k = trim($parts[0]);
+            $v = trim($parts[1], " \t\n\r\0\x0B\"'");
+            if (getenv($k) === false) {
+                putenv("$k=$v");
+                $_ENV[$k] = $v;
+            }
+        }
+    }
+}
+
 // Inicialización de Tablas si no existen
 $pdo->exec("
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -962,7 +981,7 @@ if ($action === "auth_google" && $method === "POST") {
         exit;
     }
     $googleId = $auth["googleId"];
-    $nombre = trim($body["nombre"] ?? ($auth["name"] ?: ""));
+    $nombre = htmlspecialchars(trim($body["nombre"] ?? ($auth["name"] ?: "")), ENT_QUOTES, "UTF-8");
     $email = trim($body["email"] ?? ($auth["email"] ?: ""));
     $avatarUrl = trim($body["avatarUrl"] ?? ($auth["avatar"] ?? ""));
     $colegioId = trim($body["colegioId"] ?? "janssen");
