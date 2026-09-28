@@ -51,7 +51,8 @@ estudiantina/
 │   ├── ranking.php         # API REST: jugadores, ranking y persistencia (PHP/Hostinger)
 │   ├── comunidad.php       # API REST: noticias, cronograma y metadatos
 │   ├── foro.php            # API REST: foro de debate (SQLite PDO con WAL)
-│   └── admin.php           # API REST: panel de administración y moderación
+│   ├── admin.php           # API REST: panel de administración y moderación
+│   └── _common.php         # Utilidades compartidas: validación de entradas, errores JSON y entorno (no es endpoint)
 │
 ├── 📁 data/
 │   ├── comunidad.example.json   # Semilla estructurada de noticias
@@ -114,18 +115,26 @@ npm start
 
 ```bash
 npm start              # Inicia el servidor local de desarrollo
-npm test               # Ejecuta la suite completa de pruebas automatizadas
-npm run check          # Chequeo estático de sintaxis (JS y JSON)
+npm test               # Suite completa: Node (server.js) y API PHP real vía `php -S`
+npm run check          # Chequeo estático: JSON, JS/MJS, `php -l` y archivos sensibles versionados
 npm run quality-gate   # Ejecución del Quality Gate formal
 npm run smoke-test     # Sondas pasivas post-despliegue en producción
 ```
 
-### Variables de Entorno (Opcionales)
+Requisitos: Node.js 22.13+ (`node:sqlite` sin flag) y PHP 8.1+ con `mbstring` y `pdo_sqlite`.
+Si `php` no está en el PATH (p. ej. WAMP), indicá su ruta con `PHP_BIN`; sin PHP, las pruebas y el
+lint de PHP se omiten localmente con un aviso, y en CI (`CI=true` o `REQUIRE_PHP=1`) fallan.
 
 ```bash
-PORT=3000                    # Puerto del servidor (default: 3000)
-ADMIN_SECRET=tu_clave_aqui   # Clave secreta para el panel de administración
+# PowerShell (WAMP)
+$env:PHP_BIN = "C:\wamp64\bin\php\php8.3.28\php.exe"; npm test
 ```
+
+### Variables de Entorno
+
+Ver `.env.example`. En el servidor de producción son obligatorias `NODE_ENV=production`,
+`ADMIN_SECRET`, `ADMIN_TOKEN` y `GOOGLE_CLIENT_ID` (sin este último se rechazan todos los
+inicios de sesión con Google del foro).
 
 ---
 
