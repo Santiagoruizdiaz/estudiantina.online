@@ -14,6 +14,8 @@ header("X-Frame-Options: SAMEORIGIN");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
+require_once __DIR__ . "/_common.php";
+
 $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
 
 if ($method === "OPTIONS") {
@@ -94,7 +96,7 @@ function withJsonLock($file, callable $mutator) {
         $currentData = leerDatos($file);
         $result = $mutator($currentData);
         if (is_array($result)) {
-            $json = json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $json = api_json_encode_file($result);
             $tmpFile = tempnam($dir, "rnk_");
             if ($tmpFile === false) {
                 throw new Exception("No se pudo crear archivo temporal");
@@ -189,13 +191,14 @@ if ($method === "POST") {
                 exit;
             }
 
-            $nombre = trim(substr(strip_tags($egresado["nombre"] ?? "Egresado"), 0, 30));
-            $apodo = trim(substr(strip_tags($egresado["apodoJugador"] ?? ""), 0, 35));
-            $colegioNombre = trim(substr(strip_tags($egresado["colegioNombre"] ?? ""), 0, 50));
-            $colegioApodo = trim(substr(strip_tags($egresado["colegioApodo"] ?? ""), 0, 35));
-            $escudo = trim(substr(strip_tags($egresado["escudo"] ?? "🥁"), 0, 10));
-            $rubroNombre = trim(substr(strip_tags($egresado["rubroNombre"] ?? ""), 0, 40));
-            $rolNombre = trim(substr(strip_tags($egresado["rolNombre"] ?? ""), 0, 40));
+            // Truncado por caracteres: cortar bytes UTF-8 hacía fallar json_encode y vaciaba ranking.json
+            $nombre = trim(api_truncate(strip_tags(api_scalar_str($egresado["nombre"] ?? null, "Egresado")), 30));
+            $apodo = trim(api_truncate(strip_tags(api_scalar_str($egresado["apodoJugador"] ?? null)), 35));
+            $colegioNombre = trim(api_truncate(strip_tags(api_scalar_str($egresado["colegioNombre"] ?? null)), 50));
+            $colegioApodo = trim(api_truncate(strip_tags(api_scalar_str($egresado["colegioApodo"] ?? null)), 35));
+            $escudo = trim(api_truncate(strip_tags(api_scalar_str($egresado["escudo"] ?? null, "🥁")), 10));
+            $rubroNombre = trim(api_truncate(strip_tags(api_scalar_str($egresado["rubroNombre"] ?? null)), 40));
+            $rolNombre = trim(api_truncate(strip_tags(api_scalar_str($egresado["rolNombre"] ?? null)), 40));
 
             $ovr = max(40, min(99, (int)($egresado["ovr"] ?? 50)));
             $titulosOro = max(0, min(8, (int)($egresado["titulosOro"] ?? 0)));

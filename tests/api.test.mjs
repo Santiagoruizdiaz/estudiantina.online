@@ -14,6 +14,7 @@ const TEST_PORT = 3899;
 const BASE_URL = `http://localhost:${TEST_PORT}`;
 const TEST_ADMIN_TOKEN = "dev_token_posadas_2026_master_safe_32chars!";
 const TEST_ADMIN_SECRET = "dev_secret_estudiantina_posadas_2026_32bytes_safe!";
+const TEST_ADMIN_PASSWORD = "test_admin_password_posadas_2026";
 
 test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t) => {
   let serverProcess;
@@ -32,7 +33,8 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
         DATABASE_PATH: testDbFile,
         NODE_ENV: "test",
         ADMIN_TOKEN: TEST_ADMIN_TOKEN,
-        ADMIN_SECRET: TEST_ADMIN_SECRET
+        ADMIN_SECRET: TEST_ADMIN_SECRET,
+        ADMIN_INITIAL_PASSWORD: TEST_ADMIN_PASSWORD
       },
       stdio: ["ignore", "pipe", "pipe"]
     });
@@ -120,7 +122,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Admin: Validación con Token Maestro retorna 200 y status ok", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
+    const masterToken = TEST_ADMIN_TOKEN;
     const res = await fetch(`${BASE_URL}/api/admin?action=verificar`, {
       headers: { "Authorization": `Bearer ${masterToken}` }
     });
@@ -131,7 +133,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Admin: POST login_token valida token maestro y rechaza tokens inválidos", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
+    const masterToken = TEST_ADMIN_TOKEN;
     const resOk = await fetch(`${BASE_URL}/api/admin?action=login_token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -150,7 +152,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Moderación Foro: Sancionar usuario y verificar bloqueo 403 al crear hilo/comentar", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
+    const masterToken = TEST_ADMIN_TOKEN;
     const testBadUser = "bad_user_test_999";
 
     // 1. Sancionar usuario (suspender por 24 horas)
@@ -234,7 +236,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("Moderación Foro: GET usuarios y fijar/borrar hilos", async () => {
-    const masterToken = process.env.ADMIN_TOKEN || TEST_ADMIN_TOKEN;
+    const masterToken = TEST_ADMIN_TOKEN;
 
     // 1. Obtener lista de usuarios
     const resUsers = await fetch(`${BASE_URL}/api/admin?action=usuarios`, {
@@ -370,13 +372,21 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
   });
 
   await t.test("VULN-13: Rate limit en login bloquea temporalmente tras 5 intentos fallidos con 429", async () => {
-    const testIp = `198.51.100.${Date.now() % 200 + 10}`;
+    // Un login exitoso limpia los intentos fallidos previos de esta IP (p. ej. el de VULN-02)
+    const resOk = await fetch(`${BASE_URL}/api/admin?action=login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ usuario: "admin", password: TEST_ADMIN_PASSWORD })
+    });
+    assert.equal(resOk.status, 200);
+
+    // Rotar X-Forwarded-For no debe crear contadores nuevos: el límite es por IP real
     for (let i = 0; i < 5; i++) {
       const res = await fetch(`${BASE_URL}/api/admin?action=login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Forwarded-For": testIp
+          "X-Forwarded-For": `198.51.100.${i + 10}`
         },
         body: JSON.stringify({ usuario: "admin", password: `wrong-pass-${i}` })
       });
@@ -388,7 +398,7 @@ test("API & Servidor: Pruebas de integración sobre endpoints locales", async (t
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Forwarded-For": testIp
+        "X-Forwarded-For": "198.51.100.99"
       },
       body: JSON.stringify({ usuario: "admin", password: "wrong-pass-again" })
     });

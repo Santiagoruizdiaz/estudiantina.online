@@ -15,6 +15,7 @@ let checked = 0;
 // 1. Chequeo de archivos JSON
 const jsonFiles = [
   "package.json",
+  "package-lock.json",
   "data/ranking.example.json",
   "data/comunidad.example.json",
   ".agents/hooks.json",
@@ -60,21 +61,23 @@ for (const dir of jsDirs) {
   }
 }
 
-// 3. Verificación de archivos PHP con php -l si está disponible
+// 3. Verificación de archivos PHP con php -l (PHP_BIN o php en el PATH)
+// En CI (CI=true) o con REQUIRE_PHP=1 la ausencia de PHP es un error: nunca se aprueba sin validar
 let phpBin = null;
-const possiblePhpPaths = [
-  "php",
-  "C:\\wamp64\\bin\\php\\php8.2.29\\php.exe",
-  "C:\\wamp64\\bin\\php\\php8.3.28\\php.exe",
-  "C:\\wamp64\\bin\\php\\php8.1.33\\php.exe"
-];
+const phpCandidate = process.env.PHP_BIN || "php";
+const phpRequired = process.env.REQUIRE_PHP === "1" || process.env.CI === "true";
+try {
+  execFileSync(phpCandidate, ["-v"], { stdio: "ignore" });
+  phpBin = phpCandidate;
+} catch (e) {}
 
-for (const p of possiblePhpPaths) {
-  try {
-    execFileSync(p, ["-v"], { stdio: "ignore" });
-    phpBin = p;
-    break;
-  } catch (e) {}
+if (!phpBin) {
+  if (phpRequired) {
+    console.error(`❌ PHP no encontrado (${phpCandidate}): no se puede validar la sintaxis de api/*.php.`);
+    errors++;
+  } else {
+    console.warn(`⚠️  PHP no encontrado (${phpCandidate}): se omite php -l. Definí PHP_BIN con la ruta a php para validarlo.`);
+  }
 }
 
 const apiDir = path.join(projectRoot, "api");
@@ -91,10 +94,6 @@ if (fs.existsSync(apiDir)) {
         console.error(`❌ Error de sintaxis PHP en ${relPath}:`, err.stderr?.toString() || err.message);
         errors++;
       }
-    } else {
-      // Si no hay PHP binario disponible en el entorno, validar lectura
-      fs.readFileSync(fullPath, "utf8");
-      checked++;
     }
   }
 }
@@ -114,7 +113,21 @@ if (fs.existsSync(sitemapPath)) {
   }
 }
 
-// 5. Verificación de integridad de archivos críticos
+// 5. Archivos sensibles que nunca deben versionarse (secretos y bases con datos de usuarios)
+try {
+  const tracked = execFileSync("git", ["ls-files", "-z"], { cwd: projectRoot, stdio: ["ignore", "pipe", "ignore"] })
+    .toString().split("\0").filter(Boolean);
+  const sensitive = tracked.filter(f => /(^|\/)\.env(\.(local|production))?$|\.(db|db-wal|db-shm|sqlite3?|key|pem)$/i.test(f));
+  for (const f of sensitive) {
+    console.error(`❌ Archivo sensible versionado en git: ${f}`);
+    errors++;
+  }
+  checked++;
+} catch (e) {
+  // Fuera de un repositorio git (p. ej. un zip de despliegue) no aplica
+}
+
+// 6. Verificación de integridad de archivos críticos
 const requiredFiles = [
   "index.html",
   "comunidad.html",

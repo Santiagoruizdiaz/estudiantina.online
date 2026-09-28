@@ -14,6 +14,8 @@ header("X-Frame-Options: SAMEORIGIN");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
+require_once __DIR__ . "/_common.php";
+
 $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
 
 if ($method === "OPTIONS") {
@@ -46,25 +48,6 @@ try {
     exit;
 }
 
-// Carga de variables de entorno desde .env si existe en la raíz
-$envPath = __DIR__ . "/../.env";
-if (file_exists($envPath)) {
-    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (empty($line) || str_starts_with($line, "#")) continue;
-        $parts = explode("=", $line, 2);
-        if (count($parts) === 2) {
-            $k = trim($parts[0]);
-            $v = trim($parts[1], " \t\n\r\0\x0B\"'");
-            if (getenv($k) === false) {
-                putenv("$k=$v");
-                $_ENV[$k] = $v;
-            }
-        }
-    }
-}
-
 // VULN-01: Fail-Closed Secrets. Prohibir secretos por defecto inseguros
 $INSECURE_DEFAULTS = [
     "estudiantina_admin_secret_posadas_2026_key",
@@ -73,12 +56,8 @@ $INSECURE_DEFAULTS = [
 $SAFE_DEV_SECRET = "dev_secret_estudiantina_posadas_2026_32bytes_safe!";
 $SAFE_DEV_TOKEN = "dev_token_posadas_2026_master_safe_32chars!";
 
-$nodeEnv = getenv("NODE_ENV") ?: (getenv("APP_ENV") ?: "development");
-$isProduction = ($nodeEnv === "production") ||
-                (!in_array($_SERVER["REMOTE_ADDR"] ?? "", ["127.0.0.1", "::1", "localhost"], true) &&
-                 !in_array($_SERVER["SERVER_NAME"] ?? "", ["localhost", "127.0.0.1"], true) &&
-                 !empty($_SERVER["HTTP_HOST"]) &&
-                 !str_starts_with($_SERVER["HTTP_HOST"], "localhost"));
+// El entorno se decide por configuración y REMOTE_ADDR, nunca por cabeceras del cliente (Host)
+$isProduction = api_is_production();
 
 $rawAdminSecret = getenv("ADMIN_SECRET") ?: ($_ENV["ADMIN_SECRET"] ?? "");
 $rawAdminToken = getenv("ADMIN_TOKEN") ?: ($_ENV["ADMIN_TOKEN"] ?? "");
@@ -226,7 +205,7 @@ function guardarComunidadAtómico($file, $datos) {
         flock($lockFp, LOCK_EX);
     }
     try {
-        $json = json_encode($datos, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $json = api_json_encode_file($datos);
         $tmpFile = $file . ".tmp." . getmypid() . "." . bin2hex(random_bytes(4));
         file_put_contents($tmpFile, $json, LOCK_EX);
         rename($tmpFile, $file);
@@ -354,15 +333,11 @@ if ($method === "GET") {
 }
 
 if ($method === "POST") {
-    $input = file_get_contents("php://input");
-    $body = json_decode($input, true) ?: [];
+    $body = api_json_body();
 
     // VULN-13: Rate limiting en action=login (bloqueo tras 5 intentos fallidos por 15 minutos)
     if ($action === "login") {
-        $clientIp = $_SERVER["HTTP_X_FORWARDED_FOR"] ?? ($_SERVER["REMOTE_ADDR"] ?? "unknown");
-        if (strpos($clientIp, ",") !== false) {
-            $clientIp = trim(explode(",", $clientIp)[0]);
-        }
+        $clientIp = api_client_ip();
         $now = time();
 
         $stmtRL = $pdo->prepare("SELECT intentos, bloqueado_hasta, ultimo_intento FROM admin_login_rate_limit WHERE ip = ?");
