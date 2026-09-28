@@ -14,6 +14,8 @@ header("X-Frame-Options: SAMEORIGIN");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
+require_once __DIR__ . "/_common.php";
+
 $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
 
 if ($method === "OPTIONS") {

@@ -14,6 +14,8 @@ header("X-Frame-Options: SAMEORIGIN");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 header("Cache-Control: no-cache, no-store, must-revalidate");
 
+require_once __DIR__ . "/_common.php";
+
 $method = $_SERVER["REQUEST_METHOD"] ?? "GET";
 
 if ($method === "OPTIONS") {
@@ -58,25 +60,6 @@ try {
     http_response_code(500);
     echo json_encode(["status" => "error", "message" => "Error interno del servidor"]);
     exit;
-}
-
-// Carga de variables de entorno desde .env si existe en la raíz
-$envPath = __DIR__ . "/../.env";
-if (file_exists($envPath)) {
-    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (empty($line) || str_starts_with($line, "#")) continue;
-        $parts = explode("=", $line, 2);
-        if (count($parts) === 2) {
-            $k = trim($parts[0]);
-            $v = trim($parts[1], " \t\n\r\0\x0B\"'");
-            if (getenv($k) === false) {
-                putenv("$k=$v");
-                $_ENV[$k] = $v;
-            }
-        }
-    }
 }
 
 // Inicialización de Tablas si no existen
@@ -177,8 +160,8 @@ try { $pdo->exec("ALTER TABLE comentarios ADD COLUMN en_revision INTEGER DEFAULT
  * En test permite tokens de prueba o header X-Test-Google-Id para soportar ejecuciones offline.
  */
 function verifyGoogleToken(?string $token = null, ?string $explicitGoogleId = null): ?array {
-    $nodeEnv = getenv("NODE_ENV") ?: (getenv("APP_ENV") ?: "development");
-    $isTest = ($nodeEnv === "test");
+    // El bypass de pruebas (X-Test-Google-Id, tokens test-*) solo aplica a conexiones locales en NODE_ENV=test
+    $isTest = (api_env_name() === "test" && !api_is_production());
 
     $headers = getallheaders();
     $testHeader = $headers["X-Test-Google-Id"] ?? ($headers["x-test-google-id"] ?? null);
@@ -205,7 +188,19 @@ function verifyGoogleToken(?string $token = null, ?string $explicitGoogleId = nu
         return null;
     }
 
-    $url = "https://oauth2.googleapis.com/tokeninfo?id_token=" . urlencode($token);
+    // Sin GOOGLE_CLIENT_ID no se puede validar la audiencia: falla cerrado
+    $clientId = getenv("GOOGLE_CLIENT_ID");
+    if (empty($clientId)) {
+        error_log("foro.php: GOOGLE_CLIENT_ID no configurado; se rechazan los ID tokens de Google.");
+        return null;
+    }
+
+    // GOOGLE_TOKENINFO_URL solo se admite fuera de producción (mock local en pruebas)
+    $tokeninfoUrl = getenv("GOOGLE_TOKENINFO_URL");
+    if (empty($tokeninfoUrl) || api_is_production()) {
+        $tokeninfoUrl = "https://oauth2.googleapis.com/tokeninfo";
+    }
+    $url = $tokeninfoUrl . "?id_token=" . urlencode($token);
     $ctx = stream_context_create([
         "http" => [
             "timeout" => 5,
@@ -222,8 +217,11 @@ function verifyGoogleToken(?string $token = null, ?string $explicitGoogleId = nu
         return null;
     }
 
-    $clientId = getenv("GOOGLE_CLIENT_ID");
-    if (!empty($clientId) && isset($info["aud"]) && $info["aud"] !== $clientId) {
+    // El token debe haber sido emitido por Google para este cliente (evita reutilizar tokens de otras apps)
+    if (($info["aud"] ?? "") !== $clientId) {
+        return null;
+    }
+    if (!in_array($info["iss"] ?? "", ["accounts.google.com", "https://accounts.google.com"], true)) {
         return null;
     }
 
@@ -971,7 +969,7 @@ if ($action === "perfil") {
 // ACTION: AUTH GOOGLE (Guardar / Actualizar usuario)
 // -------------------------------------------------------------
 if ($action === "auth_google" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $rawToken = $body["token"] ?? null;
     $googleId = trim($body["googleId"] ?? "");
     $auth = verifyGoogleToken($rawToken, $googleId);
@@ -1039,7 +1037,7 @@ if ($action === "auth_google" && $method === "POST") {
 // ACTION: COMPLETAR REGISTRO (Onboarding con @username único y foto)
 // -------------------------------------------------------------
 if ($action === "completar_registro" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $rawToken = $body["token"] ?? null;
     $googleId = trim($body["googleId"] ?? "");
 
@@ -1146,7 +1144,7 @@ if ($action === "completar_registro" && $method === "POST") {
 // ACTION: EDITAR PERFIL
 // -------------------------------------------------------------
 if ($action === "editar_perfil" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $rawToken = $body["token"] ?? null;
     $googleId = trim($body["googleId"] ?? "");
 
@@ -1271,7 +1269,7 @@ if ($action === "editar_perfil" && $method === "POST") {
 // ACTION: CREAR HILO
 // -------------------------------------------------------------
 if ($action === "crear_hilo" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $canalId = trim($body["canalId"] ?? "general");
     $titulo = trim($body["titulo"] ?? "");
     $contenido = trim($body["contenido"] ?? "");
@@ -1347,7 +1345,7 @@ if ($action === "crear_hilo" && $method === "POST") {
 // ACTION: COMENTAR
 // -------------------------------------------------------------
 if ($action === "comentar" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $hiloId = (int)($body["hiloId"] ?? 0);
     $contenido = trim($body["contenido"] ?? "");
     $rawToken = $body["token"] ?? null;
@@ -1428,7 +1426,7 @@ if ($action === "comentar" && $method === "POST") {
 // ACTION: VOTAR (Toggle único por Google ID)
 // -------------------------------------------------------------
 if ($action === "votar" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $tipo = ($body["tipo"] ?? "") === "comentario" ? "comentario" : "hilo";
     $itemId = (int)($body["itemId"] ?? $body["id"] ?? 0);
     $rawToken = $body["token"] ?? null;
@@ -1490,7 +1488,7 @@ if ($action === "votar" && $method === "POST") {
 // ACTION: REPORTAR (Auto-moderación protegida con 3 reportes únicos)
 // -------------------------------------------------------------
 if ($action === "reportar" && $method === "POST") {
-    $body = json_decode(file_get_contents("php://input"), true);
+    $body = api_json_body();
     $tipo = ($body["tipo"] ?? "") === "comentario" ? "comentario" : "hilo";
     $itemId = (int)($body["itemId"] ?? $body["id"] ?? 0);
     $rawToken = $body["token"] ?? null;

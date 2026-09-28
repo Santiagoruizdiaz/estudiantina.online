@@ -80,6 +80,10 @@ if (isProduction && isSecretsInvalid) {
   process.exit(1);
 }
 
+if (!process.env.GOOGLE_CLIENT_ID && NODE_ENV !== "test") {
+  console.warn("[Seguridad] GOOGLE_CLIENT_ID no definido: el inicio de sesión con Google del foro quedará deshabilitado.");
+}
+
 let foroDb = null;
 function getForoDb() {
   if (!DatabaseSync) return null;
@@ -619,6 +623,44 @@ function sendOptimizedJson(req, res, statusCode, payload, { cacheable = false, m
   }
 }
 
+// Lectura centralizada del cuerpo JSON: límite de tamaño (413) y estructura válida (400)
+const MAX_JSON_BODY_BYTES = 2 * 1024 * 1024;
+function readJsonBody(req, res, onBody) {
+  const chunks = [];
+  let totalBytes = 0;
+  let payloadTooLarge = false;
+
+  req.on("data", chunk => {
+    if (payloadTooLarge) return;
+    totalBytes += chunk.length;
+    if (totalBytes > MAX_JSON_BODY_BYTES) {
+      payloadTooLarge = true;
+      res.writeHead(413, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
+      req.destroy();
+      return;
+    }
+    chunks.push(chunk);
+  });
+
+  req.on("end", () => {
+    if (payloadTooLarge) return;
+    let body;
+    try {
+      // Buffer.concat evita cortar caracteres UTF-8 multibyte entre chunks
+      body = JSON.parse(Buffer.concat(chunks).toString("utf-8") || "{}");
+    } catch {
+      body = null;
+    }
+    if (body === null || typeof body !== "object") {
+      res.writeHead(400, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ status: "error", message: "JSON inválido" }));
+      return;
+    }
+    onBody(body);
+  });
+}
+
 // Helpers de Seguridad de Administración
 function generateAdminToken(admin) {
   const now = Math.floor(Date.now() / 1000);
@@ -677,6 +719,7 @@ function getAdminFromRequest(req) {
 }
 
 // VULN-03: Google ID Token verification
+const GOOGLE_ISSUERS = new Set(["accounts.google.com", "https://accounts.google.com"]);
 async function verifyGoogleToken(token, explicitGoogleId = null, req = null) {
   const isTest = (NODE_ENV === "test");
 
@@ -705,8 +748,17 @@ async function verifyGoogleToken(token, explicitGoogleId = null, req = null) {
     return null;
   }
 
+  // Sin GOOGLE_CLIENT_ID no se puede validar la audiencia: falla cerrado
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    return null;
+  }
+
+  // GOOGLE_TOKENINFO_URL solo se admite fuera de producción (mock local en pruebas)
+  const tokeninfoUrl = (!isProduction && process.env.GOOGLE_TOKENINFO_URL) || "https://oauth2.googleapis.com/tokeninfo";
+
   try {
-    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`, {
+    const res = await fetch(`${tokeninfoUrl}?id_token=${encodeURIComponent(token)}`, {
       signal: AbortSignal.timeout(5000)
     });
     if (!res.ok) return null;
@@ -717,8 +769,8 @@ async function verifyGoogleToken(token, explicitGoogleId = null, req = null) {
       return null;
     }
 
-    const clientId = process.env.GOOGLE_CLIENT_ID;
-    if (clientId && info.aud && info.aud !== clientId) {
+    // El token debe haber sido emitido por Google para este cliente (evita reutilizar tokens de otras apps)
+    if (info.aud !== clientId || !GOOGLE_ISSUERS.has(info.iss)) {
       return null;
     }
 
@@ -1022,7 +1074,7 @@ const server = http.createServer((req, res) => {
   const pathname = reqUrl.pathname;
 
   // Endpoint API Comunidad & Noticias (SQLite + JSON fallback)
-  if (pathname === "/api/comunidad" || pathname === "/api/noticias") {
+  if (pathname === "/api/comunidad" || pathname === "/api/comunidad.php" || pathname === "/api/noticias") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     try {
@@ -1099,28 +1151,8 @@ const server = http.createServer((req, res) => {
     }
 
     if (req.method === "POST") {
-      let bodyStr = "";
-      let totalBytes = 0;
-      let payloadTooLarge = false;
-      const MAX_PAYLOAD = 2 * 1024 * 1024;
-
-      req.on("data", chunk => {
-        if (payloadTooLarge) return;
-        totalBytes += chunk.length;
-        if (totalBytes > MAX_PAYLOAD) {
-          payloadTooLarge = true;
-          res.writeHead(413, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
-          req.destroy();
-          return;
-        }
-        bodyStr += chunk;
-      });
-
-      req.on("end", () => {
-        if (payloadTooLarge) return;
+      readJsonBody(req, res, (body) => {
         try {
-          const body = JSON.parse(bodyStr || "{}");
           const action = body.action || reqUrl.searchParams.get("action") || "";
           const data = leerRanking();
 
@@ -1663,29 +1695,8 @@ const server = http.createServer((req, res) => {
     }
 
     if (req.method === "POST") {
-      let bodyStr = "";
-      let totalBytes = 0;
-      let payloadTooLarge = false;
-      const MAX_PAYLOAD = 2 * 1024 * 1024;
-
-      req.on("data", chunk => {
-        if (payloadTooLarge) return;
-        totalBytes += chunk.length;
-        if (totalBytes > MAX_PAYLOAD) {
-          payloadTooLarge = true;
-          res.writeHead(413, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
-          req.destroy();
-          return;
-        }
-        bodyStr += chunk;
-      });
-
-      req.on("end", async () => {
-        if (payloadTooLarge) return;
+      readJsonBody(req, res, async (body) => {
         try {
-          const body = JSON.parse(bodyStr || "{}");
-
           if (action === "auth_google") {
             const rawGoogleId = String(body.googleId || "").trim();
             const auth = await verifyGoogleToken(body.token, rawGoogleId, req);
@@ -2317,32 +2328,12 @@ const server = http.createServer((req, res) => {
     }
 
     if (req.method === "POST") {
-      let bodyStr = "";
-      let totalBytes = 0;
-      let payloadTooLarge = false;
-      const MAX_PAYLOAD = 2 * 1024 * 1024;
-
-      req.on("data", chunk => {
-        if (payloadTooLarge) return;
-        totalBytes += chunk.length;
-        if (totalBytes > MAX_PAYLOAD) {
-          payloadTooLarge = true;
-          res.writeHead(413, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ status: "error", message: "Payload demasiado grande" }));
-          req.destroy();
-          return;
-        }
-        bodyStr += chunk;
-      });
-
-      req.on("end", () => {
-        if (payloadTooLarge) return;
+      readJsonBody(req, res, (body) => {
         try {
-          const body = JSON.parse(bodyStr || "{}");
-
           // Login de Administrador
           if (action === "login") {
-            const clientIp = (req.headers["x-forwarded-for"] ? String(req.headers["x-forwarded-for"]).split(",")[0].trim() : (req.socket.remoteAddress || "unknown"));
+            // X-Forwarded-For lo controla el cliente: el rate limit usa la IP real del socket
+            const clientIp = req.socket.remoteAddress || "unknown";
             const now = Math.floor(Date.now() / 1000);
 
             const rlRow = db.prepare("SELECT intentos, bloqueado_hasta, ultimo_intento FROM admin_login_rate_limit WHERE ip = ?").get(clientIp);
@@ -2988,7 +2979,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const SENSITIVE_EXTENSIONS = new Set([".db", ".sql", ".log", ".env", ".sqlite", ".sqlite3", ".bak", ".sh"]);
+  const SENSITIVE_EXTENSIONS = new Set([".db", ".sql", ".log", ".env", ".sqlite", ".sqlite3", ".bak", ".sh", ".php"]);
   const ext = path.extname(filePath).toLowerCase();
   const segments = relativePath.split(/[\\\/]/);
   const hasDotfile = segments.some(seg => seg.startsWith(".") && seg !== "." && seg !== "..");
